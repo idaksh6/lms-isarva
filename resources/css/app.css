@@ -1,0 +1,1326 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    body {
+        @apply bg-white text-isarva-dark antialiased;
+    }
+}
+
+@layer components {
+    .lms-card {
+        @apply rounded-2xl border border-isarva-border bg-white p-5 shadow-isarva;
+    }
+
+    /* Site container — matches isarvait.com content width */
+    .isarva-container {
+        @apply mx-auto w-full max-w-[1280px] px-4 sm:px-5 lg:px-8;
+    }
+
+    /* 3D orange button — auth uses --lg; in-app CTAs use lms-btn-primary (--sm) */
+    .isarva-btn {
+        cursor: pointer;
+        display: inline-flex;
+        position: relative;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 8px;
+        background: #f97316;
+        color: #fff;
+        font-weight: 700;
+        line-height: 1.25;
+        text-align: center;
+        transition: all 0.3s;
+        transform: perspective(1000px) translateZ(0);
+        box-shadow:
+            0 6px #ea580c,
+            0 8px 12px rgba(234, 88, 12, 0.3),
+            0 12px 24px rgba(234, 88, 12, 0.15);
+    }
+
+    .isarva-btn--lg {
+        gap: 10px;
+        padding: 12px 24px;
+        font-size: 15px;
+    }
+
+    .isarva-btn:not(.isarva-btn--sm):not(.lms-btn-primary):not(.isarva-btn--xs) {
+        gap: 10px;
+        padding: 12px 24px;
+        font-size: 15px;
+    }
+
+    .isarva-btn--sm,
+    .lms-btn-primary {
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 13px;
+        box-shadow:
+            0 4px #ea580c,
+            0 6px 10px rgba(234, 88, 12, 0.28),
+            0 8px 16px rgba(234, 88, 12, 0.12);
+    }
+
+    .isarva-btn--sm:hover,
+    .lms-btn-primary:hover {
+        box-shadow:
+            0 6px #ea580c,
+            0 8px 14px rgba(234, 88, 12, 0.32),
+            0 10px 20px rgba(234, 88, 12, 0.14);
+    }
+
+    .isarva-btn--sm:active,
+    .lms-btn-primary:active {
+        box-shadow:
+            0 2px #ea580c,
+            0 3px 6px rgba(234, 88, 12, 0.22);
+    }
+
+    .isarva-btn--xs,
+    .lms-btn-primary--xs {
+        gap: 4px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .isarva-btn:hover {
+        background: #fb923c;
+        transform: perspective(1000px) translateY(-2px) translateZ(0);
+    }
+
+    .isarva-btn:not(.isarva-btn--sm):not(.lms-btn-primary):not(.isarva-btn--xs):hover {
+        box-shadow:
+            0 8px #ea580c,
+            0 10px 16px rgba(234, 88, 12, 0.35),
+            0 14px 28px rgba(234, 88, 12, 0.18);
+    }
+
+    .isarva-btn:active {
+        background: #f97316;
+        transform: perspective(1000px) translateY(4px) translateZ(0);
+    }
+
+    .isarva-btn:not(.isarva-btn--sm):not(.lms-btn-primary):not(.isarva-btn--xs):active {
+        box-shadow:
+            0 2px #ea580c,
+            0 4px 8px rgba(234, 88, 12, 0.25);
+    }
+
+    .isarva-btn-block {
+        @apply w-full;
+    }
+
+    .lms-btn-primary {
+        @apply isarva-btn;
+    }
+
+    .lms-text-link {
+        @apply text-xs font-semibold text-brand-600 transition hover:text-brand-700;
+    }
+
+    /* ——— LMS shell ——— */
+    .lms-body {
+        @apply min-h-dvh text-isarva-dark;
+        background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 45%, #ecfdf5 100%);
+    }
+
+    .lms-app {
+        @apply grid min-h-dvh w-full grid-cols-1 lg:grid-cols-[252px_minmax(0,1fr)];
+    }
+
+    .lms-overlay {
+        @apply fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px];
+    }
+
+    .lms-shell {
+        @apply col-start-1 row-start-1 flex min-h-dvh min-w-0 flex-col lg:col-start-2;
+    }
+
+    .lms-main {
+        @apply min-h-0 flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-6;
+    }
+
+    .lms-page-content {
+        @apply w-full;
+    }
+
+    .lms-site-footer {
+        @apply mt-auto shrink-0 border-t border-isarva-border bg-white px-4 py-3 sm:px-5 lg:px-6;
+    }
+
+    .lms-site-footer-text {
+        @apply text-center text-xs text-isarva-muted;
+    }
+
+    /* Sidebar */
+    .lms-sidebar {
+        @apply fixed inset-y-0 left-0 z-50 col-start-1 row-start-1 h-dvh max-h-dvh w-[252px] max-w-[85vw] -translate-x-full bg-white transition-transform duration-200 ease-out;
+        @apply lg:sticky lg:top-0 lg:z-30 lg:min-h-full lg:w-full lg:max-w-none lg:translate-x-0 lg:self-stretch;
+    }
+
+    .lms-sidebar.is-open {
+        @apply translate-x-0;
+    }
+
+    .lms-sidebar-inner {
+        @apply flex h-dvh max-h-dvh w-full flex-col overflow-hidden border-r border-slate-200/90 bg-white px-4 py-4 shadow-xl lg:sticky lg:top-0 lg:shadow-none;
+    }
+
+    .lms-sidebar-brand {
+        @apply mb-4 flex shrink-0 flex-col items-center gap-1.5 px-1 text-center;
+    }
+
+    .lms-sidebar-brand img {
+        @apply mx-auto h-11 w-auto max-w-[180px] object-contain;
+    }
+
+    .lms-sidebar-appname {
+        @apply block text-center text-[10px] font-extrabold uppercase leading-tight tracking-wide text-brand-600;
+    }
+
+    .lms-sidebar-nav {
+        @apply -mx-1 min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-1 py-2;
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+    }
+
+    .lms-sidebar-nav::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .lms-sidebar-nav::-webkit-scrollbar-track {
+        @apply rounded-full bg-slate-100;
+    }
+
+    .lms-sidebar-nav::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-slate-300;
+    }
+
+    .lms-sidebar-nav::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-400;
+    }
+
+    .lms-sidebar-link {
+        @apply flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition;
+    }
+
+    .lms-sidebar-link:hover {
+        @apply bg-slate-50 text-isarva-heading;
+    }
+
+    .lms-sidebar-link.is-active {
+        @apply bg-gradient-to-r from-brand-600 to-brand-500 font-semibold text-white shadow-sm shadow-brand-600/25;
+    }
+
+    .lms-sidebar-link.is-active svg {
+        @apply text-white;
+    }
+
+    .lms-sidebar-link.is-soon {
+        @apply cursor-not-allowed text-slate-400 hover:bg-transparent hover:text-slate-400;
+    }
+
+    .lms-sidebar-link.is-logout {
+        @apply bg-rose-50 text-rose-700 ring-1 ring-rose-100;
+    }
+
+    .lms-sidebar-link.is-logout:hover {
+        @apply bg-rose-100 text-rose-800 ring-rose-200;
+    }
+
+    .lms-sidebar-link.is-logout svg {
+        @apply text-rose-600;
+    }
+
+    .lms-dropdown-logout {
+        @apply bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 focus:bg-rose-100;
+    }
+
+    .lms-soon-badge {
+        @apply shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400;
+    }
+
+    .lms-sidebar-profile {
+        @apply shrink-0 border-t border-slate-100 pt-4;
+    }
+
+    .lms-sidebar-profile-card {
+        @apply flex items-start gap-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-slate-50 to-brand-50/40 p-3.5 transition hover:border-brand-200 hover:bg-brand-50/60;
+    }
+
+    .lms-sidebar-profile-avatar {
+        @apply relative mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 ring-2 ring-white shadow-sm;
+    }
+
+    .lms-sidebar-profile-initials {
+        @apply relative z-[1] text-sm font-bold text-brand-700;
+    }
+
+    .lms-sidebar-profile-default-icon {
+        @apply absolute inset-0 m-auto h-7 w-7 text-brand-600/25;
+    }
+
+    .lms-sidebar-profile-meta {
+        @apply flex min-w-0 flex-1 flex-col gap-2;
+    }
+
+    .lms-sidebar-profile-name {
+        @apply line-clamp-2 text-sm font-bold leading-snug text-isarva-heading;
+    }
+
+    .lms-sidebar-profile-meta .lms-role-badge {
+        @apply w-fit self-start;
+    }
+
+    .lms-sidebar-profile-role {
+        @apply text-xs font-semibold text-brand-700;
+    }
+
+    .lms-sidebar-profile-email {
+        @apply truncate text-xs leading-relaxed text-isarva-muted;
+    }
+
+    .lms-sidebar-profile-id {
+        @apply text-[11px] font-medium leading-relaxed text-slate-500;
+    }
+
+    .lms-sidebar-footer {
+        @apply shrink-0 bg-white px-1 pb-1 pt-2;
+    }
+
+    /* Top bar — compact */
+    .lms-topbar {
+        @apply sticky top-0 z-20 border-b border-isarva-border/80 bg-white px-3 py-2 sm:px-4 lg:px-5;
+    }
+
+    .lms-topbar-row {
+        @apply flex min-h-[44px] flex-wrap items-center gap-2 lg:gap-4;
+    }
+
+    .lms-topbar-left {
+        @apply flex min-w-0 items-center gap-2 lg:w-36;
+    }
+
+    .lms-page-title {
+        @apply text-sm font-bold text-isarva-heading sm:text-base;
+    }
+
+    .lms-search {
+        @apply relative mx-auto flex min-w-0 flex-1 items-center lg:max-w-sm;
+    }
+
+    .lms-search-icon {
+        @apply absolute left-3 flex text-brand-600;
+    }
+
+    .lms-search-input {
+        @apply w-full rounded-full border-0 bg-[#f0f2f5] py-2 pl-10 pr-3 text-sm text-isarva-dark outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500/20;
+    }
+
+    .lms-topbar-right {
+        @apply ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2;
+    }
+
+    .lms-icon-btn {
+        @apply inline-flex h-8 w-8 items-center justify-center rounded-full border border-isarva-border bg-white text-slate-600 transition hover:bg-brand-50 hover:text-brand-600;
+    }
+
+    .lms-user-chip {
+        @apply flex items-center gap-2 rounded-full border border-isarva-border bg-white py-0.5 pl-0.5 pr-2.5 text-sm transition hover:border-brand-200;
+    }
+
+    .lms-user-name {
+        @apply hidden max-w-[8.5rem] truncate font-medium text-slate-700 md:inline;
+    }
+
+    .lms-user-avatar {
+        @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-[10px] font-bold text-white;
+    }
+
+    .topbar-datetime {
+        @apply items-center gap-2.5 rounded-full bg-slate-100 px-3 py-1.5;
+    }
+
+    .topbar-date {
+        @apply border-r border-slate-200/90 pr-2.5 text-xs font-medium text-slate-600;
+    }
+
+    .topbar-clock-time {
+        @apply font-mono font-semibold tabular-nums text-slate-700;
+    }
+
+    .topbar-clock-seconds {
+        @apply font-bold text-accent-500;
+    }
+
+    /* Dashboard grid */
+    .dashboard-layout {
+        @apply grid gap-6 lg:gap-8 xl:grid-cols-[minmax(0,1fr)_340px];
+    }
+
+    .dashboard-main {
+        @apply min-w-0 space-y-6;
+    }
+
+    .dashboard-aside {
+        @apply min-w-0 space-y-6;
+    }
+
+    .quyl-card {
+        @apply rounded-xl border border-white/80 bg-white p-4 shadow-card sm:p-5;
+    }
+
+    .quyl-card-title {
+        @apply text-base font-bold text-isarva-heading;
+    }
+
+    .quyl-section-title {
+        @apply text-xs font-extrabold uppercase tracking-widest text-brand-600/80;
+    }
+
+    .quyl-stat-card {
+        @apply flex flex-col rounded-2xl border p-4 shadow-sm transition hover:shadow-md;
+    }
+
+    .quyl-stat-card-head {
+        @apply flex items-start justify-between gap-2;
+    }
+
+    .quyl-stat-card-icon {
+        @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl;
+    }
+
+    .quyl-stat-card-pct {
+        @apply rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-600;
+    }
+
+    .quyl-stat-card-value {
+        @apply mt-4 text-[1.75rem] font-bold leading-none tracking-tight text-isarva-heading;
+    }
+
+    .quyl-stat-card-label {
+        @apply mt-1.5 text-sm font-semibold text-isarva-heading;
+    }
+
+    .quyl-stat-card-sub {
+        @apply mt-1 text-xs leading-relaxed text-isarva-muted;
+    }
+
+    .quyl-stat-card-track {
+        @apply mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100;
+    }
+
+    .quyl-stat-card-fill {
+        @apply h-full rounded-full transition-[width] duration-500 ease-out;
+    }
+
+    /* Card surface colors: border-sky-300 bg-sky-100 etc. in stat-ring.blade.php */
+
+    .quyl-stat-card--sky .quyl-stat-card-icon {
+        @apply bg-white text-sky-600 shadow-sm ring-1 ring-sky-200;
+    }
+
+    .quyl-stat-card--sky .quyl-stat-card-pct {
+        @apply bg-sky-200/80 text-sky-900;
+    }
+
+    .quyl-stat-card--sky .quyl-stat-card-track {
+        @apply bg-sky-200/70;
+    }
+
+    .quyl-stat-card--sky .quyl-stat-card-fill {
+        @apply bg-sky-600;
+    }
+
+    .quyl-stat-card--rose .quyl-stat-card-icon {
+        @apply bg-white text-rose-600 shadow-sm ring-1 ring-rose-200;
+    }
+
+    .quyl-stat-card--rose .quyl-stat-card-pct {
+        @apply bg-rose-200/80 text-rose-900;
+    }
+
+    .quyl-stat-card--rose .quyl-stat-card-track {
+        @apply bg-rose-200/70;
+    }
+
+    .quyl-stat-card--rose .quyl-stat-card-fill {
+        @apply bg-rose-600;
+    }
+
+    .quyl-stat-card--brand .quyl-stat-card-icon {
+        @apply bg-white text-brand-700 shadow-sm ring-1 ring-emerald-200;
+    }
+
+    .quyl-stat-card--brand .quyl-stat-card-pct {
+        @apply bg-emerald-200/80 text-emerald-900;
+    }
+
+    .quyl-stat-card--brand .quyl-stat-card-track {
+        @apply bg-emerald-200/70;
+    }
+
+    .quyl-stat-card--brand .quyl-stat-card-fill {
+        @apply bg-brand-600;
+    }
+
+    .quyl-stat-card--orange .quyl-stat-card-icon {
+        @apply bg-white text-orange-600 shadow-sm ring-1 ring-orange-200;
+    }
+
+    .quyl-stat-card--orange .quyl-stat-card-pct {
+        @apply bg-orange-200/80 text-orange-900;
+    }
+
+    .quyl-stat-card--orange .quyl-stat-card-track {
+        @apply bg-orange-200/70;
+    }
+
+    .quyl-stat-card--orange .quyl-stat-card-fill {
+        @apply bg-orange-500;
+    }
+
+    .quyl-resume-card {
+        @apply flex flex-wrap items-center gap-4 rounded-xl border border-brand-100/80 bg-gradient-to-r from-white via-white to-brand-50/60 p-4 shadow-card sm:flex-nowrap;
+    }
+
+    .quyl-resume-btn {
+        @apply inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-accent-500/25 transition hover:brightness-105;
+    }
+
+    .quyl-course-row {
+        @apply flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4 transition hover:border-brand-200 hover:bg-brand-50/40 hover:shadow-sm;
+    }
+
+    .quyl-course-icon {
+        @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm;
+    }
+
+    .quyl-tab {
+        @apply rounded-full px-4 py-2 text-xs font-bold text-isarva-muted transition hover:bg-violet-50 hover:text-violet-700;
+    }
+
+    .quyl-tab-active {
+        @apply bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm;
+    }
+
+    .quyl-upcoming-date {
+        @apply flex w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-violet-50 to-sky-50 py-2.5 text-center ring-1 ring-violet-100;
+    }
+
+    /* Calendar */
+    .quyl-card-calendar {
+        @apply p-5 sm:p-6;
+    }
+
+    .calendar-month-badge {
+        @apply shrink-0 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700;
+    }
+
+    .calendar-subtitle {
+        @apply mt-2.5 text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .calendar-body {
+        @apply mt-5 border-t border-isarva-border pt-5;
+    }
+
+    .calendar-legend {
+        @apply mb-6 flex flex-wrap items-center gap-x-8 gap-y-3;
+    }
+
+    .calendar-legend-item {
+        @apply flex items-center gap-3 text-xs font-medium text-slate-600;
+    }
+
+    .calendar-legend-swatch {
+        @apply h-4 w-4 shrink-0 rounded;
+    }
+
+    .calendar-legend-swatch--today {
+        @apply bg-gradient-to-br from-brand-500 to-brand-600 shadow-sm shadow-brand-500/25;
+    }
+
+    .calendar-legend-swatch--due {
+        @apply bg-orange-50 ring-2 ring-orange-200;
+    }
+
+    .calendar-weekdays {
+        @apply mb-4 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400;
+    }
+
+    .calendar-grid {
+        @apply grid grid-cols-7 gap-1.5 sm:gap-2;
+    }
+
+    .calendar-cell {
+        @apply flex items-center justify-center py-0.5;
+    }
+
+    .calendar-day {
+        @apply flex h-9 w-9 max-w-full items-center justify-center rounded-lg text-xs font-semibold text-slate-700 transition sm:h-10 sm:w-10;
+    }
+
+    .calendar-day.is-outside {
+        @apply text-slate-300 font-normal;
+    }
+
+    .calendar-day.is-today {
+        @apply bg-gradient-to-br from-brand-500 to-brand-600 font-bold text-white shadow-md shadow-brand-500/35;
+    }
+
+    .calendar-day.has-event {
+        @apply bg-orange-50 font-bold text-orange-700 ring-2 ring-orange-200;
+    }
+
+    .calendar-day:not(.is-today):not(.has-event):hover {
+        @apply bg-slate-100;
+    }
+
+    /* Legacy panels (inner pages) */
+    .dash-panel {
+        @apply rounded-2xl border border-isarva-border bg-white shadow-isarva;
+    }
+
+    .dash-panel-header {
+        @apply flex flex-wrap items-center justify-between gap-3 border-b border-isarva-border px-5 py-4 sm:px-6;
+    }
+
+    .dash-list-item {
+        @apply flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-slate-50 sm:px-6;
+    }
+
+    .lms-card {
+        @apply rounded-2xl border border-isarva-border bg-white p-5 shadow-sm;
+    }
+
+    /* Secondary — white bordered like "Explore Services" */
+    .isarva-btn-outline,
+    .lms-btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-isarva-border bg-white px-4 py-2 text-sm font-semibold text-isarva-dark shadow-sm transition hover:border-slate-300 hover:bg-isarva-surface;
+    }
+
+    .lms-btn-back {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:border-slate-700 hover:bg-slate-800;
+    }
+
+    .lms-input {
+        @apply w-full rounded-xl border border-isarva-border bg-white px-4 py-3 text-sm text-isarva-dark shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500/25;
+    }
+
+    /* Login / auth fields with a leading icon in a relative wrapper */
+    .lms-input--icon {
+        @apply pl-11 pr-4;
+    }
+
+    .lms-field-label {
+        @apply block text-sm font-semibold text-slate-700;
+    }
+
+    .lms-field-input {
+        @apply w-full rounded-xl border border-isarva-border bg-white px-4 py-2.5 text-sm text-isarva-dark shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500/25;
+    }
+
+    .lms-form-header {
+        @apply border-b border-isarva-border pb-4;
+    }
+
+    .lms-form-title {
+        @apply text-base font-bold text-isarva-heading;
+    }
+
+    .lms-form-desc {
+        @apply mt-1 text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .lms-form-field {
+        @apply space-y-1.5;
+    }
+
+    .lms-field-hint {
+        @apply text-xs text-isarva-muted;
+    }
+
+    .lms-form-card {
+        @apply lms-card w-full space-y-6;
+    }
+
+    .lms-form-actions {
+        @apply flex flex-wrap gap-3 border-t border-isarva-border pt-5;
+    }
+
+    .lms-form-check {
+        @apply flex items-start gap-3 rounded-xl border border-isarva-border bg-slate-50/80 px-4 py-3;
+    }
+
+    .lms-form-check input {
+        @apply mt-0.5 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500;
+    }
+
+    .lms-file-upload-zone {
+        @apply mt-2 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center transition hover:border-brand-300 hover:bg-brand-50/40;
+    }
+
+    .lms-file-upload-zone--drag {
+        @apply border-brand-400 bg-brand-50/60;
+    }
+
+    .lms-file-upload-icon {
+        @apply mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm ring-1 ring-slate-100;
+    }
+
+    .lms-file-upload-title {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-file-upload-meta {
+        @apply mt-1 text-xs text-isarva-muted;
+    }
+
+    .lms-file-upload-list {
+        @apply mt-3 space-y-2;
+    }
+
+    .lms-file-upload-item {
+        @apply flex items-center gap-3 rounded-lg border border-isarva-border bg-white px-3 py-2.5;
+    }
+
+    .lms-file-upload-item-icon {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500;
+    }
+
+    .lms-file-upload-remove {
+        @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg leading-none text-slate-400 transition hover:bg-rose-50 hover:text-rose-600;
+    }
+
+    .lms-attachment-list {
+        @apply mt-4 flex flex-col gap-2;
+    }
+
+    .lms-attachment-link {
+        @apply inline-flex items-center gap-2 rounded-lg border border-isarva-border bg-slate-50 px-3 py-2 text-sm font-medium text-isarva-heading transition hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-700;
+    }
+
+    .lms-page-actions {
+        @apply mb-6 flex flex-wrap gap-2;
+    }
+
+    .lms-panel {
+        @apply lms-card flex flex-col;
+    }
+
+    .lms-panel--fill {
+        @apply h-full;
+    }
+
+    .lms-panel-header {
+        @apply flex items-center justify-between gap-3 border-b border-isarva-border pb-4;
+    }
+
+    .lms-panel-title {
+        @apply text-base font-bold text-isarva-heading;
+    }
+
+    .lms-panel-count {
+        @apply rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600;
+    }
+
+    .lms-panel-body {
+        @apply pt-4;
+    }
+
+    .lms-panel--fill .lms-panel-body {
+        @apply min-h-0 flex-1;
+    }
+
+    .lms-empty-panel {
+        @apply flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-10 text-center;
+    }
+
+    .lms-page-stack {
+        @apply space-y-6;
+    }
+
+    .lms-student-list {
+        @apply divide-y divide-isarva-border;
+    }
+
+    .lms-student-row {
+        @apply flex items-center justify-between gap-3 py-3 first:pt-0;
+    }
+
+    .lms-student-avatar {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700;
+    }
+
+    .lms-student-picker {
+        @apply max-h-72 overflow-y-auto rounded-xl border border-isarva-border;
+    }
+
+    .lms-student-picker-item {
+        @apply flex cursor-pointer items-center gap-3 border-b border-isarva-border px-3 py-2.5 last:border-b-0 transition hover:bg-slate-50;
+    }
+
+    .lms-student-picker-item input {
+        @apply h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500;
+    }
+
+    .lms-course-hero {
+        @apply mb-6 overflow-hidden rounded-2xl border border-isarva-border bg-white shadow-sm;
+    }
+
+    .lms-course-hero-banner {
+        @apply relative min-h-[11rem] w-full overflow-hidden sm:min-h-[12.5rem];
+    }
+
+    .lms-banner--hero .lms-banner-motif {
+        @apply items-center justify-end pr-6 opacity-40 sm:pr-10;
+    }
+
+    .lms-banner--hero .lms-banner-svg {
+        @apply max-h-[75%] max-w-[38%] sm:max-w-[32%];
+    }
+
+    .lms-banner--hero .lms-banner-shine {
+        opacity: 0.1;
+    }
+
+    .lms-banner--hero .lms-motif-float,
+    .lms-banner--hero .lms-motif-drift {
+        animation: none;
+    }
+
+    .lms-course-hero-overlay {
+        @apply pointer-events-none absolute inset-0 z-[1];
+        background: linear-gradient(
+            105deg,
+            rgba(15, 23, 42, 0.72) 0%,
+            rgba(15, 23, 42, 0.45) 42%,
+            rgba(15, 23, 42, 0.12) 68%,
+            transparent 100%
+        );
+    }
+
+    .lms-course-hero-content {
+        @apply absolute inset-0 z-[2] flex items-end px-5 py-5 sm:items-center sm:px-8 sm:py-6;
+    }
+
+    .lms-course-hero-copy {
+        @apply flex w-full max-w-2xl flex-col gap-3 sm:gap-4;
+    }
+
+    .lms-course-hero-eyebrow {
+        @apply text-xs font-bold uppercase tracking-widest text-white/80;
+    }
+
+    .lms-course-hero-title {
+        @apply text-2xl font-bold leading-tight text-white sm:text-3xl;
+    }
+
+    .lms-course-hero-details {
+        @apply flex flex-wrap items-center gap-2 sm:gap-3;
+    }
+
+    .lms-course-hero-pill {
+        @apply inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white ring-1 ring-white/25 backdrop-blur-sm;
+    }
+
+    .lms-course-hero-actions {
+        @apply flex flex-wrap gap-2 border-t border-isarva-border bg-white px-4 py-3 sm:px-5;
+    }
+
+    .lms-course-hero-tab {
+        @apply inline-flex items-center justify-center rounded-lg border border-isarva-border bg-white px-4 py-2 text-sm font-semibold text-isarva-heading shadow-sm transition hover:border-slate-300 hover:bg-slate-50;
+    }
+
+    .lms-course-hero-tab--active {
+        @apply border-brand-300 bg-brand-50 text-brand-800 ring-2 ring-brand-500/20;
+    }
+
+    .lms-assignment-row {
+        @apply flex flex-col gap-3 rounded-xl border border-isarva-border p-4 transition hover:border-brand-200 hover:bg-slate-50/50 sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .lms-assignment-row-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600;
+    }
+
+    .lms-btn-danger {
+        @apply inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/30;
+    }
+
+    .lms-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+
+    .auth-page {
+        @apply relative flex min-h-screen flex-col bg-isarva-surface;
+    }
+
+    .auth-page::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 80% 50% at 10% 20%, rgba(0, 168, 107, 0.08) 0%, transparent 55%),
+            radial-gradient(ellipse 60% 40% at 90% 80%, rgba(0, 153, 102, 0.06) 0%, transparent 50%);
+    }
+
+    .auth-card {
+        @apply relative z-10 w-full overflow-hidden rounded-2xl border border-isarva-border bg-white shadow-isarva-lg;
+    }
+
+    .auth-left-panel {
+        @apply relative flex flex-col overflow-hidden bg-white p-8 lg:p-10;
+    }
+
+    .auth-left-panel::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        left: -10%;
+        width: 70%;
+        height: 60%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 168, 107, 0.14) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .auth-left-panel > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Pill badge — "Premium Website Services" style */
+    .isarva-pill {
+        @apply inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700;
+    }
+
+    .isarva-pill-dot {
+        @apply h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600;
+    }
+
+    .auth-tagline {
+        @apply isarva-pill;
+    }
+
+    /* Full-bleed animated course banners (mesh blobs) */
+    @keyframes lms-banner-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes lms-blob-drift-1 {
+        0%, 100% { transform: translate(-10%, -15%) scale(1); }
+        50% { transform: translate(15%, 10%) scale(1.15); }
+    }
+
+    @keyframes lms-blob-drift-2 {
+        0%, 100% { transform: translate(20%, 5%) scale(1.1); }
+        50% { transform: translate(-15%, -10%) scale(1); }
+    }
+
+    @keyframes lms-blob-drift-3 {
+        0%, 100% { transform: translate(-5%, 20%) scale(1.05); }
+        50% { transform: translate(10%, -20%) scale(1.2); }
+    }
+
+    @keyframes lms-blob-drift-4 {
+        0%, 100% { transform: translate(15%, -15%) scale(1.08); }
+        50% { transform: translate(-20%, 15%) scale(0.95); }
+    }
+
+    @keyframes lms-banner-shine {
+        0%, 100% { opacity: 0.35; transform: translateX(-30%); }
+        50% { opacity: 0.55; transform: translateX(30%); }
+    }
+
+    @keyframes lms-motif-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    @keyframes lms-motif-drift {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.35; }
+        50% { transform: translate(6px, -10px) rotate(6deg); opacity: 0.55; }
+    }
+
+    @keyframes lms-motif-bar-pulse {
+        0%, 100% { transform: scaleY(1); transform-origin: bottom; }
+        50% { transform: scaleY(1.08); transform-origin: bottom; }
+    }
+
+    @keyframes lms-motif-line-draw {
+        0%, 100% { stroke-dashoffset: 0; opacity: 0.65; }
+        50% { opacity: 1; }
+    }
+
+    .lms-banner {
+        @apply absolute inset-0 isolate overflow-hidden;
+    }
+
+    .lms-banner-motif {
+        @apply absolute inset-0 z-[1] flex items-center justify-center px-4 py-3;
+        pointer-events: none;
+    }
+
+    .lms-banner-svg {
+        @apply h-full w-full max-h-[88%] max-w-[72%];
+        filter: drop-shadow(0 6px 16px rgba(15, 23, 42, 0.2));
+    }
+
+    .lms-motif-float {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: lms-motif-float 5s ease-in-out infinite;
+    }
+
+    .lms-motif-float--delay {
+        animation-delay: 0.4s;
+    }
+
+    .lms-motif-drift {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: lms-motif-drift 7s ease-in-out infinite;
+    }
+
+    .lms-motif-bar {
+        transform-box: fill-box;
+        transform-origin: bottom center;
+        animation: lms-motif-bar-pulse 4s ease-in-out infinite;
+    }
+
+    .lms-motif-bar--1 { animation-delay: 0s; }
+    .lms-motif-bar--2 { animation-delay: 0.35s; }
+    .lms-motif-bar--3 { animation-delay: 0.7s; }
+    .lms-motif-bar--4 { animation-delay: 1.05s; }
+
+    .lms-motif-chart-line {
+        animation: lms-motif-line-draw 5s ease-in-out infinite;
+    }
+
+    .lms-banner-base {
+        @apply absolute inset-0;
+        background-size: 400% 400%;
+        animation: lms-banner-shift 12s ease infinite;
+    }
+
+    .lms-banner-blob {
+        @apply absolute z-0 rounded-full opacity-60;
+        filter: blur(24px);
+        width: 70%;
+        height: 110%;
+        will-change: transform;
+    }
+
+    .lms-banner-blob--1 { top: -35%; left: -20%; animation: lms-blob-drift-1 9s ease-in-out infinite; }
+    .lms-banner-blob--2 { top: -25%; right: -25%; animation: lms-blob-drift-2 11s ease-in-out infinite; }
+    .lms-banner-blob--3 { bottom: -40%; left: 5%; animation: lms-blob-drift-3 10s ease-in-out infinite; }
+    .lms-banner-blob--4 { bottom: -30%; right: -10%; animation: lms-blob-drift-4 13s ease-in-out infinite; }
+
+    .lms-banner-shine {
+        @apply absolute inset-0 z-[2];
+        background: linear-gradient(
+            105deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.2) 45%,
+            rgba(255, 255, 255, 0.35) 50%,
+            rgba(255, 255, 255, 0.2) 55%,
+            transparent 100%
+        );
+        animation: lms-banner-shine 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .lms-banner--books .lms-banner-base {
+        background-image: linear-gradient(125deg, #064e3b, #059669, #34d399, #6ee7b7, #10b981, #059669);
+    }
+
+    .lms-banner--books .lms-banner-blob--1 { background: #a7f3d0; }
+    .lms-banner--books .lms-banner-blob--2 { background: #34d399; }
+    .lms-banner--books .lms-banner-blob--3 { background: #059669; }
+    .lms-banner--books .lms-banner-blob--4 { background: #6ee7b7; }
+
+    .lms-banner--notebook .lms-banner-base {
+        background-image: linear-gradient(125deg, #4c1d95, #7c3aed, #a78bfa, #c4b5fd, #8b5cf6, #6d28d9);
+    }
+
+    .lms-banner--notebook .lms-banner-blob--1 { background: #ddd6fe; }
+    .lms-banner--notebook .lms-banner-blob--2 { background: #a78bfa; }
+    .lms-banner--notebook .lms-banner-blob--3 { background: #7c3aed; }
+    .lms-banner--notebook .lms-banner-blob--4 { background: #c4b5fd; }
+
+    .lms-banner--analytics .lms-banner-base {
+        background-image: linear-gradient(125deg, #0c4a6e, #0284c7, #0ea5e9, #38bdf8, #7dd3fc, #0369a1);
+    }
+
+    .lms-banner--analytics .lms-banner-blob--1 { background: #7dd3fc; }
+    .lms-banner--analytics .lms-banner-blob--2 { background: #38bdf8; }
+    .lms-banner--analytics .lms-banner-blob--3 { background: #0284c7; }
+    .lms-banner--analytics .lms-banner-blob--4 { background: #0ea5e9; }
+
+    .lms-banner--laptop .lms-banner-base {
+        background-image: linear-gradient(125deg, #9a3412, #ea580c, #fb923c, #fdba74, #f97316, #c2410c);
+    }
+
+    .lms-banner--laptop .lms-banner-blob--1 { background: #fdba74; }
+    .lms-banner--laptop .lms-banner-blob--2 { background: #fb923c; }
+    .lms-banner--laptop .lms-banner-blob--3 { background: #ea580c; }
+    .lms-banner--laptop .lms-banner-blob--4 { background: #fed7aa; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .lms-banner-base,
+        .lms-banner-blob,
+        .lms-banner-shine,
+        .lms-motif-float,
+        .lms-motif-drift,
+        .lms-motif-bar,
+        .lms-motif-chart-line {
+            animation: none;
+        }
+    }
+
+    .lms-courses-grid {
+        @apply grid w-full gap-5 sm:grid-cols-2 xl:grid-cols-3;
+    }
+
+    /* Course cards */
+    .lms-course-card {
+        @apply flex h-full flex-col overflow-hidden rounded-2xl border-2 border-slate-200 bg-white ring-1 ring-slate-100 transition duration-200 hover:border-brand-300;
+        box-shadow:
+            0 2px 0 #e2e8f0,
+            0 4px 14px rgba(15, 23, 42, 0.08),
+            0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+
+    .lms-course-card:hover {
+        box-shadow:
+            0 3px 0 #e2e8f0,
+            0 8px 22px rgba(15, 23, 42, 0.1),
+            0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    .lms-course-card-cover {
+        @apply relative h-36 w-full shrink-0 overflow-hidden border-b border-slate-100 sm:h-40;
+    }
+
+    .lms-course-card-cover-overlay {
+        @apply pointer-events-none absolute inset-0 z-[1];
+        background: linear-gradient(
+            180deg,
+            rgba(15, 23, 42, 0.12) 0%,
+            transparent 50%,
+            rgba(15, 23, 42, 0.4) 100%
+        );
+    }
+
+    .lms-course-card-cover-badges {
+        @apply absolute inset-x-0 bottom-0 z-[2] flex items-center justify-between gap-2 px-3 pb-3 sm:px-4;
+    }
+
+    .lms-course-card-code {
+        @apply inline-flex rounded-lg bg-white/95 px-2.5 py-1 text-xs font-bold text-slate-800 shadow-sm backdrop-blur-sm;
+    }
+
+    .lms-course-card-enrolled {
+        @apply inline-flex rounded-full bg-slate-900/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm;
+    }
+
+    .lms-course-card-draft {
+        @apply absolute right-3 top-3 z-10 rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white;
+    }
+
+    .lms-course-card-body {
+        @apply flex flex-1 flex-col gap-4 px-4 pb-4 pt-4 sm:px-5;
+    }
+
+    .lms-course-card-footer {
+        @apply mt-auto w-full border-t-2 border-slate-100 bg-slate-50/70 px-4 pt-3 pb-4 sm:px-5;
+    }
+
+    .lms-course-card-head {
+        @apply space-y-2;
+    }
+
+    .lms-course-card-title {
+        @apply line-clamp-2 text-[15px] font-bold leading-snug text-isarva-heading transition group-hover:text-brand-600;
+    }
+
+    .lms-course-card-subrow {
+        @apply flex items-center justify-between gap-3;
+    }
+
+    .lms-course-card-lecturer {
+        @apply flex min-w-0 flex-1 items-center gap-2;
+    }
+
+    .lms-course-card-lecturer-avatar {
+        @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700;
+    }
+
+    .lms-course-card-meta {
+        @apply truncate text-sm text-isarva-muted;
+    }
+
+    .lms-course-card-tag {
+        @apply shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600;
+    }
+
+    .lms-course-card-tag--muted {
+        @apply bg-brand-50 font-medium text-brand-700;
+    }
+
+    .lms-course-card-metrics {
+        @apply grid grid-cols-2 gap-2.5;
+    }
+
+    .lms-course-card-metric {
+        @apply flex items-center justify-center rounded-xl bg-slate-50/90 px-2 py-3 ring-1 ring-slate-100;
+    }
+
+    .lms-course-card-metric .lms-mini-ring {
+        @apply flex-col items-center gap-1.5;
+    }
+
+    .lms-mini-ring {
+        @apply flex items-center gap-2;
+    }
+
+    .lms-mini-ring-chart {
+        @apply relative flex h-10 w-10 shrink-0 items-center justify-center;
+    }
+
+    .lms-mini-ring-value {
+        @apply absolute inset-0 flex items-center justify-center text-[10px] font-bold text-isarva-heading;
+    }
+
+    .lms-mini-ring-label {
+        @apply text-[11px] font-medium text-isarva-muted;
+    }
+
+    .lms-course-card-action {
+        @apply flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition duration-200;
+        box-shadow: 0 2px 0 #c2410c;
+        transform: translateZ(0);
+    }
+
+    .lms-course-card:hover .lms-course-card-action {
+        @apply bg-orange-600;
+        box-shadow: 0 3px 0 #c2410c;
+        transform: translateY(-1px);
+    }
+
+    .lms-course-card-action:active {
+        @apply bg-orange-600;
+        box-shadow: 0 1px 0 #c2410c;
+        transform: translateY(1px);
+    }
+
+    .lms-empty-state {
+        @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-isarva-border bg-white/80 px-6 py-12 text-center;
+    }
+
+    .lms-empty-state-art {
+        @apply w-full max-w-sm;
+    }
+
+    /* User cards */
+    .lms-user-card {
+        @apply flex h-full flex-col overflow-hidden rounded-2xl border-2 border-slate-200 bg-white ring-1 ring-slate-100 transition duration-200 hover:border-brand-300;
+        box-shadow:
+            0 2px 0 #e2e8f0,
+            0 4px 14px rgba(15, 23, 42, 0.08),
+            0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+
+    .lms-user-card:hover {
+        box-shadow:
+            0 3px 0 #e2e8f0,
+            0 8px 22px rgba(15, 23, 42, 0.1),
+            0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    .lms-user-card-visual {
+        @apply h-24 shrink-0 overflow-hidden border-b border-slate-100;
+    }
+
+    .lms-user-illustration {
+        @apply flex h-full w-full items-center justify-center p-4;
+    }
+
+    .lms-user-illustration-svg {
+        @apply h-full w-full max-h-[5.5rem] max-w-[8rem];
+    }
+
+    .lms-user-illustration-badge {
+        filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.08));
+    }
+
+    .lms-role-badge {
+        @apply inline-flex w-fit shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    }
+
+    .lms-user-card-body {
+        @apply flex flex-1 flex-col gap-2 p-4 sm:p-5;
+    }
+
+    .lms-user-card-name {
+        @apply font-bold text-isarva-heading;
+    }
+
+    .lms-user-card-email {
+        @apply truncate text-sm text-isarva-muted;
+    }
+
+    .lms-user-card-actions {
+        @apply mt-auto w-full border-t-2 border-slate-100 bg-slate-50/70 px-4 pt-3 pb-4 sm:px-5;
+    }
+
+    .lms-user-card-btn {
+        @apply flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition duration-200;
+        box-shadow: 0 2px 0 #c2410c;
+        transform: translateZ(0);
+    }
+
+    .lms-user-card:hover .lms-user-card-btn {
+        @apply bg-orange-600;
+        box-shadow: 0 3px 0 #c2410c;
+        transform: translateY(-1px);
+    }
+
+    .lms-user-card-btn:active {
+        @apply bg-orange-600;
+        box-shadow: 0 1px 0 #c2410c;
+        transform: translateY(1px);
+    }
+
+    /* Dashboard course row — thumbnail */
+    .quyl-course-row-cover {
+        @apply relative h-14 w-28 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/50;
+    }
+
+    .quyl-course-row-cover {
+        @apply relative h-14 w-28 shrink-0 overflow-hidden rounded-xl;
+    }
+
+    .quyl-course-row-cover .lms-banner-blob {
+        filter: blur(18px);
+    }
+
+    .quyl-resume-card-art {
+        @apply relative h-20 w-28 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/30 sm:h-24 sm:w-32;
+    }
+
+    .quyl-resume-card-art .lms-banner-blob {
+        filter: blur(16px);
+    }
+}
