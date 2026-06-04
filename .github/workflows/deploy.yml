@@ -43,9 +43,22 @@ jobs:
             set -e
             APP="${{ secrets.SSH_APP_DIR }}"
             cd "$APP"
+            # CyberPanel SSH often defaults to PHP 8.0; website uses 8.3
+            PHP=""
+            for c in /usr/local/lsws/lsphp83/bin/php /usr/bin/php8.3 /opt/alt/php83/usr/bin/php php; do
+              if [ -x "$c" ] && "$c" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null | grep -qE '^8\.(3|4|5)$'; then
+                PHP="$c"
+                break
+              fi
+            done
+            if [ -z "$PHP" ]; then
+              echo "ERROR: PHP 8.3+ not found for CLI. Set PHP 8.3 in CyberPanel for this site." >&2
+              exit 1
+            fi
+            echo "Using PHP: $PHP ($($PHP -v | head -1))"
             git fetch origin main
             git reset --hard origin/main
-            composer install --no-dev --optimize-autoloader --no-interaction
+            $PHP "$(command -v composer)" install --no-dev --optimize-autoloader --no-interaction
             mkdir -p public/build public_html/build
             rsync -a --delete build/ public/build/
             rsync -a --delete build/ public_html/build/
@@ -54,10 +67,10 @@ jobs:
                 rsync -a "public/$item" public_html/
               fi
             done
-            php artisan storage:link 2>/dev/null || true
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            $PHP artisan storage:link 2>/dev/null || true
+            $PHP artisan migrate --force
+            $PHP artisan config:cache
+            $PHP artisan route:cache
+            $PHP artisan view:cache
             chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
             echo "Deploy OK"
