@@ -69,6 +69,11 @@ Students `student2` … `student5` use `@lms.test`.
 
 Step-by-step UAT test cases (Tests 1–15) are in [docs/manual-testing/TEST_CASES.md](docs/manual-testing/TEST_CASES.md).
 
+## Deploy to server (CyberPanel)
+
+- **Already uploaded zip?** Follow [docs/deploy/ZIP_TO_AUTO_DEPLOY.md](docs/deploy/ZIP_TO_AUTO_DEPLOY.md) step by step.
+- **GitHub Actions reference:** [docs/deploy/GITHUB_AUTO_DEPLOY.md](docs/deploy/GITHUB_AUTO_DEPLOY.md).
+
 ## Project structure
 
 - `app/Http/Controllers/` — Course, assignment, submission, admin user flows
