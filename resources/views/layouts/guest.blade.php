@@ -34,14 +34,15 @@
                 <div class="auth-card grid lg:grid-cols-2">
                     <div class="auth-left-panel hidden lg:flex lg:flex-col lg:justify-between">
                         <div>
-                            <a href="https://www.isarvait.com" target="_blank" rel="noopener" class="inline-block">
-                                <x-isarva-logo variant="large" />
-                            </a>
-
-                            <p class="auth-tagline mt-8">
-                                <span class="isarva-pill-dot"></span>
-                                Data Science Learning Platform
-                            </p>
+                            <div class="auth-brand-stack">
+                                <a href="https://www.isarvait.com" target="_blank" rel="noopener" class="auth-brand-logo">
+                                    <x-isarva-logo variant="large" />
+                                </a>
+                                <p class="auth-tagline">
+                                    <span class="isarva-pill-dot" aria-hidden="true"></span>
+                                    Data Science Learning Platform
+                                </p>
+                            </div>
                             <h1 class="mt-5 text-[1.75rem] font-bold leading-snug tracking-tight text-isarva-heading xl:text-[2rem]">
                                 Innovating learning.<br>
                                 <span class="text-brand-600">Powering student success.</span>
@@ -77,11 +78,11 @@
                     </div>
 
                     <div class="flex flex-col justify-center border-isarva-border bg-white p-7 sm:p-9 lg:border-l lg:p-10 xl:p-12">
-                        <div class="mb-6 lg:hidden">
-                            <x-isarva-logo variant="large" class="!max-w-[220px]" />
-                            <p class="auth-tagline mt-4">
-                                <span class="isarva-pill-dot"></span>
-                                {{ config('app.name') }}
+                        <div class="auth-brand-stack mb-6 lg:hidden">
+                            <x-isarva-logo variant="large" class="auth-brand-logo !max-w-[220px]" />
+                            <p class="auth-tagline">
+                                <span class="isarva-pill-dot" aria-hidden="true"></span>
+                                Data Science Learning Platform
                             </p>
                         </div>
                         {{ $slot }}

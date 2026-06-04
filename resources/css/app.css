@@ -1492,8 +1492,16 @@
         @apply h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600;
     }
 
+    .auth-brand-stack {
+        @apply flex max-w-full flex-col items-start gap-4;
+    }
+
+    .auth-brand-logo {
+        @apply block w-full max-w-[280px];
+    }
+
     .auth-tagline {
-        @apply isarva-pill;
+        @apply isarva-pill m-0 max-w-full whitespace-nowrap sm:whitespace-normal;
     }
 
     /* Full-bleed animated course banners (mesh blobs) */
