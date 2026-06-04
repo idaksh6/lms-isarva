@@ -4,54 +4,62 @@
 @section('page_title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-layout">
-    <div class="dashboard-main">
-        <x-dashboard.resume-card
-            :course="$featuredCourse"
-            :progress="$featuredProgress"
-            subtitle="Your latest course"
-        />
+<div class="dashboard-page">
+    <div class="dashboard-layout">
+        <div class="dashboard-main">
+            <header class="dashboard-welcome">
+                <div>
+                    <p class="dashboard-welcome-eyebrow">Lecturer dashboard</p>
+                    <h2 class="dashboard-welcome-title">Welcome back, {{ auth()->user()->name }}</h2>
+                    <p class="dashboard-welcome-desc">Track your modules, reviews, and upcoming deadlines.</p>
+                </div>
+                <a href="{{ route('courses.create') }}" class="lms-btn-primary">New course</a>
+            </header>
 
-        <section>
-            <h2 class="quyl-section-title">Status</h2>
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                <x-dashboard.stat-ring label="Active courses" :value="$stats['active_courses']" :sub="$stats['active_courses'].' of '.$stats['courses'].' courses'" :percent="$stats['active_courses_pct']" tone="brand" />
-                <x-dashboard.stat-ring label="To review" :value="$stats['pending_reviews']" :sub="$stats['reviewed'].' of '.$stats['total_submissions'].' reviewed'" :percent="$stats['reviewed_pct']" tone="orange" />
-            </div>
-        </section>
+            <x-dashboard.resume-card
+                :course="$featuredCourse"
+                :progress="$featuredProgress"
+                subtitle="Your latest course"
+            />
 
-        <section class="quyl-card">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="quyl-card-title">My courses</h2>
-                <a href="{{ route('courses.create') }}" class="lms-btn-primary lms-btn-primary--xs">New course <span aria-hidden="true">→</span></a>
-            </div>
+            <section class="dashboard-section">
+                <div class="dashboard-section-head">
+                    <h2 class="dashboard-section-title">Status</h2>
+                </div>
+                <div class="dashboard-stats-grid dashboard-stats-grid--2">
+                    <x-dashboard.stat-ring label="Active courses" :value="$stats['active_courses']" :sub="$stats['active_courses'].' of '.$stats['courses'].' courses'" :percent="$stats['active_courses_pct']" tone="brand" />
+                    <x-dashboard.stat-ring label="To review" :value="$stats['pending_reviews']" :sub="$stats['reviewed'].' of '.$stats['total_submissions'].' reviewed'" :percent="$stats['reviewed_pct']" tone="orange" />
+                </div>
+            </section>
 
-            <div class="mt-4 space-y-3">
-                @forelse ($courses as $index => $course)
-                    @php
-                        $tones = [
-                            ['bg' => 'bg-violet-100', 'text' => 'text-violet-700', 'from' => 'from-violet-400', 'to' => 'to-brand-500'],
-                            ['bg' => 'bg-sky-100', 'text' => 'text-sky-700', 'from' => 'from-sky-400', 'to' => 'to-cyan-500'],
-                            ['bg' => 'bg-orange-100', 'text' => 'text-orange-700', 'from' => 'from-orange-400', 'to' => 'to-amber-500'],
-                        ];
-                        $t = $tones[$index % count($tones)];
-                    @endphp
-                    <x-dashboard.course-row
-                        :course="$course"
-                        :progress="\App\Support\DashboardMetrics::lecturerCourseProgress($course)"
-                        :meta="$course->students_count.' students · '.$course->assignments_count.' assignments'"
-                        :bar-from="$t['from']"
-                        :bar-to="$t['to']"
-                    />
-                @empty
-                    <x-lms.empty-state title="Create your first course" message="Add a module to start assigning work to students." variant="notebook">
-                        <a href="{{ route('courses.create') }}" class="lms-btn-primary">Create course <span aria-hidden="true">→</span></a>
-                    </x-lms.empty-state>
-                @endforelse
-            </div>
-        </section>
+            <section class="dashboard-section dashboard-panel">
+                <div class="dashboard-section-head">
+                    <div>
+                        <h2 class="dashboard-section-title-lg">My courses</h2>
+                        <p class="dashboard-section-desc">{{ $courses->count() }} {{ $courses->count() === 1 ? 'module' : 'modules' }} you teach.</p>
+                    </div>
+                    <a href="{{ route('courses.index') }}" class="lms-text-link">View all →</a>
+                </div>
+
+                <div class="dashboard-course-grid">
+                    @forelse ($courses as $course)
+                        <x-dashboard.course-card
+                            :course="$course"
+                            :progress="\App\Support\DashboardMetrics::lecturerCourseProgress($course)"
+                            :meta="$course->students_count.' students · '.$course->assignments_count.' assignments'"
+                        />
+                    @empty
+                        <div class="dashboard-course-grid-empty">
+                            <x-lms.empty-state title="Create your first course" message="Add a module to start assigning work to students." variant="notebook">
+                                <a href="{{ route('courses.create') }}" class="lms-btn-primary">Create course</a>
+                            </x-lms.empty-state>
+                        </div>
+                    @endforelse
+                </div>
+            </section>
+        </div>
+
+        @include('dashboard.partials.aside', ['upcoming' => $upcoming, 'highlightDates' => $highlightDates])
     </div>
-
-    @include('dashboard.partials.aside', ['upcoming' => $upcoming, 'highlightDates' => $highlightDates])
 </div>
 @endsection

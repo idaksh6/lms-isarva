@@ -7,8 +7,8 @@
 <div class="lms-page-stack">
     <x-lms.course-hero :course="$course" active="enrollments" />
 
-    <div class="grid gap-6 lg:grid-cols-2">
-        <section class="lms-panel lms-panel--fill">
+    <div class="lms-page-grid-2">
+        <section class="lms-panel">
             <div class="lms-panel-header">
                 <h2 class="lms-panel-title">Enrolled students</h2>
                 <span class="lms-panel-count">{{ $course->students->count() }}</span>
@@ -42,7 +42,7 @@
             </div>
         </section>
 
-        <section class="lms-panel lms-panel--fill">
+        <section class="lms-panel">
             <div class="lms-panel-header">
                 <h2 class="lms-panel-title">Add students</h2>
                 @if ($availableStudents->isNotEmpty())

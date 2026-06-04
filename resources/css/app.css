@@ -248,51 +248,51 @@
     }
 
     .lms-sidebar-profile {
-        @apply shrink-0 border-t border-slate-100 pt-4;
+        @apply shrink-0 border-t border-slate-200/80 px-0.5 pt-3;
     }
 
     .lms-sidebar-profile-card {
-        @apply flex items-start gap-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-slate-50 to-brand-50/40 p-3.5 transition hover:border-brand-200 hover:bg-brand-50/60;
+        @apply flex items-center gap-3 rounded-lg bg-slate-50/80 px-2.5 py-2.5 transition hover:bg-slate-100;
     }
 
     .lms-sidebar-profile-avatar {
-        @apply relative mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 ring-2 ring-white shadow-sm;
+        @apply flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-600 shadow-sm;
     }
 
     .lms-sidebar-profile-initials {
-        @apply relative z-[1] text-sm font-bold text-brand-700;
-    }
-
-    .lms-sidebar-profile-default-icon {
-        @apply absolute inset-0 m-auto h-7 w-7 text-brand-600/25;
+        @apply text-sm font-bold tracking-wide text-white;
     }
 
     .lms-sidebar-profile-meta {
-        @apply flex min-w-0 flex-1 flex-col gap-2;
+        @apply flex min-w-0 flex-1 flex-col gap-0.5;
     }
 
     .lms-sidebar-profile-name {
-        @apply line-clamp-2 text-sm font-bold leading-snug text-isarva-heading;
-    }
-
-    .lms-sidebar-profile-meta .lms-role-badge {
-        @apply w-fit self-start;
+        @apply truncate text-sm font-semibold text-isarva-heading;
     }
 
     .lms-sidebar-profile-role {
-        @apply text-xs font-semibold text-brand-700;
+        @apply text-[11px] font-medium text-brand-600;
     }
 
     .lms-sidebar-profile-email {
-        @apply truncate text-xs leading-relaxed text-isarva-muted;
+        @apply truncate text-[11px] text-isarva-muted;
     }
 
     .lms-sidebar-profile-id {
-        @apply text-[11px] font-medium leading-relaxed text-slate-500;
+        @apply text-[10px] font-medium text-slate-400;
+    }
+
+    .lms-sidebar-profile-chevron {
+        @apply h-4 w-4 shrink-0 text-slate-300 transition group-hover:text-slate-400;
+    }
+
+    .lms-sidebar-profile-card:hover .lms-sidebar-profile-chevron {
+        @apply text-brand-500;
     }
 
     .lms-sidebar-footer {
-        @apply shrink-0 bg-white px-1 pb-1 pt-2;
+        @apply shrink-0 px-0.5 pb-0.5 pt-1;
     }
 
     /* Top bar — compact */
@@ -360,9 +360,13 @@
         @apply font-bold text-accent-500;
     }
 
-    /* Dashboard grid */
+    /* Dashboard */
+    .dashboard-page {
+        @apply -mx-1 px-1 sm:mx-0 sm:px-0;
+    }
+
     .dashboard-layout {
-        @apply grid gap-6 lg:gap-8 xl:grid-cols-[minmax(0,1fr)_340px];
+        @apply grid gap-6 lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px];
     }
 
     .dashboard-main {
@@ -371,6 +375,240 @@
 
     .dashboard-aside {
         @apply min-w-0 space-y-6;
+    }
+
+    .dashboard-welcome {
+        @apply flex flex-col gap-4 rounded-2xl border border-isarva-border bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6;
+    }
+
+    .dashboard-welcome-eyebrow {
+        @apply text-xs font-bold uppercase tracking-widest text-brand-600;
+    }
+
+    .dashboard-welcome-title {
+        @apply mt-1 text-xl font-bold text-isarva-heading sm:text-2xl;
+    }
+
+    .dashboard-welcome-desc {
+        @apply mt-1 max-w-xl text-sm text-isarva-muted;
+    }
+
+    .dashboard-welcome-actions {
+        @apply flex shrink-0 flex-wrap gap-2;
+    }
+
+    .dashboard-section {
+        @apply space-y-3;
+    }
+
+    .dashboard-section-head {
+        @apply flex flex-wrap items-end justify-between gap-3;
+    }
+
+    .dashboard-section-title {
+        @apply text-xs font-extrabold uppercase tracking-widest text-brand-600/80;
+    }
+
+    .dashboard-section-title-lg {
+        @apply text-lg font-bold text-isarva-heading;
+    }
+
+    .dashboard-section-desc {
+        @apply mt-0.5 text-sm text-isarva-muted;
+    }
+
+    .dashboard-panel {
+        @apply rounded-2xl border border-isarva-border bg-white p-5 shadow-sm sm:p-6;
+    }
+
+    .dashboard-stats-grid {
+        @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
+    }
+
+    .dashboard-stats-grid--2 {
+        @apply xl:grid-cols-2;
+    }
+
+    .dashboard-stats-grid--3 {
+        @apply sm:grid-cols-3 xl:grid-cols-3;
+    }
+
+    .dashboard-course-grid {
+        @apply flex flex-col gap-2.5;
+    }
+
+    .dashboard-course-grid-empty {
+        @apply w-full;
+    }
+
+    /* Small thumb: gentle Ken Burns motion only (no overlays, no play icon) */
+    .dashboard-cover-motion {
+        @apply relative h-full w-full overflow-hidden bg-slate-100;
+    }
+
+    .dashboard-cover-motion::after {
+        content: '';
+        @apply pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/15 via-transparent to-brand-50/20;
+    }
+
+    .dashboard-course-cover-img {
+        @apply absolute inset-0 h-full w-full object-cover;
+        transform: scale(1.12);
+        animation: dashboard-cover-drift 20s ease-in-out infinite alternate;
+    }
+
+    .group:hover .dashboard-course-cover-img,
+    .dashboard-featured:hover .dashboard-course-cover-img {
+        animation-duration: 14s;
+    }
+
+    .dashboard-cover-motion--static .dashboard-course-cover-img {
+        animation: none;
+        transform: scale(1.05);
+    }
+
+    @keyframes dashboard-cover-drift {
+        0% {
+            transform: scale(1.1) translate(0%, 0%);
+        }
+        50% {
+            transform: scale(1.16) translate(-2%, -1%);
+        }
+        100% {
+            transform: scale(1.12) translate(1%, -2%);
+        }
+    }
+
+    .dashboard-cover-motion--large .dashboard-course-cover-img {
+        transform: scale(1.02);
+        animation: dashboard-cover-drift-large 24s ease-in-out infinite alternate;
+    }
+
+    @keyframes dashboard-cover-drift-large {
+        0% {
+            transform: scale(1.02) translate(0%, 0%);
+        }
+        50% {
+            transform: scale(1.05) translate(-1%, -0.5%);
+        }
+        100% {
+            transform: scale(1.03) translate(0.5%, -1%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-course-cover-img {
+            animation: none;
+            transform: scale(1.05);
+        }
+    }
+
+    .dashboard-course-card {
+        @apply flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200/90 bg-white p-2.5 shadow-sm ring-1 ring-slate-100 transition hover:border-brand-200 hover:shadow-md sm:gap-3.5 sm:p-3;
+    }
+
+    .dashboard-course-card-thumb {
+        @apply relative h-[4.25rem] w-[5.75rem] shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-[4.5rem] sm:w-24;
+    }
+
+    .dashboard-course-card-code {
+        @apply absolute bottom-1 left-1 z-[2] rounded bg-slate-900/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white;
+    }
+
+    .dashboard-course-card-body {
+        @apply min-w-0 flex-1 py-0.5;
+    }
+
+    .dashboard-course-card-top {
+        @apply flex items-start justify-between gap-2;
+    }
+
+    .dashboard-course-card-title {
+        @apply line-clamp-2 text-sm font-bold leading-snug text-isarva-heading group-hover:text-brand-700 sm:text-[0.9375rem];
+    }
+
+    .dashboard-course-card-pct {
+        @apply shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-600;
+    }
+
+    .dashboard-course-card-meta {
+        @apply mt-0.5 line-clamp-1 text-[11px] text-isarva-muted;
+    }
+
+    .dashboard-course-card-track {
+        @apply mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100;
+    }
+
+    .dashboard-course-card-fill {
+        @apply h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600;
+    }
+
+    .dashboard-course-card-arrow {
+        @apply hidden shrink-0 pr-1 text-base font-semibold text-brand-600 sm:block sm:opacity-0 sm:transition group-hover:sm:opacity-100;
+    }
+
+    .dashboard-featured {
+        @apply flex items-center gap-3 overflow-hidden rounded-xl border border-isarva-border bg-white p-2.5 shadow-sm ring-1 ring-slate-100 transition hover:border-brand-200 hover:shadow-md sm:gap-4 sm:p-3;
+    }
+
+    .dashboard-featured-thumb {
+        @apply relative h-[4.5rem] w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-20 sm:w-32;
+    }
+
+    .dashboard-featured-code {
+        @apply absolute bottom-1.5 left-1.5 z-[2] rounded bg-slate-900/75 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white;
+    }
+
+    .dashboard-featured-body {
+        @apply min-w-0 flex-1;
+    }
+
+    .dashboard-featured-eyebrow {
+        @apply text-[10px] font-bold uppercase tracking-widest text-brand-600;
+    }
+
+    .dashboard-featured-title {
+        @apply line-clamp-2 text-sm font-bold leading-snug text-isarva-heading sm:text-base;
+    }
+
+    .dashboard-featured-meta {
+        @apply mt-0.5 text-xs text-isarva-muted;
+    }
+
+    .dashboard-featured-track {
+        @apply mt-1.5 h-1 max-w-xs overflow-hidden rounded-full bg-slate-100;
+    }
+
+    .dashboard-featured-fill {
+        @apply h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600;
+    }
+
+    .dashboard-featured-cta {
+        @apply hidden shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm sm:inline-flex;
+    }
+
+    .dashboard-course-row {
+        @apply flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition hover:border-brand-200 hover:shadow-md;
+    }
+
+    .dashboard-course-row-thumb {
+        @apply relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100;
+    }
+
+    .dashboard-course-row-track {
+        @apply h-1.5 max-w-xs flex-1 overflow-hidden rounded-full bg-slate-100;
+    }
+
+    .dashboard-course-row-fill {
+        @apply h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600;
+    }
+
+    .dashboard-course-row-arrow {
+        @apply shrink-0 text-lg font-semibold text-brand-600 opacity-0 transition group-hover:opacity-100;
+    }
+
+    .dashboard-assignment-pill {
+        @apply flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 transition hover:border-brand-200 hover:bg-brand-50/50;
     }
 
     .quyl-card {
@@ -485,18 +723,6 @@
 
     .quyl-stat-card--orange .quyl-stat-card-fill {
         @apply bg-orange-500;
-    }
-
-    .quyl-resume-card {
-        @apply flex flex-wrap items-center gap-4 rounded-xl border border-brand-100/80 bg-gradient-to-r from-white via-white to-brand-50/60 p-4 shadow-card sm:flex-nowrap;
-    }
-
-    .quyl-resume-btn {
-        @apply inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-accent-500/25 transition hover:brightness-105;
-    }
-
-    .quyl-course-row {
-        @apply flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4 transition hover:border-brand-200 hover:bg-brand-50/40 hover:shadow-sm;
     }
 
     .quyl-course-icon {
@@ -717,7 +943,7 @@
     }
 
     .lms-panel--fill {
-        @apply h-full;
+        @apply flex min-h-0 flex-col;
     }
 
     .lms-panel-header {
@@ -741,11 +967,86 @@
     }
 
     .lms-empty-panel {
-        @apply flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-10 text-center;
+        @apply col-span-full flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-12 text-center;
+    }
+
+    .lms-assignment-grid--single {
+        @apply grid-cols-1;
     }
 
     .lms-page-stack {
-        @apply space-y-6;
+        @apply relative space-y-6;
+    }
+
+    .lms-page-stack > .lms-panel,
+    .lms-page-stack > section.lms-panel {
+        @apply relative z-[1];
+    }
+
+    .lms-page-grid-2 {
+        @apply grid items-start gap-6 lg:grid-cols-2;
+    }
+
+    .lms-page-grid-3 {
+        @apply grid items-start gap-6 xl:grid-cols-3;
+    }
+
+    .lms-page-grid-3-main {
+        @apply min-w-0 space-y-6 xl:col-span-2;
+    }
+
+    .lms-page-grid-3-side {
+        @apply min-w-0 space-y-6 xl:col-span-1;
+    }
+
+    /* Lecturer assignment — stacked sections, no side-by-side height stretch */
+    .lms-assignment-staff-layout {
+        @apply flex flex-col gap-6;
+    }
+
+    .lms-assignment-meta-strip {
+        @apply grid gap-4 rounded-2xl border border-isarva-border bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-isarva-border lg:p-0;
+    }
+
+    .lms-assignment-meta-item {
+        @apply flex flex-col gap-1 lg:px-5 lg:py-4;
+    }
+
+    .lms-assignment-meta-label {
+        @apply text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-500;
+    }
+
+    .lms-assignment-meta-value {
+        @apply text-sm text-slate-900;
+    }
+
+    .lms-assignment-submissions-hub {
+        @apply overflow-hidden rounded-2xl border-2 border-brand-200/70 bg-white ring-1 ring-brand-100;
+        box-shadow: 0 2px 0 #d1fae5, 0 6px 24px rgba(0, 153, 102, 0.08);
+    }
+
+    .lms-assignment-submissions-hub-header {
+        @apply flex flex-wrap items-start justify-between gap-4 border-b border-brand-100 bg-gradient-to-r from-brand-50 via-white to-white px-5 py-5 sm:px-6;
+    }
+
+    .lms-assignment-submissions-hub-title {
+        @apply text-lg font-bold text-isarva-heading;
+    }
+
+    .lms-assignment-submissions-hub-desc {
+        @apply mt-1 max-w-xl text-sm text-slate-500;
+    }
+
+    .lms-assignment-submissions-hub-count {
+        @apply flex h-11 min-w-[2.75rem] shrink-0 items-center justify-center rounded-full bg-brand-600 px-3 text-lg font-bold text-white shadow-sm;
+    }
+
+    .lms-assignment-submissions-hub-body {
+        @apply flex flex-col gap-3 p-5 sm:p-6;
+    }
+
+    .lms-assignment-submissions-empty {
+        @apply flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-14 text-center;
     }
 
     .lms-student-list {
@@ -758,6 +1059,10 @@
 
     .lms-student-avatar {
         @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700;
+    }
+
+    .lms-student-avatar--lg {
+        @apply h-11 w-11 text-sm;
     }
 
     .lms-student-picker {
@@ -780,20 +1085,20 @@
         @apply relative min-h-[11rem] w-full overflow-hidden sm:min-h-[12.5rem];
     }
 
-    .lms-banner--hero .lms-banner-motif {
+    .lms-banner.lms-banner--hero .lms-banner-motif {
         @apply items-center justify-end pr-6 opacity-40 sm:pr-10;
     }
 
-    .lms-banner--hero .lms-banner-svg {
+    .lms-banner.lms-banner--hero .lms-banner-svg {
         @apply max-h-[75%] max-w-[38%] sm:max-w-[32%];
     }
 
-    .lms-banner--hero .lms-banner-shine {
+    .lms-banner.lms-banner--hero .lms-banner-shine {
         opacity: 0.1;
     }
 
-    .lms-banner--hero .lms-motif-float,
-    .lms-banner--hero .lms-motif-drift {
+    .lms-banner.lms-banner--hero .lms-motif-float,
+    .lms-banner.lms-banner--hero .lms-motif-drift {
         animation: none;
     }
 
@@ -850,6 +1155,285 @@
 
     .lms-assignment-row-icon {
         @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600;
+    }
+
+    /* Assignment pages */
+    .lms-banner--assignment .lms-banner-base,
+    .lms-banner--assignment-hero .lms-banner-base,
+    .lms-banner--assignment-card .lms-banner-base,
+    .lms-banner--submit-context .lms-banner-base {
+        background-image: linear-gradient(125deg, #1e3a8a, #2563eb, #3b82f6, #60a5fa, #1d4ed8, #1e40af);
+    }
+
+    .lms-banner--assignment .lms-banner-blob--1,
+    .lms-banner--assignment-hero .lms-banner-blob--1,
+    .lms-banner--assignment-card .lms-banner-blob--1,
+    .lms-banner--submit-context .lms-banner-blob--1 { background: #93c5fd; }
+    .lms-banner--assignment .lms-banner-blob--2,
+    .lms-banner--assignment-hero .lms-banner-blob--2,
+    .lms-banner--assignment-card .lms-banner-blob--2,
+    .lms-banner--submit-context .lms-banner-blob--2 { background: #60a5fa; }
+    .lms-banner--assignment .lms-banner-blob--3,
+    .lms-banner--assignment-hero .lms-banner-blob--3,
+    .lms-banner--assignment-card .lms-banner-blob--3,
+    .lms-banner--submit-context .lms-banner-blob--3 { background: #3b82f6; }
+    .lms-banner--assignment .lms-banner-blob--4,
+    .lms-banner--assignment-hero .lms-banner-blob--4,
+    .lms-banner--assignment-card .lms-banner-blob--4,
+    .lms-banner--submit-context .lms-banner-blob--4 { background: #bfdbfe; }
+
+    .lms-banner.lms-banner--assignment-hero .lms-banner-motif {
+        @apply items-center justify-end pr-4 opacity-50 sm:pr-8 md:pr-12;
+    }
+
+    .lms-banner.lms-banner--assignment-hero .lms-banner-svg {
+        @apply max-h-[82%] max-w-[42%] sm:max-w-[36%] md:max-w-[30%];
+    }
+
+    .lms-banner.lms-banner--assignment-hero .lms-motif-float,
+    .lms-banner.lms-banner--assignment-hero .lms-motif-drift {
+        animation: none;
+    }
+
+    /* Modifier classes are merged onto .lms-banner itself (not a wrapper) */
+    .lms-banner.lms-banner--assignment-card {
+        @apply min-h-[5.5rem];
+    }
+
+    .lms-banner.lms-banner--assignment-card .lms-banner-motif {
+        @apply opacity-90;
+    }
+
+    .lms-banner.lms-banner--assignment-card .lms-banner-svg {
+        @apply max-h-[4.5rem] max-w-[7rem];
+    }
+
+    .lms-banner.lms-banner--submit-context {
+        @apply relative inset-auto min-h-[7rem] w-full rounded-2xl;
+    }
+
+    .lms-assignment-header {
+        @apply flex overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
+    }
+
+    .lms-assignment-header-accent {
+        @apply w-1 shrink-0 bg-gradient-to-b from-brand-600 via-brand-500 to-brand-400;
+    }
+
+    .lms-assignment-header-body {
+        @apply flex min-w-0 flex-1 flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-4;
+    }
+
+    .lms-assignment-header-copy {
+        @apply min-w-0;
+    }
+
+    .lms-assignment-header-eyebrow {
+        @apply flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-medium text-slate-500 sm:text-sm;
+    }
+
+    .lms-assignment-header-course-link {
+        @apply font-bold uppercase tracking-wide text-brand-700 transition hover:text-brand-800;
+    }
+
+    .lms-assignment-header-title {
+        @apply mt-0.5 text-xl font-bold leading-snug text-slate-900 text-balance sm:text-2xl;
+    }
+
+    .lms-assignment-header-aside {
+        @apply flex shrink-0 flex-wrap items-center gap-2;
+    }
+
+    .lms-assignment-header-due {
+        @apply rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 sm:text-sm;
+    }
+
+    .lms-assignment-header-due--overdue {
+        @apply bg-rose-50 text-rose-700 ring-rose-200;
+    }
+
+    .lms-assignment-grid {
+        @apply grid gap-4 sm:grid-cols-2;
+    }
+
+    .lms-assignment-card {
+        @apply flex h-full flex-col overflow-hidden rounded-2xl border-2 border-slate-200 bg-white ring-1 ring-slate-100 transition duration-200 hover:border-brand-300 hover:shadow-md;
+        box-shadow: 0 2px 0 #e2e8f0, 0 3px 10px rgba(15, 23, 42, 0.06);
+    }
+
+    .lms-assignment-card-visual {
+        @apply relative h-24 shrink-0 overflow-hidden border-b border-slate-100;
+    }
+
+    .lms-assignment-card-body {
+        @apply flex flex-1 flex-col gap-3 p-4;
+    }
+
+    .lms-assignment-card-title {
+        @apply font-bold text-isarva-heading transition group-hover:text-brand-600;
+    }
+
+    .lms-assignment-card-footer {
+        @apply mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3;
+    }
+
+    .lms-assignment-card-cta {
+        @apply text-sm font-semibold text-brand-600 group-hover:text-brand-700;
+    }
+
+    .lms-meta-list {
+        @apply divide-y divide-isarva-border;
+    }
+
+    .lms-meta-list-row {
+        @apply grid gap-1.5 py-4 first:pt-0 last:pb-0;
+    }
+
+    .lms-meta-list-row dt {
+        @apply text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-500;
+    }
+
+    .lms-meta-list-row dd {
+        @apply m-0 leading-snug;
+    }
+
+    .lms-meta-list-value {
+        @apply text-base font-semibold text-slate-900;
+    }
+
+    .lms-meta-list-sub {
+        @apply mt-1 block text-sm font-normal text-slate-500;
+    }
+
+    .lms-meta-list-link {
+        @apply text-base font-semibold text-brand-600 transition hover:text-brand-700;
+    }
+
+    .lms-meta-list-date {
+        @apply text-sm font-medium text-slate-600;
+    }
+
+    .lms-meta-list-note {
+        @apply rounded-xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 text-sm leading-relaxed text-slate-600;
+    }
+
+    /* Alias used on assignment sidebar */
+    .lms-assignment-glance {
+        @apply lms-meta-list;
+    }
+
+    .lms-assignment-glance-row {
+        @apply lms-meta-list-row;
+    }
+
+    .lms-assignment-glance-row dt {
+        @apply text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-500;
+    }
+
+    .lms-assignment-glance-row dd {
+        @apply m-0 leading-snug;
+    }
+
+    .lms-submit-context {
+        @apply relative overflow-hidden rounded-2xl border border-isarva-border bg-white;
+    }
+
+    .lms-submit-context-copy {
+        @apply relative z-[2] px-5 py-5 sm:px-6;
+    }
+
+    .lms-prose {
+        @apply text-sm leading-relaxed text-slate-700;
+    }
+
+    .lms-panel--highlight {
+        @apply border-brand-200 bg-brand-50/20;
+    }
+
+    .lms-submission-list {
+        @apply flex flex-col gap-3;
+    }
+
+    .lms-submission-card {
+        @apply flex flex-col gap-3 rounded-xl border border-isarva-border bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md;
+    }
+
+    .lms-submission-card--row {
+        @apply border-brand-100 bg-white sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5 sm:py-4;
+    }
+
+    .lms-submission-card-main {
+        @apply flex min-w-0 flex-1 items-center gap-3;
+    }
+
+    .lms-submission-card-actions {
+        @apply flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-4;
+    }
+
+    .lms-submission-card--row .lms-submission-card-actions .lms-btn-primary,
+    .lms-submission-card--row .lms-submission-card-actions .lms-btn-secondary {
+        @apply w-full sm:w-auto sm:min-w-[10.5rem];
+    }
+
+    .lms-submission-list-item {
+        @apply flex items-center gap-3 py-3 transition first:pt-0 hover:bg-slate-50/80;
+    }
+
+    /* Document viewer */
+    .lms-doc-file {
+        @apply rounded-xl border border-isarva-border bg-slate-50/60 p-4;
+    }
+
+    .lms-doc-file-row {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
+    .lms-doc-file-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 ring-1 ring-slate-200;
+    }
+
+    .lms-doc-modal {
+        @apply fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6;
+    }
+
+    .lms-doc-modal-backdrop {
+        @apply absolute inset-0 bg-slate-900/70 backdrop-blur-sm;
+    }
+
+    .lms-doc-modal-panel {
+        @apply relative z-10 flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl;
+    }
+
+    .lms-doc-modal-toolbar {
+        @apply flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-isarva-border px-4 py-3 sm:px-5;
+    }
+
+    .lms-doc-modal-body {
+        @apply min-h-0 flex-1 overflow-auto bg-slate-100 p-2 sm:p-4;
+    }
+
+    .lms-doc-iframe {
+        @apply h-[70vh] w-full rounded-lg border border-slate-200 bg-white;
+    }
+
+    .lms-doc-iframe--inline {
+        @apply h-[min(70vh,520px)];
+    }
+
+    .lms-doc-image {
+        @apply mx-auto max-h-[70vh] w-auto max-w-full rounded-lg;
+    }
+
+    .lms-doc-image--inline {
+        @apply max-h-[min(70vh,520px)];
+    }
+
+    .lms-doc-fallback {
+        @apply rounded-xl bg-white px-6 py-10 text-center;
+    }
+
+    .lms-doc-inline-preview {
+        @apply rounded-xl border border-isarva-border bg-white p-3;
     }
 
     .lms-btn-danger {
@@ -1090,41 +1674,38 @@
     }
 
     .lms-courses-grid {
-        @apply grid w-full gap-5 sm:grid-cols-2 xl:grid-cols-3;
+        @apply grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-3;
     }
 
-    /* Course cards */
+    /* Course cards — framed cover, clear borders, Open course button */
     .lms-course-card {
-        @apply flex h-full flex-col overflow-hidden rounded-2xl border-2 border-slate-200 bg-white ring-1 ring-slate-100 transition duration-200 hover:border-brand-300;
-        box-shadow:
-            0 2px 0 #e2e8f0,
-            0 4px 14px rgba(15, 23, 42, 0.08),
-            0 1px 3px rgba(15, 23, 42, 0.05);
-    }
-
-    .lms-course-card:hover {
-        box-shadow:
-            0 3px 0 #e2e8f0,
-            0 8px 22px rgba(15, 23, 42, 0.1),
-            0 2px 6px rgba(15, 23, 42, 0.06);
+        @apply flex h-full flex-col overflow-hidden rounded-2xl border-[3px] border-slate-200/90 bg-white shadow-sm transition duration-200 hover:border-brand-400 hover:shadow-md;
     }
 
     .lms-course-card-cover {
-        @apply relative h-36 w-full shrink-0 overflow-hidden border-b border-slate-100 sm:h-40;
+        @apply relative mx-3 mt-3 h-36 shrink-0 overflow-hidden rounded-xl border-2 border-slate-200 bg-slate-100 shadow-[inset_0_1px_2px_rgba(15,23,42,0.06)] sm:mx-3.5 sm:mt-3.5 sm:h-40;
+    }
+
+    .lms-course-card-cover .dashboard-cover-motion {
+        @apply absolute inset-0 h-full w-full;
+    }
+
+    .lms-course-card-cover .dashboard-course-cover-img {
+        @apply [image-rendering:auto] [backface-visibility:hidden];
     }
 
     .lms-course-card-cover-overlay {
-        @apply pointer-events-none absolute inset-0 z-[1];
+        @apply pointer-events-none absolute inset-0 z-[1] rounded-[10px];
         background: linear-gradient(
             180deg,
-            rgba(15, 23, 42, 0.12) 0%,
-            transparent 50%,
-            rgba(15, 23, 42, 0.4) 100%
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 55%,
+            rgba(15, 23, 42, 0.06) 100%
         );
     }
 
     .lms-course-card-cover-badges {
-        @apply absolute inset-x-0 bottom-0 z-[2] flex items-center justify-between gap-2 px-3 pb-3 sm:px-4;
+        @apply absolute inset-x-0 top-0 z-[2] flex items-start justify-between gap-2 px-3 pt-3 sm:px-4;
     }
 
     .lms-course-card-code {
@@ -1132,19 +1713,19 @@
     }
 
     .lms-course-card-enrolled {
-        @apply inline-flex rounded-full bg-slate-900/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm;
+        @apply inline-flex rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200/80 backdrop-blur-sm;
     }
 
     .lms-course-card-draft {
-        @apply absolute right-3 top-3 z-10 rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white;
+        @apply absolute right-3 top-12 z-10 rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white;
     }
 
     .lms-course-card-body {
-        @apply flex flex-1 flex-col gap-4 px-4 pb-4 pt-4 sm:px-5;
+        @apply flex flex-1 flex-col gap-3 border-t border-slate-100 px-4 pb-3 pt-4 sm:px-5;
     }
 
     .lms-course-card-footer {
-        @apply mt-auto w-full border-t-2 border-slate-100 bg-slate-50/70 px-4 pt-3 pb-4 sm:px-5;
+        @apply mt-auto w-full border-t-2 border-dashed border-slate-200 bg-slate-50/50 px-4 pt-3 pb-4 sm:px-5;
     }
 
     .lms-course-card-head {
@@ -1180,31 +1761,15 @@
     }
 
     .lms-course-card-metrics {
-        @apply grid grid-cols-2 gap-2.5;
+        @apply grid grid-cols-2 gap-2;
     }
 
     .lms-course-card-metric {
-        @apply flex items-center justify-center rounded-xl bg-slate-50/90 px-2 py-3 ring-1 ring-slate-100;
+        @apply flex items-center justify-center rounded-xl border-2 border-brand-100/80 bg-white px-2 py-2.5;
     }
 
     .lms-course-card-metric .lms-mini-ring {
         @apply flex-col items-center gap-1.5;
-    }
-
-    .lms-mini-ring {
-        @apply flex items-center gap-2;
-    }
-
-    .lms-mini-ring-chart {
-        @apply relative flex h-10 w-10 shrink-0 items-center justify-center;
-    }
-
-    .lms-mini-ring-value {
-        @apply absolute inset-0 flex items-center justify-center text-[10px] font-bold text-isarva-heading;
-    }
-
-    .lms-mini-ring-label {
-        @apply text-[11px] font-medium text-isarva-muted;
     }
 
     .lms-course-card-action {
@@ -1223,6 +1788,22 @@
         @apply bg-orange-600;
         box-shadow: 0 1px 0 #c2410c;
         transform: translateY(1px);
+    }
+
+    .lms-mini-ring {
+        @apply flex items-center gap-2;
+    }
+
+    .lms-mini-ring-chart {
+        @apply relative flex h-10 w-10 shrink-0 items-center justify-center;
+    }
+
+    .lms-mini-ring-value {
+        @apply absolute inset-0 flex items-center justify-center text-[10px] font-bold text-isarva-heading;
+    }
+
+    .lms-mini-ring-label {
+        @apply text-[11px] font-medium text-isarva-muted;
     }
 
     .lms-empty-state {
@@ -1303,24 +1884,4 @@
         transform: translateY(1px);
     }
 
-    /* Dashboard course row — thumbnail */
-    .quyl-course-row-cover {
-        @apply relative h-14 w-28 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/50;
-    }
-
-    .quyl-course-row-cover {
-        @apply relative h-14 w-28 shrink-0 overflow-hidden rounded-xl;
-    }
-
-    .quyl-course-row-cover .lms-banner-blob {
-        filter: blur(18px);
-    }
-
-    .quyl-resume-card-art {
-        @apply relative h-20 w-28 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/30 sm:h-24 sm:w-32;
-    }
-
-    .quyl-resume-card-art .lms-banner-blob {
-        filter: blur(16px);
-    }
 }

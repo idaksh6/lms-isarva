@@ -5,6 +5,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assignments.submissions.store');
     Route::get('submissions/{submission}', [SubmissionController::class, 'show'])
         ->name('submissions.show');
+
+    Route::get('media/assignment-attachments/{attachment}', [MediaController::class, 'assignmentAttachment'])
+        ->name('media.assignment-attachment');
+    Route::get('media/assignment-attachments/{attachment}/download', [MediaController::class, 'downloadAssignmentAttachment'])
+        ->name('media.assignment-attachment.download');
+    Route::get('media/submissions/{submission}', [MediaController::class, 'submission'])
+        ->name('media.submission');
+    Route::get('media/submissions/{submission}/download', [MediaController::class, 'downloadSubmission'])
+        ->name('media.submission.download');
     Route::patch('submissions/{submission}/reviewed', [SubmissionController::class, 'markReviewed'])
         ->name('submissions.reviewed');
 

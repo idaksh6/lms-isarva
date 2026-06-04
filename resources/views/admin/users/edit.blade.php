@@ -47,14 +47,24 @@
         </div>
 
         <div class="lms-form-field">
-            <label for="password" class="lms-field-label">New password</label>
-            <input id="password" type="password" name="password" class="lms-field-input mt-1.5" autocomplete="new-password">
+            <p class="lms-field-label">Change password</p>
+            <div class="mt-1.5 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm leading-relaxed text-amber-950">
+                <p class="font-semibold">Password fields are intentionally empty</p>
+                <p class="mt-1 text-amber-900/90">For security, we never show the current password. Leave both fields blank when you only want to update name, email, or role — the existing password stays the same.</p>
+                <p class="mt-1 text-amber-900/90">Fill in both fields below only if you want to set a new password.</p>
+            </div>
+        </div>
+
+        <div class="lms-form-field">
+            <label for="password" class="lms-field-label">New password <span class="font-normal text-isarva-muted">(optional)</span></label>
+            <input id="password" type="password" name="password" class="lms-field-input mt-1.5" autocomplete="new-password" placeholder="Leave blank to keep current password">
             <x-input-error :messages="$errors->get('password')" class="mt-1.5" />
         </div>
 
         <div class="lms-form-field">
-            <label for="password_confirmation" class="lms-field-label">Confirm new password</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" class="lms-field-input mt-1.5" autocomplete="new-password">
+            <label for="password_confirmation" class="lms-field-label">Confirm new password <span class="font-normal text-isarva-muted">(optional)</span></label>
+            <input id="password_confirmation" type="password" name="password_confirmation" class="lms-field-input mt-1.5" autocomplete="new-password" placeholder="Only required if changing password">
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1.5" />
         </div>
 
         <div class="lms-form-actions">

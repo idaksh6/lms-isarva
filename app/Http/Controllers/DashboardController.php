@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $highlightDates = $upcoming->pluck('due_at')->filter()->map(fn ($d) => $d->format('Y-m-d'))->unique()->values();
 
         if ($user->isAdmin()) {
-            $recentCourses = Course::query()->with('lecturer')->withCount(['students', 'assignments'])->latest()->take(5)->get();
+            $recentCourses = Course::query()->with('lecturer')->withCount(['students', 'assignments'])->latest()->take(6)->get();
             $stats = DashboardMetrics::adminStats();
 
             return view('dashboard.admin', [
@@ -35,7 +35,7 @@ class DashboardController extends Controller
         }
 
         if ($user->isLecturer()) {
-            $courses = $user->taughtCourses()->withCount(['students', 'assignments'])->get();
+            $courses = $user->taughtCourses()->with('lecturer')->withCount(['students', 'assignments'])->get();
             $stats = DashboardMetrics::lecturerStats($user);
 
             return view('dashboard.lecturer', [
@@ -51,6 +51,7 @@ class DashboardController extends Controller
         }
 
         $courses = $user->enrolledCourses()
+            ->with('lecturer')
             ->withCount(['assignments' => fn ($q) => $q->where('is_published', true)])
             ->with(['assignments' => fn ($q) => $q->where('is_published', true)->orderBy('due_at')])
             ->get();
@@ -94,7 +95,7 @@ class DashboardController extends Controller
         if ($user->isLecturer()) {
             $query->whereHas('course', fn ($q) => $q->where('lecturer_id', $user->id));
         } elseif ($user->isStudent()) {
-            $courseIds = $user->enrolledCourses()->pluck('id');
+            $courseIds = $user->enrolledCourses()->pluck('courses.id');
             $query->whereIn('course_id', $courseIds);
         }
 

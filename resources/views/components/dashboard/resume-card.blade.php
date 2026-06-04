@@ -4,31 +4,31 @@
     'subtitle' => null,
 ])
 
-@php
-    use App\Support\CourseIllustration;
-
-    $motif = $course ? CourseIllustration::variantFor($course->code) : 'books';
-@endphp
-
 @if ($course)
-    <a href="{{ route('courses.show', $course) }}" class="quyl-resume-card group">
-        <div class="quyl-resume-card-art">
-            <x-lms.illustration :variant="$motif" />
+    @php
+        $pct = min(100, max(0, (int) $progress));
+    @endphp
+    <a href="{{ route('courses.show', $course) }}" class="dashboard-featured group">
+        <div class="dashboard-featured-thumb">
+            <x-dashboard.course-cover :course="$course" />
+            <span class="dashboard-featured-code">{{ $course->code }}</span>
         </div>
-        <div class="min-w-0 flex-1">
-            <p class="text-[11px] font-semibold uppercase tracking-wide text-isarva-muted">{{ $subtitle ?? 'Continue learning' }}</p>
-            <p class="truncate text-sm font-bold text-isarva-heading group-hover:text-brand-600">{{ $course->title }}</p>
-            <p class="text-xs text-isarva-muted">{{ $course->code }}@if($course->relationLoaded('lecturer') && $course->lecturer) · {{ $course->lecturer->name }}@endif</p>
-            <div class="mt-2 flex items-center gap-2">
-                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                    <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all" style="width: {{ min(100, max(0, (int) $progress)) }}%"></div>
-                </div>
-                <span class="text-[11px] font-bold text-brand-600">{{ min(100, max(0, (int) $progress)) }}%</span>
+        <div class="dashboard-featured-body">
+            <p class="dashboard-featured-eyebrow">{{ $subtitle ?? 'Continue learning' }}</p>
+            <h2 class="dashboard-featured-title">{{ $course->title }}</h2>
+            <p class="dashboard-featured-meta">
+                @if ($course->relationLoaded('lecturer') && $course->lecturer)
+                    {{ $course->lecturer->name }} ·
+                @endif
+                {{ $pct }}% progress
+            </p>
+            <div class="dashboard-featured-track" role="presentation">
+                <div class="dashboard-featured-fill" style="width: {{ $pct }}%"></div>
             </div>
         </div>
-        <span class="quyl-resume-btn">
+        <span class="dashboard-featured-cta">
             Open
-            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
         </span>
     </a>
 @endif

@@ -1,15 +1,9 @@
 @props([
     'course',
     'progress' => 0,
-    'variant' => null,
 ])
 
 @php
-    use App\Support\CourseIllustration;
-
-    $motif = ($variant && in_array($variant, CourseIllustration::VARIANTS, true))
-        ? $variant
-        : CourseIllustration::variantFor($course->code);
     $enrolled = $course->students_count ?? null;
     $assignments = $course->assignments_count ?? null;
     $completionPct = min(100, max(0, (int) $progress));
@@ -21,7 +15,7 @@
 
 <a href="{{ route('courses.show', $course) }}" {{ $attributes->merge(['class' => 'lms-course-card group']) }}>
     <div class="lms-course-card-cover">
-        <x-lms.illustration :variant="$motif" />
+        <x-dashboard.course-cover :course="$course" :large="true" />
         <div class="lms-course-card-cover-overlay" aria-hidden="true"></div>
         <div class="lms-course-card-cover-badges">
             <span class="lms-course-card-code">{{ $course->code }}</span>

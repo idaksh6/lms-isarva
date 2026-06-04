@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\SubmissionStatus;
 use App\Models\Assignment;
 use App\Models\Submission;
+use App\Support\UploadLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +24,10 @@ class SubmissionController extends Controller
             return view('submissions.show', ['submission' => $existing->load('assignment.course')]);
         }
 
-        return view('submissions.create', compact('assignment'));
+        return view('submissions.create', [
+            'assignment' => $assignment,
+            'maxUploadMb' => UploadLimits::submissionMaxMegabytes(),
+        ]);
     }
 
     public function store(Request $request, Assignment $assignment): RedirectResponse
@@ -34,9 +38,21 @@ class SubmissionController extends Controller
             return back()->with('error', 'You have already submitted work for this assignment.');
         }
 
+        $file = $request->file('file');
+        if ($file && ! $file->isValid()) {
+            return back()
+                ->withInput()
+                ->withErrors(['file' => UploadLimits::fileUploadErrorMessage($file->getError())]);
+        }
+
+        $maxKb = UploadLimits::submissionMaxKilobytes();
+
         $validated = $request->validate([
             'notes' => ['nullable', 'string', 'max:5000'],
-            'file' => ['required', 'file', 'max:20480'],
+            'file' => ['required', 'file', "max:{$maxKb}"],
+        ], [
+            'file.max' => "The file may not be larger than {$maxKb} kilobytes (about ".UploadLimits::submissionMaxMegabytes().' MB).',
+            'file.uploaded' => UploadLimits::fileUploadErrorMessage($file?->getError() ?? UPLOAD_ERR_NO_FILE),
         ]);
 
         $file = $request->file('file');

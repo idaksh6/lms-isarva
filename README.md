@@ -65,6 +65,10 @@ composer run dev
 
 Students `student2` … `student5` use `@lms.test`.
 
+## Manual testing
+
+Step-by-step UAT test cases (Tests 1–15) are in [docs/manual-testing/TEST_CASES.md](docs/manual-testing/TEST_CASES.md).
+
 ## Project structure
 
 - `app/Http/Controllers/` — Course, assignment, submission, admin user flows

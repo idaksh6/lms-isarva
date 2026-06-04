@@ -9,6 +9,7 @@
         'violet', 'code', 'notebook' => 'notebook',
         'sky', 'data', 'analytics' => 'analytics',
         'amber', 'chart', 'laptop' => 'laptop',
+        'assignment', 'task', 'document' => 'assignment',
         default => 'books',
     };
 @endphp
@@ -58,6 +59,28 @@
                         <path d="M38 38 L52 46 L66 34 L80 42 L94 30" stroke="white" stroke-opacity="0.7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lms-motif-chart-line"/>
                     </g>
                     <circle class="lms-motif-drift" cx="108" cy="32" r="10" fill="white" fill-opacity="0.25"/>
+                </svg>
+                @break
+
+            @case('assignment')
+                <svg class="lms-banner-svg" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g class="lms-motif-float lms-motif-float--delay">
+                        <rect x="20" y="16" width="80" height="68" rx="12" fill="white" fill-opacity="0.18"/>
+                    </g>
+                    <g class="lms-motif-float">
+                        <rect x="32" y="12" width="56" height="72" rx="8" fill="white" fill-opacity="0.92"/>
+                        <rect x="40" y="22" width="40" height="48" rx="4" fill="white" fill-opacity="0.2"/>
+                        <line x1="48" y1="30" x2="72" y2="30" stroke="white" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="48" y1="38" x2="68" y2="38" stroke="white" stroke-opacity="0.4" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="48" y1="46" x2="70" y2="46" stroke="white" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="48" y1="54" x2="64" y2="54" stroke="white" stroke-opacity="0.3" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="78" cy="62" r="10" fill="white" fill-opacity="0.45"/>
+                        <path d="M75 62 L81 62 M78 59 L78 65" stroke="white" stroke-opacity="0.85" stroke-width="2" stroke-linecap="round"/>
+                    </g>
+                    <g class="lms-motif-drift">
+                        <path d="M88 20 L104 14 L118 28 L102 34 Z" fill="white" fill-opacity="0.35"/>
+                        <rect x="94" y="48" width="24" height="32" rx="4" fill="white" fill-opacity="0.28"/>
+                    </g>
                 </svg>
                 @break
 

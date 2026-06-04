@@ -56,7 +56,7 @@ class AssignmentController extends Controller
     {
         $this->authorize('view', $assignment);
 
-        $assignment->load(['course.lecturer', 'submissions.student', 'attachments']);
+        $assignment->load(['course.lecturer', 'submissions.student', 'attachments'])->loadCount('submissions');
 
         $userSubmission = null;
         if (request()->user()->isStudent()) {
