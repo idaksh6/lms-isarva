@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\SubmissionStatus;
 use App\Models\Assignment;
 use App\Models\Submission;
+use App\Notifications\GradePostedNotification;
+use App\Notifications\SubmissionReceivedNotification;
+use App\Support\GradeHelper;
 use App\Support\UploadLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class SubmissionController extends Controller
@@ -20,13 +24,14 @@ class SubmissionController extends Controller
             ->where('user_id', request()->user()->id)
             ->first();
 
-        if ($existing) {
+        if ($existing && ! $existing->canResubmit()) {
             return view('submissions.show', ['submission' => $existing->load('assignment.course')]);
         }
 
         return view('submissions.create', [
             'assignment' => $assignment,
             'maxUploadMb' => UploadLimits::submissionMaxMegabytes(),
+            'resubmit' => $existing?->canResubmit() ?? false,
         ]);
     }
 
@@ -34,7 +39,11 @@ class SubmissionController extends Controller
     {
         $this->authorize('create', [Submission::class, $assignment]);
 
-        if ($assignment->submissions()->where('user_id', $request->user()->id)->exists()) {
+        $existing = $assignment->submissions()
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if ($existing && ! $existing->canResubmit()) {
             return back()->with('error', 'You have already submitted work for this assignment.');
         }
 
@@ -62,42 +71,103 @@ class SubmissionController extends Controller
             ? SubmissionStatus::Late
             : SubmissionStatus::Submitted;
 
-        $submission = Submission::query()->create([
-            'assignment_id' => $assignment->id,
-            'user_id' => $request->user()->id,
-            'notes' => $validated['notes'] ?? null,
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'status' => $status,
-            'submitted_at' => now(),
-        ]);
+        if ($existing) {
+            if ($existing->file_path) {
+                Storage::disk('public')->delete($existing->file_path);
+            }
+
+            $existing->update([
+                'notes' => $validated['notes'] ?? null,
+                'file_path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'status' => $status,
+                'submitted_at' => now(),
+                'score' => null,
+                'letter_grade' => null,
+                'feedback' => null,
+                'reviewed_at' => null,
+                'reviewed_by' => null,
+            ]);
+
+            $submission = $existing;
+        } else {
+            $submission = Submission::query()->create([
+                'assignment_id' => $assignment->id,
+                'user_id' => $request->user()->id,
+                'notes' => $validated['notes'] ?? null,
+                'file_path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'status' => $status,
+                'submitted_at' => now(),
+            ]);
+        }
+
+        $lecturer = $assignment->course->lecturer;
+        if ($lecturer && $lecturer->isActive()) {
+            $lecturer->notify(new SubmissionReceivedNotification($submission));
+        }
 
         return redirect()
             ->route('submissions.show', $submission)
-            ->with('success', 'Your work was submitted successfully.');
+            ->with('success', $existing ? 'Your revised work was submitted.' : 'Your work was submitted successfully.');
     }
 
     public function show(Submission $submission): View
     {
         $this->authorize('view', $submission);
 
-        $submission->load(['assignment.course', 'student']);
+        $submission->load(['assignment.course', 'student', 'reviewer']);
 
         return view('submissions.show', compact('submission'));
     }
 
-    public function markReviewed(Submission $submission): RedirectResponse
+    public function review(Request $request, Submission $submission): RedirectResponse
     {
-        $user = request()->user();
-        if (! $user->isLecturer() && ! $user->isAdmin()) {
-            abort(403);
+        $this->authorize('review', $submission);
+
+        $validated = $request->validate([
+            'action' => ['required', 'in:grade,revision,reviewed'],
+            'score' => ['nullable', 'numeric', 'min:0', 'max:100', 'required_if:action,grade'],
+            'feedback' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        $user = $request->user();
+
+        if ($validated['action'] === 'revision') {
+            $submission->update([
+                'status' => SubmissionStatus::NeedsRevision,
+                'feedback' => $validated['feedback'] ?? $submission->feedback,
+                'reviewed_at' => now(),
+                'reviewed_by' => $user->id,
+            ]);
+
+            return back()->with('success', 'Student was asked to revise and resubmit.');
         }
 
-        if ($user->isLecturer() && $submission->assignment->course->lecturer_id !== $user->id) {
-            abort(403);
+        if ($validated['action'] === 'grade') {
+            $score = (float) $validated['score'];
+            $letter = GradeHelper::letterFromScore($score);
+
+            $submission->update([
+                'status' => SubmissionStatus::Reviewed,
+                'score' => $score,
+                'letter_grade' => $letter,
+                'feedback' => $validated['feedback'] ?? null,
+                'reviewed_at' => now(),
+                'reviewed_by' => $user->id,
+            ]);
+
+            $submission->student->notify(new GradePostedNotification($submission));
+
+            return back()->with('success', 'Grade and feedback posted to the student.');
         }
 
-        $submission->update(['status' => SubmissionStatus::Reviewed]);
+        $submission->update([
+            'status' => SubmissionStatus::Reviewed,
+            'feedback' => $validated['feedback'] ?? $submission->feedback,
+            'reviewed_at' => now(),
+            'reviewed_by' => $user->id,
+        ]);
 
         return back()->with('success', 'Submission marked as reviewed.');
     }

@@ -17,7 +17,7 @@ class CourseController extends Controller
         $courses = match (true) {
             $user->isAdmin() => Course::query()->with('lecturer')->withCount(['students', 'assignments'])->latest(),
             $user->isLecturer() => $user->taughtCourses()->withCount(['students', 'assignments'])->latest(),
-            default => $user->enrolledCourses()->with('lecturer')->withCount(['assignments', 'students'])->latest(),
+            default => $user->enrolledCourses()->where('is_active', true)->with('lecturer')->withCount(['assignments', 'students'])->latest(),
         };
 
         if ($search = $request->string('q')->trim()->toString()) {
@@ -25,6 +25,15 @@ class CourseController extends Controller
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
             });
+        }
+
+        if (($user->isAdmin() || $user->isLecturer()) && $request->filled('status')) {
+            $status = $request->string('status')->toString();
+            if ($status === 'active') {
+                $courses->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $courses->where('is_active', false);
+            }
         }
 
         return view('courses.index', [
@@ -126,5 +135,35 @@ class CourseController extends Controller
         return redirect()
             ->route('courses.show', $course)
             ->with('success', 'Course updated.');
+    }
+
+    public function destroy(Course $course): RedirectResponse
+    {
+        $this->authorize('delete', $course);
+
+        $hasSubmissions = $course->assignments()
+            ->whereHas('submissions')
+            ->exists();
+
+        if ($hasSubmissions) {
+            $course->update(['is_active' => false]);
+
+            return redirect()
+                ->route('courses.index')
+                ->with('success', 'Course archived because it has student submissions. It is now hidden from active lists.');
+        }
+
+        $course->assignments()->each(function ($assignment) {
+            $assignment->attachments()->each(fn ($a) => $a->deleteFile());
+            $assignment->attachments()->delete();
+            $assignment->delete();
+        });
+        $course->enrollments()->delete();
+        $course->announcements()->delete();
+        $course->delete();
+
+        return redirect()
+            ->route('courses.index')
+            ->with('success', 'Course deleted permanently.');
     }
 }

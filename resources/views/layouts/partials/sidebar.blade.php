@@ -1,6 +1,6 @@
 @php
     $user = auth()->user();
-    $role = $user->role->value;
+    $role = $user->role?->value ?? 'student';
     $menuItems = collect(config('lms-menu.items', []))
         ->filter(fn ($item) => in_array($role, $item['roles'] ?? [], true));
 @endphp
@@ -31,7 +31,9 @@
                     @php
                         $active = match ($item['route'] ?? '') {
                             'dashboard' => request()->routeIs('dashboard'),
-                            'courses.index' => request()->routeIs('courses.*', 'assignments.*', 'submissions.*'),
+                            'courses.index' => request()->routeIs('courses.*') && ! request()->routeIs('assignments.*', 'submissions.*'),
+                            'assignments.index' => request()->routeIs('assignments.*') && ! request()->routeIs('assignments.submit', 'assignments.submissions.*'),
+                            'submissions.index' => request()->routeIs('submissions.*'),
                             'admin.users.index' => request()->routeIs('admin.users.*'),
                             'profile.edit' => request()->routeIs('profile.*'),
                             default => isset($item['route']) && request()->routeIs($item['route'].'*'),

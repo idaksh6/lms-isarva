@@ -77,6 +77,13 @@
     <div class="lms-form-actions">
         <button type="submit" class="lms-btn-primary">Save changes</button>
         <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-secondary">Cancel</a>
+        @can('delete', $assignment)
+            <form method="POST" action="{{ route('assignments.destroy', $assignment) }}" class="ml-auto" onsubmit="return confirm('Delete this assignment and all submissions?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="lms-btn-danger">Delete assignment</button>
+            </form>
+        @endcan
     </div>
 </form>
 @endsection

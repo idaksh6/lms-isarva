@@ -1,13 +1,22 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\AssignmentHubController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\GradebookController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\SubmissionHubController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::resource('courses', CourseController::class)->only([
-        'index', 'create', 'store', 'show', 'edit', 'update',
+        'index', 'create', 'store', 'show', 'edit', 'update', 'destroy',
     ]);
 
     Route::get('courses/{course}/enrollments', [EnrollmentController::class, 'edit'])
@@ -35,19 +44,49 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('courses/{course}/assignments', [AssignmentController::class, 'store'])
         ->name('courses.assignments.store');
 
+    Route::get('assignments', [AssignmentHubController::class, 'index'])->name('assignments.index');
     Route::get('assignments/{assignment}', [AssignmentController::class, 'show'])
         ->name('assignments.show');
     Route::get('assignments/{assignment}/edit', [AssignmentController::class, 'edit'])
         ->name('assignments.edit');
     Route::patch('assignments/{assignment}', [AssignmentController::class, 'update'])
         ->name('assignments.update');
+    Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy'])
+        ->name('assignments.destroy');
 
+    Route::get('submissions', [SubmissionHubController::class, 'index'])->name('submissions.index');
     Route::get('assignments/{assignment}/submit', [SubmissionController::class, 'create'])
         ->name('assignments.submit');
     Route::post('assignments/{assignment}/submissions', [SubmissionController::class, 'store'])
         ->name('assignments.submissions.store');
     Route::get('submissions/{submission}', [SubmissionController::class, 'show'])
         ->name('submissions.show');
+    Route::patch('submissions/{submission}/review', [SubmissionController::class, 'review'])
+        ->name('submissions.review');
+
+    Route::get('gradebook', [GradebookController::class, 'index'])->name('gradebook.index');
+    Route::get('gradebook/export', [GradebookController::class, 'export'])->name('gradebook.export');
+
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+    Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy'])
+        ->name('announcements.destroy');
+
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
+
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('settings', [SettingsController::class, 'update'])->name('settings.update');
+
+    Route::get('help', [HelpController::class, 'index'])->name('help.index');
+
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])
+        ->name('notifications.read');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])
+        ->name('notifications.read-all');
 
     Route::get('media/assignment-attachments/{attachment}', [MediaController::class, 'assignmentAttachment'])
         ->name('media.assignment-attachment');
@@ -57,8 +96,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('media.submission');
     Route::get('media/submissions/{submission}/download', [MediaController::class, 'downloadSubmission'])
         ->name('media.submission.download');
-    Route::patch('submissions/{submission}/reviewed', [SubmissionController::class, 'markReviewed'])
-        ->name('submissions.reviewed');
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
@@ -66,6 +103,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('users', [AdminUserController::class, 'store'])->name('users.store');
         Route::get('users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
         Route::patch('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::patch('users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->name('users.deactivate');
+        Route::patch('users/{user}/activate', [AdminUserController::class, 'activate'])->name('users.activate');
+        Route::delete('users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
 });
 

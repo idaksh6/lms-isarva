@@ -14,14 +14,33 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $users = User::query()
+            ->when($request->string('q')->trim()->toString(), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('student_id', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('role'), fn ($q) => $q->where('role', $request->string('role')->toString()))
+            ->when($request->string('status')->toString() === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->string('status')->toString() === 'active', fn ($q) => $q->where('is_active', true))
             ->orderByRaw("CASE role WHEN 'admin' THEN 1 WHEN 'lecturer' THEN 2 ELSE 3 END")
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        $stats = [
+            'total' => User::count(),
+            'admins' => User::where('role', UserRole::Admin)->count(),
+            'lecturers' => User::where('role', UserRole::Lecturer)->count(),
+            'students' => User::where('role', UserRole::Student)->count(),
+            'active' => User::where('is_active', true)->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'stats'));
     }
 
     public function create(): View
@@ -98,5 +117,37 @@ class UserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User account updated.');
+    }
+
+    public function deactivate(User $user): RedirectResponse
+    {
+        $this->authorize('deactivate', $user);
+        $user->update(['is_active' => false]);
+
+        return back()->with('success', $user->name.' was deactivated.');
+    }
+
+    public function activate(User $user): RedirectResponse
+    {
+        $this->authorize('deactivate', $user);
+        $user->update(['is_active' => true]);
+
+        return back()->with('success', $user->name.' was reactivated.');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->authorize('delete', $user);
+
+        if ($user->submissions()->exists()) {
+            return back()->with('error', 'Cannot delete this user because they have submissions. Deactivate the account instead.');
+        }
+
+        $user->enrolledCourses()->detach();
+        $user->delete();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User account deleted.');
     }
 }

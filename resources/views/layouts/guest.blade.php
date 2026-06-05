@@ -78,7 +78,7 @@
                     </div>
 
                     <div class="flex flex-col justify-center border-isarva-border bg-white p-7 sm:p-9 lg:border-l lg:p-10 xl:p-12">
-                        <div class="auth-brand-stack mb-6 lg:hidden test">
+                        <div class="auth-brand-stack mb-6 lg:hidden">
                             <x-isarva-logo variant="large" class="auth-brand-logo !max-w-[220px]" />
                             <p class="auth-tagline">
                                 <span class="isarva-pill-dot" aria-hidden="true"></span>

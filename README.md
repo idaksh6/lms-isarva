@@ -71,8 +71,10 @@ Step-by-step UAT test cases (Tests 1–15) are in [docs/manual-testing/TEST_CASE
 
 ## Deploy to server (CyberPanel)
 
-- **Already uploaded zip?** Follow [docs/deploy/ZIP_TO_AUTO_DEPLOY.md](docs/deploy/ZIP_TO_AUTO_DEPLOY.md) step by step.
-- **GitHub Actions reference:** [docs/deploy/GITHUB_AUTO_DEPLOY.md](docs/deploy/GITHUB_AUTO_DEPLOY.md).
+- **CI/CD pipeline guide (Word):** [docs/deploy/CI_CD_PIPELINE_INTEGRATION.docx](docs/deploy/CI_CD_PIPELINE_INTEGRATION.docx)
+- **CI/CD pipeline guide (Markdown):** [docs/deploy/CI_CD_PIPELINE_INTEGRATION.md](docs/deploy/CI_CD_PIPELINE_INTEGRATION.md)
+- **Already uploaded zip?** [docs/deploy/ZIP_TO_AUTO_DEPLOY.md](docs/deploy/ZIP_TO_AUTO_DEPLOY.md)
+- **GitHub Actions reference:** [docs/deploy/GITHUB_AUTO_DEPLOY.md](docs/deploy/GITHUB_AUTO_DEPLOY.md)
 
 ## Project structure
 

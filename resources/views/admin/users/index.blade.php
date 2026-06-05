@@ -4,45 +4,55 @@
 @section('page_title', 'Users')
 
 @section('content')
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <p class="text-sm text-isarva-muted">{{ $users->total() }} accounts in the system</p>
-    <a href="{{ route('admin.users.create') }}" class="lms-btn-primary">Add user <span aria-hidden="true">→</span></a>
-</div>
-
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    @forelse ($users as $user)
-        <article class="lms-user-card">
-            <div class="lms-user-card-visual">
-                <x-lms.user-illustration :role="$user->role->value" />
-            </div>
-            <div class="lms-user-card-body">
-                <div class="flex items-start justify-between gap-2">
-                    <h3 class="lms-user-card-name">{{ $user->name }}</h3>
-                    <x-lms.role-badge :role="$user->role" />
-                </div>
-                <p class="lms-user-card-email">{{ $user->email }}</p>
-                @if ($user->student_id)
-                    <p class="text-xs font-medium text-isarva-muted">ID: {{ $user->student_id }}</p>
-                @endif
-            </div>
-            <div class="lms-user-card-actions">
-                <a href="{{ route('admin.users.edit', $user) }}" class="lms-user-card-btn">Edit user</a>
-            </div>
-        </article>
-    @empty
-        <div class="sm:col-span-2 lg:col-span-4">
-            <x-lms.empty-state
-                title="No users yet"
-                message="Add lecturers and students to get your programme running."
-                variant="sky"
-            >
-                <a href="{{ route('admin.users.create') }}" class="lms-btn-primary">Add user <span aria-hidden="true">→</span></a>
-            </x-lms.empty-state>
+<div class="lms-page-stack">
+    <x-lms.module-hero module="users" variant="sky" title="People & accounts" subtitle="Manage administrators, lecturers, and students across your LMS.">
+        <div class="lms-stat-chips">
+            <span class="lms-stat-chip"><strong>{{ $stats['total'] }}</strong> total</span>
+            <span class="lms-stat-chip"><strong>{{ $stats['active'] }}</strong> active</span>
+            <span class="lms-stat-chip"><strong>{{ $stats['students'] }}</strong> students</span>
+            <a href="{{ route('admin.users.create') }}" class="lms-btn-primary lms-btn-primary--xs">Add user</a>
         </div>
-    @endforelse
-</div>
+    </x-lms.module-hero>
 
-@if ($users->hasPages())
-    <div class="mt-6">{{ $users->links() }}</div>
-@endif
+    <form method="GET" class="lms-filter-bar">
+        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search name, email, student ID..." class="lms-field-input lms-filter-search">
+        <div class="lms-filter-select-wrap">
+            <select name="role" class="lms-field-input lms-filter-select">
+                <option value="">All roles</option>
+                @foreach (\App\Enums\UserRole::cases() as $role)
+                    <option value="{{ $role->value }}" @selected(request('role') === $role->value)>{{ $role->label() }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="lms-filter-select-wrap">
+            <select name="status" class="lms-field-input lms-filter-select">
+                <option value="">All statuses</option>
+                <option value="active" @selected(request('status') === 'active')>Active</option>
+                <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+            </select>
+        </div>
+        <button type="submit" class="lms-btn-secondary">Filter</button>
+    </form>
+
+    <section class="lms-user-list-section">
+        <div class="lms-user-list-header">
+            <h2 class="lms-user-list-title">All accounts</h2>
+            <span class="lms-panel-count">{{ $users->total() }} shown</span>
+        </div>
+
+        <div class="lms-user-row-list">
+            @forelse ($users as $user)
+                <x-lms.user-list-item :user="$user" />
+            @empty
+                <x-lms.empty-state title="No users found" message="Try a different search or add a new account." variant="sky">
+                    <a href="{{ route('admin.users.create') }}" class="lms-btn-primary">Add user</a>
+                </x-lms.empty-state>
+            @endforelse
+        </div>
+    </section>
+
+    @if ($users->hasPages())
+        <div>{{ $users->links() }}</div>
+    @endif
+</div>
 @endsection

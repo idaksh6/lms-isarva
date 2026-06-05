@@ -9,6 +9,12 @@
         <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-back">← Back to assignment</a>
     </div>
 
+    @if (! empty($resubmit))
+        <div class="lms-resubmit-banner">
+            <p class="text-sm font-semibold text-violet-900">Your lecturer requested a revision. Upload an improved file below.</p>
+        </div>
+    @endif
+
     <div class="lms-submit-context">
         <x-lms.illustration variant="assignment" class="lms-banner--submit-context" />
         <div class="lms-submit-context-copy">

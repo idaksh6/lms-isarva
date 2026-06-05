@@ -13,7 +13,7 @@
                     <h2 class="dashboard-welcome-title">Hi, {{ auth()->user()->name }}</h2>
                     <p class="dashboard-welcome-desc">Pick up assignments and track progress across your modules.</p>
                 </div>
-                <a href="{{ route('courses.index') }}" class="lms-btn-secondary">All courses</a>
+                <a href="{{ route('courses.index') }}" class="lms-btn-primary">All courses</a>
             </header>
 
             <x-dashboard.resume-card

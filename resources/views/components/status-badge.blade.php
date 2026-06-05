@@ -1,13 +1,18 @@
-@props(['status'])
+@props([
+    'status',
+    'tone' => null,
+])
 
 @php
-    $classes = match ($status) {
-        'submitted', \App\Enums\SubmissionStatus::Submitted => 'bg-blue-100 text-blue-800',
-        'late', \App\Enums\SubmissionStatus::Late => 'bg-amber-100 text-amber-800',
-        'reviewed', \App\Enums\SubmissionStatus::Reviewed => 'bg-emerald-100 text-emerald-800',
-        default => 'bg-slate-100 text-slate-700',
+    $toneClass = $tone ?? match ($status) {
+        'submitted', \App\Enums\SubmissionStatus::Submitted => 'is-submitted',
+        'late', \App\Enums\SubmissionStatus::Late => 'is-late',
+        'needs_revision', \App\Enums\SubmissionStatus::NeedsRevision => 'is-needs-revision',
+        'reviewed', \App\Enums\SubmissionStatus::Reviewed => 'is-reviewed',
+        default => 'is-default',
     };
+
     $label = $status instanceof \App\Enums\SubmissionStatus ? $status->label() : ucfirst((string) $status);
 @endphp
 
-<span {{ $attributes->merge(['class' => 'lms-badge '.$classes]) }}>{{ $label }}</span>
+<span {{ $attributes->merge(['class' => 'lms-status-badge '.$toneClass]) }}>{{ $label }}</span>

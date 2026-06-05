@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\AssignmentAttachment;
 use App\Models\Course;
+use App\Notifications\AssignmentPublishedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -46,6 +47,10 @@ class AssignmentController extends Controller
         ]);
 
         $this->storeUploadedAttachments($assignment, $request->file('attachments', []));
+
+        if ($assignment->is_published) {
+            $this->notifyStudents($course, $assignment);
+        }
 
         return redirect()
             ->route('assignments.show', $assignment)
@@ -107,9 +112,47 @@ class AssignmentController extends Controller
 
         $this->storeUploadedAttachments($assignment, $newFiles);
 
+        if ($assignment->is_published && $assignment->wasChanged('is_published')) {
+            $this->notifyStudents($assignment->course, $assignment);
+        }
+
         return redirect()
             ->route('assignments.show', $assignment)
             ->with('success', 'Assignment updated.');
+    }
+
+    public function destroy(Assignment $assignment): RedirectResponse
+    {
+        $this->authorize('delete', $assignment);
+
+        $course = $assignment->course;
+        $assignment->load('submissions', 'attachments');
+
+        foreach ($assignment->submissions as $submission) {
+            if ($submission->file_path) {
+                Storage::disk('public')->delete($submission->file_path);
+            }
+        }
+        $assignment->submissions()->delete();
+
+        $assignment->attachments()->each(fn ($a) => $a->deleteFile());
+        $assignment->attachments()->delete();
+        $assignment->delete();
+
+        return redirect()
+            ->route('courses.show', $course)
+            ->with('success', 'Assignment deleted.');
+    }
+
+    private function notifyStudents(Course $course, Assignment $assignment): void
+    {
+        $course->load('students');
+
+        foreach ($course->students as $student) {
+            if ($student->isActive()) {
+                $student->notify(new AssignmentPublishedNotification($assignment));
+            }
+        }
     }
 
     /**

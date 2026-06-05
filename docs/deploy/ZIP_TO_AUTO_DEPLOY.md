@@ -67,7 +67,7 @@ Click **New repository secret** for each:
 | Name | Value |
 |------|--------|
 | `SSH_HOST` | `139.84.143.214` |
-| `SSH_USER` | `root` (or the user you use for SSH) |
+| `SSH_USER` | `lmsis1337` |
 | `SSH_PRIVATE_KEY` | Contents of `~/.ssh/lms_deploy` (private key) |
 | `SSH_APP_DIR` | `/home/lms.isarvait.com` |
 
@@ -78,10 +78,8 @@ Click **New repository secret** for each:
 Use **CyberPanel → SSH** or Terminal on your Mac:
 
 ```bash
-ssh root@139.84.143.214
+ssh lmsis1337@139.84.143.214
 ```
-
-(Replace `root` with your SSH user if different.)
 
 ---
 
@@ -90,8 +88,8 @@ ssh root@139.84.143.214
 ```bash
 cd /home/lms.isarvait.com
 
-cp .env /root/lms.env.backup
-cp -a storage/app/public /root/lms-storage-backup 2>/dev/null || true
+cp .env ~/lms.env.backup
+cp -a storage/app/public ~/lms-storage-backup 2>/dev/null || true
 ```
 
 Your live `.env` and any uploaded files in `storage` are safe.
@@ -173,7 +171,7 @@ git fetch origin main
 git checkout -B main origin/main
 
 # Put your live .env back (Git must not replace it)
-cp /root/lms.env.backup .env
+cp ~/lms.env.backup .env
 ```
 
 If `git checkout` complains about local files, backup and force once:
@@ -222,7 +220,7 @@ Open **https://lms.isarvait.com/login** — site should still work.
 ### Step 8 — Test SSH deploy from your Mac
 
 ```bash
-ssh -i ~/.ssh/lms_deploy root@139.84.143.214 "cd /home/lms.isarvait.com && git status"
+ssh -i ~/.ssh/lms_deploy lmsis1337@139.84.143.214 "cd /home/lms.isarvait.com && git status"
 ```
 
 If that works, GitHub Actions can reach the server.
@@ -283,9 +281,9 @@ Wait ~1–2 minutes → site updates. No more zip upload.
 ## If something breaks
 
 ```bash
-ssh root@139.84.143.214
+ssh lmsis1337@139.84.143.214
 cd /home/lms.isarvait.com
-cp /root/lms.env.backup .env
+cp ~/lms.env.backup .env
 tail -50 storage/logs/laravel.log
 bash scripts/deploy.sh
 ```
@@ -293,7 +291,7 @@ bash scripts/deploy.sh
 ## Manual deploy (without waiting for Actions)
 
 ```bash
-ssh root@139.84.143.214
+ssh lmsis1337@139.84.143.214
 cd /home/lms.isarvait.com
 git pull origin main
 bash scripts/deploy.sh

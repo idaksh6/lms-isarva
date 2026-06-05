@@ -83,7 +83,10 @@
             0 3px 6px rgba(234, 88, 12, 0.22);
     }
 
-    .isarva-btn--xs,
+    .isarva-btn--xs {
+        @apply px-2.5 py-1 text-xs;
+    }
+
     .lms-btn-primary--xs {
         gap: 4px;
         padding: 6px 12px;
@@ -119,6 +122,158 @@
 
     .lms-btn-primary {
         @apply isarva-btn;
+    }
+
+    /* Secondary / danger / back — same 3D press style as primary, different colors */
+    .lms-btn-secondary,
+    .isarva-btn-outline,
+    .lms-btn-danger,
+    .lms-btn-back {
+        cursor: pointer;
+        display: inline-flex;
+        position: relative;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.25;
+        text-align: center;
+        transition: all 0.3s;
+        transform: perspective(1000px) translateZ(0);
+    }
+
+    .lms-btn-secondary,
+    .isarva-btn-outline {
+        background: #0f766e;
+        color: #fff;
+        box-shadow:
+            0 4px #115e59,
+            0 6px 10px rgba(17, 94, 89, 0.28),
+            0 8px 16px rgba(17, 94, 89, 0.12);
+    }
+
+    .lms-btn-secondary:hover,
+    .isarva-btn-outline:hover {
+        background: #0d9488;
+        transform: perspective(1000px) translateY(-2px) translateZ(0);
+        box-shadow:
+            0 6px #115e59,
+            0 8px 14px rgba(17, 94, 89, 0.32),
+            0 10px 20px rgba(17, 94, 89, 0.14);
+    }
+
+    .lms-btn-secondary:active,
+    .isarva-btn-outline:active {
+        background: #0f766e;
+        transform: perspective(1000px) translateY(4px) translateZ(0);
+        box-shadow:
+            0 2px #0f5f57,
+            0 3px 6px rgba(17, 94, 89, 0.22);
+    }
+
+    .lms-btn-danger {
+        background: #e11d48;
+        color: #fff;
+        box-shadow:
+            0 4px #be123c,
+            0 6px 10px rgba(190, 18, 60, 0.28),
+            0 8px 16px rgba(190, 18, 60, 0.12);
+    }
+
+    .lms-btn-danger:hover {
+        background: #f43f5e;
+        transform: perspective(1000px) translateY(-2px) translateZ(0);
+        box-shadow:
+            0 6px #be123c,
+            0 8px 14px rgba(190, 18, 60, 0.32),
+            0 10px 20px rgba(190, 18, 60, 0.14);
+    }
+
+    .lms-btn-danger:active {
+        background: #e11d48;
+        transform: perspective(1000px) translateY(4px) translateZ(0);
+        box-shadow:
+            0 2px #9f1239,
+            0 3px 6px rgba(190, 18, 60, 0.22);
+    }
+
+    .lms-btn-back {
+        background: #4f46e5;
+        color: #fff;
+        box-shadow:
+            0 4px #4338ca,
+            0 6px 10px rgba(67, 56, 202, 0.28),
+            0 8px 16px rgba(67, 56, 202, 0.12);
+    }
+
+    .lms-btn-back:hover {
+        background: #6366f1;
+        transform: perspective(1000px) translateY(-2px) translateZ(0);
+        box-shadow:
+            0 6px #4338ca,
+            0 8px 14px rgba(67, 56, 202, 0.32),
+            0 10px 20px rgba(67, 56, 202, 0.14);
+    }
+
+    .lms-btn-back:active {
+        background: #4f46e5;
+        transform: perspective(1000px) translateY(4px) translateZ(0);
+        box-shadow:
+            0 2px #3730a3,
+            0 3px 6px rgba(67, 56, 202, 0.22);
+    }
+
+    .lms-btn-secondary--xs,
+    .lms-btn-danger--xs {
+        gap: 4px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .lms-btn-secondary--xs,
+    .isarva-btn-outline.lms-btn-secondary--xs {
+        box-shadow:
+            0 3px #115e59,
+            0 5px 8px rgba(17, 94, 89, 0.24),
+            0 6px 12px rgba(17, 94, 89, 0.1);
+    }
+
+    .lms-btn-secondary--xs:hover {
+        box-shadow:
+            0 5px #115e59,
+            0 7px 12px rgba(17, 94, 89, 0.28),
+            0 8px 16px rgba(17, 94, 89, 0.12);
+    }
+
+    .lms-btn-secondary--xs:active {
+        box-shadow:
+            0 2px #0f5f57,
+            0 3px 5px rgba(17, 94, 89, 0.2);
+    }
+
+    .lms-btn-danger--xs {
+        box-shadow:
+            0 3px #be123c,
+            0 5px 8px rgba(190, 18, 60, 0.24),
+            0 6px 12px rgba(190, 18, 60, 0.1);
+    }
+
+    .lms-btn-danger--xs:hover {
+        box-shadow:
+            0 5px #be123c,
+            0 7px 12px rgba(190, 18, 60, 0.28),
+            0 8px 16px rgba(190, 18, 60, 0.12);
+    }
+
+    .lms-btn-danger--xs:active {
+        box-shadow:
+            0 2px #9f1239,
+            0 3px 5px rgba(190, 18, 60, 0.2);
     }
 
     .lms-text-link {
@@ -186,29 +341,30 @@
     }
 
     .lms-sidebar-nav {
-        @apply -mx-1 min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-1 py-2;
+        @apply -mx-1 min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-1 py-4;
         scrollbar-width: thin;
-        scrollbar-color: #94a3b8 #f1f5f9;
+        scrollbar-color: #c7d2e0 transparent;
     }
 
     .lms-sidebar-nav::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
     }
 
     .lms-sidebar-nav::-webkit-scrollbar-track {
-        @apply rounded-full bg-slate-100;
+        background: transparent;
     }
 
     .lms-sidebar-nav::-webkit-scrollbar-thumb {
-        @apply rounded-full bg-slate-300;
+        border-radius: 999px;
+        background: #d1d9e6;
     }
 
     .lms-sidebar-nav::-webkit-scrollbar-thumb:hover {
-        @apply bg-slate-400;
+        background: #b8c4d4;
     }
 
     .lms-sidebar-link {
-        @apply flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition;
+        @apply flex w-full items-center gap-3 rounded-lg px-3.5 py-3.5 text-sm font-medium text-slate-600 transition;
     }
 
     .lms-sidebar-link:hover {
@@ -827,16 +983,6 @@
         @apply rounded-2xl border border-isarva-border bg-white p-5 shadow-sm;
     }
 
-    /* Secondary — white bordered like "Explore Services" */
-    .isarva-btn-outline,
-    .lms-btn-secondary {
-        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-isarva-border bg-white px-4 py-2 text-sm font-semibold text-isarva-dark shadow-sm transition hover:border-slate-300 hover:bg-isarva-surface;
-    }
-
-    .lms-btn-back {
-        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:border-slate-700 hover:bg-slate-800;
-    }
-
     .lms-input {
         @apply w-full rounded-xl border border-isarva-border bg-white px-4 py-3 text-sm text-isarva-dark shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500/25;
     }
@@ -999,6 +1145,16 @@
         @apply min-w-0 space-y-6 xl:col-span-1;
     }
 
+    .lms-page-grid-submission {
+        @apply grid items-start gap-6;
+    }
+
+    @media (min-width: 1280px) {
+        .lms-page-grid-submission {
+            grid-template-columns: minmax(26rem, 2.25fr) minmax(0, 2.75fr);
+        }
+    }
+
     /* Lecturer assignment — stacked sections, no side-by-side height stretch */
     .lms-assignment-staff-layout {
         @apply flex flex-col gap-6;
@@ -1085,32 +1241,73 @@
         @apply relative min-h-[11rem] w-full overflow-hidden sm:min-h-[12.5rem];
     }
 
-    .lms-banner.lms-banner--hero .lms-banner-motif {
-        @apply items-center justify-end pr-6 opacity-40 sm:pr-10;
+    .lms-hero-photo {
+        @apply absolute inset-0 h-full w-full object-cover;
     }
 
-    .lms-banner.lms-banner--hero .lms-banner-svg {
-        @apply max-h-[75%] max-w-[38%] sm:max-w-[32%];
-    }
-
-    .lms-banner.lms-banner--hero .lms-banner-shine {
-        opacity: 0.1;
-    }
-
-    .lms-banner.lms-banner--hero .lms-motif-float,
-    .lms-banner.lms-banner--hero .lms-motif-drift {
-        animation: none;
-    }
-
-    .lms-course-hero-overlay {
+    .lms-hero-theme-overlay {
         @apply pointer-events-none absolute inset-0 z-[1];
+        background:
+            linear-gradient(
+                108deg,
+                rgba(15, 23, 42, 0.88) 0%,
+                rgba(0, 99, 67, 0.72) 28%,
+                rgba(15, 23, 42, 0.52) 52%,
+                rgba(243, 112, 33, 0.28) 78%,
+                rgba(15, 23, 42, 0.18) 100%
+            );
+    }
+
+    .lms-hero-theme-overlay::before {
+        content: '';
+        position: absolute;
+        inset: 0;
         background: linear-gradient(
-            105deg,
-            rgba(15, 23, 42, 0.72) 0%,
-            rgba(15, 23, 42, 0.45) 42%,
-            rgba(15, 23, 42, 0.12) 68%,
-            transparent 100%
+            180deg,
+            rgba(0, 168, 107, 0.18) 0%,
+            transparent 45%,
+            rgba(243, 112, 33, 0.12) 100%
         );
+    }
+
+    .lms-hero-theme-overlay::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            90deg,
+            rgba(15, 23, 42, 0.35) 0%,
+            transparent 55%,
+            rgba(255, 255, 255, 0.06) 100%
+        );
+    }
+
+    .lms-hero-eyebrow {
+        @apply text-xs font-bold uppercase tracking-widest text-orange-200;
+        text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
+    }
+
+    .lms-hero-title {
+        @apply text-2xl font-extrabold leading-tight text-white sm:text-3xl;
+        text-shadow: 0 2px 8px rgba(15, 23, 42, 0.45);
+    }
+
+    .lms-hero-subtitle {
+        @apply max-w-2xl text-sm text-white/90 sm:text-base;
+        text-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
+    }
+
+    .lms-hero-pill {
+        @apply inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-white/30 backdrop-blur-md;
+        text-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+    }
+
+    .lms-course-hero-art {
+        @apply absolute right-4 top-1/2 z-[1] hidden h-28 w-44 -translate-y-1/2 opacity-90 sm:block;
+    }
+
+    .lms-course-hero-illustration {
+        @apply h-full w-full rounded-xl shadow-lg ring-1 ring-white/20;
     }
 
     .lms-course-hero-content {
@@ -1121,20 +1318,8 @@
         @apply flex w-full max-w-2xl flex-col gap-3 sm:gap-4;
     }
 
-    .lms-course-hero-eyebrow {
-        @apply text-xs font-bold uppercase tracking-widest text-white/80;
-    }
-
-    .lms-course-hero-title {
-        @apply text-2xl font-bold leading-tight text-white sm:text-3xl;
-    }
-
     .lms-course-hero-details {
         @apply flex flex-wrap items-center gap-2 sm:gap-3;
-    }
-
-    .lms-course-hero-pill {
-        @apply inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white ring-1 ring-white/25 backdrop-blur-sm;
     }
 
     .lms-course-hero-actions {
@@ -1142,11 +1327,51 @@
     }
 
     .lms-course-hero-tab {
-        @apply inline-flex items-center justify-center rounded-lg border border-isarva-border bg-white px-4 py-2 text-sm font-semibold text-isarva-heading shadow-sm transition hover:border-slate-300 hover:bg-slate-50;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #0284c7;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.25;
+        transition: all 0.3s;
+        transform: perspective(1000px) translateZ(0);
+        box-shadow:
+            0 4px #0369a1,
+            0 6px 10px rgba(3, 105, 161, 0.28),
+            0 8px 16px rgba(3, 105, 161, 0.12);
+    }
+
+    .lms-course-hero-tab:hover {
+        background: #0ea5e9;
+        transform: perspective(1000px) translateY(-2px) translateZ(0);
+        box-shadow:
+            0 6px #0369a1,
+            0 8px 14px rgba(3, 105, 161, 0.32),
+            0 10px 20px rgba(3, 105, 161, 0.14);
     }
 
     .lms-course-hero-tab--active {
-        @apply border-brand-300 bg-brand-50 text-brand-800 ring-2 ring-brand-500/20;
+        background: #059669;
+        color: #fff;
+        box-shadow:
+            0 4px #047857,
+            0 6px 10px rgba(4, 120, 87, 0.28),
+            0 8px 16px rgba(4, 120, 87, 0.12);
+    }
+
+    .lms-course-hero-tab--active:hover {
+        background: #10b981;
+        box-shadow:
+            0 6px #047857,
+            0 8px 14px rgba(4, 120, 87, 0.32),
+            0 10px 20px rgba(4, 120, 87, 0.14);
     }
 
     .lms-assignment-row {
@@ -1355,24 +1580,61 @@
     }
 
     .lms-submission-card {
-        @apply flex flex-col gap-3 rounded-xl border border-isarva-border bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md;
+        @apply flex h-full flex-col gap-4 rounded-2xl border border-isarva-border bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md;
     }
 
     .lms-submission-card--row {
-        @apply border-brand-100 bg-white sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5 sm:py-4;
+        @apply border-brand-100 bg-gradient-to-br from-white to-brand-50/20;
     }
 
     .lms-submission-card-main {
-        @apply flex min-w-0 flex-1 items-center gap-3;
+        @apply flex min-w-0 items-start gap-3;
+    }
+
+    .lms-submission-card-body {
+        @apply flex flex-col gap-1;
+    }
+
+    .lms-submission-card-name {
+        @apply truncate text-base font-semibold leading-snug text-slate-900;
+    }
+
+    .lms-submission-card-meta {
+        @apply flex flex-wrap items-center gap-1 text-xs text-slate-500;
+    }
+
+    .lms-submission-card-dot {
+        @apply text-slate-300;
+    }
+
+    .lms-submission-card-assignment {
+        @apply mt-1 truncate text-sm font-medium leading-snug text-brand-700;
+    }
+
+    .lms-submission-card-date {
+        @apply text-xs leading-relaxed text-slate-400;
     }
 
     .lms-submission-card-actions {
-        @apply flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-4;
+        @apply mt-auto flex flex-col gap-3 border-t border-slate-100 pt-3;
     }
 
-    .lms-submission-card--row .lms-submission-card-actions .lms-btn-primary,
-    .lms-submission-card--row .lms-submission-card-actions .lms-btn-secondary {
-        @apply w-full sm:w-auto sm:min-w-[10.5rem];
+    .lms-submission-card-meta-row {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .lms-submission-card-actions .lms-btn-primary,
+    .lms-submission-card-actions .lms-btn-secondary {
+        @apply w-full justify-center;
+    }
+
+    .lms-review-actions {
+        @apply flex flex-col gap-2 xl:flex-row xl:flex-wrap xl:items-center;
+    }
+
+    .lms-review-actions .lms-btn-primary,
+    .lms-review-actions .lms-btn-secondary {
+        @apply w-full justify-center px-3 text-xs xl:w-auto xl:shrink-0;
     }
 
     .lms-submission-list-item {
@@ -1436,12 +1698,32 @@
         @apply rounded-xl border border-isarva-border bg-white p-3;
     }
 
-    .lms-btn-danger {
-        @apply inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/30;
-    }
-
     .lms-badge {
         @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+
+    .lms-status-badge {
+        @apply inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-sm;
+    }
+
+    .lms-status-badge.is-submitted {
+        @apply border-sky-200 bg-sky-50 text-sky-800 ring-1 ring-sky-100;
+    }
+
+    .lms-status-badge.is-late {
+        @apply border-amber-200 bg-amber-50 text-amber-800 ring-1 ring-amber-100;
+    }
+
+    .lms-status-badge.is-needs-revision {
+        @apply border-violet-200 bg-violet-50 text-violet-800 ring-1 ring-violet-100;
+    }
+
+    .lms-status-badge.is-reviewed {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100;
+    }
+
+    .lms-status-badge.is-default {
+        @apply border-slate-200 bg-slate-50 text-slate-700;
     }
 
     .auth-page {
@@ -1890,6 +2172,608 @@
         @apply bg-orange-600;
         box-shadow: 0 1px 0 #c2410c;
         transform: translateY(1px);
+    }
+
+    /* User list — horizontal row cards */
+    .lms-user-list-section {
+        @apply space-y-4;
+    }
+
+    .lms-user-list-header {
+        @apply flex items-center justify-between gap-3 px-1;
+    }
+
+    .lms-user-list-title {
+        @apply text-sm font-bold uppercase tracking-wide text-slate-500;
+    }
+
+    .lms-user-row-list {
+        @apply flex flex-col gap-3;
+    }
+
+    .lms-user-row-card {
+        @apply grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md;
+    }
+
+    @media (min-width: 1024px) {
+        .lms-user-row-card {
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.6fr) auto;
+            align-items: stretch;
+        }
+    }
+
+    .lms-user-row-card--admin {
+        @apply ring-1 ring-sky-100;
+    }
+
+    .lms-user-row-card--admin .lms-user-row-card-identity {
+        @apply border-sky-100 bg-sky-50/40;
+    }
+
+    .lms-user-row-card--lecturer {
+        @apply ring-1 ring-violet-100;
+    }
+
+    .lms-user-row-card--lecturer .lms-user-row-card-identity {
+        @apply border-violet-100 bg-violet-50/35;
+    }
+
+    .lms-user-row-card--student {
+        @apply ring-1 ring-emerald-100;
+    }
+
+    .lms-user-row-card--student .lms-user-row-card-identity {
+        @apply border-emerald-100 bg-emerald-50/35;
+    }
+
+    .lms-user-row-card.is-inactive {
+        @apply opacity-75;
+    }
+
+    .lms-user-row-card-identity {
+        @apply flex min-w-0 items-center gap-3 rounded-xl border px-3 py-2.5;
+    }
+
+    .lms-user-row-card-details {
+        @apply grid grid-cols-1 gap-2 sm:grid-cols-3;
+    }
+
+    .lms-user-detail-box {
+        @apply flex min-w-0 flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5;
+    }
+
+    .lms-user-detail-label {
+        @apply text-[0.625rem] font-bold uppercase tracking-wider text-slate-400;
+    }
+
+    .lms-user-detail-value {
+        @apply text-sm font-semibold text-slate-800;
+    }
+
+    .lms-user-detail-value--mono {
+        @apply font-mono text-xs tracking-wide text-slate-700;
+    }
+
+    .lms-user-detail-value--muted {
+        @apply text-xs font-medium text-slate-400;
+    }
+
+    .lms-user-detail-value--active {
+        @apply inline-flex w-fit items-center rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800;
+    }
+
+    .lms-user-detail-value--inactive {
+        @apply inline-flex w-fit items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-bold text-red-800;
+    }
+
+    .lms-user-row-card-actions {
+        @apply flex flex-col justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 lg:min-w-[9.5rem];
+    }
+
+    .lms-user-action-group {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .lms-user-action-group form {
+        @apply inline-flex;
+    }
+
+    .lms-directory-avatar {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold;
+    }
+
+    .lms-directory-avatar--admin {
+        @apply bg-sky-100 text-sky-700 ring-2 ring-white;
+    }
+
+    .lms-directory-avatar--lecturer {
+        @apply bg-violet-100 text-violet-700 ring-2 ring-white;
+    }
+
+    .lms-directory-avatar--student {
+        @apply bg-emerald-100 text-emerald-700 ring-2 ring-white;
+    }
+
+    .lms-module-hero {
+        @apply relative overflow-hidden rounded-2xl border border-isarva-border bg-white shadow-isarva;
+        min-height: 11rem;
+    }
+
+    .lms-module-hero-media {
+        @apply absolute inset-0;
+    }
+
+    .lms-module-hero-art {
+        @apply absolute right-4 top-1/2 z-[1] hidden h-28 w-44 -translate-y-1/2 opacity-90 sm:block;
+    }
+
+    .lms-module-hero-illustration {
+        @apply h-full w-full rounded-xl shadow-lg ring-1 ring-white/20;
+    }
+
+    .lms-module-hero-content {
+        @apply relative z-10 flex flex-col justify-center gap-2 p-6 sm:p-8;
+    }
+
+    .lms-module-hero-stats {
+        @apply mt-2 flex flex-wrap items-center gap-2;
+    }
+
+    .lms-stat-chips {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .lms-stat-chip {
+        @apply inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-md;
+        text-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+    }
+
+    .lms-stat-chip strong {
+        @apply font-extrabold;
+    }
+
+    .lms-filter-bar {
+        @apply flex flex-col gap-2 rounded-2xl border border-isarva-border bg-white p-3 shadow-isarva sm:flex-row sm:items-center sm:flex-nowrap;
+    }
+
+    .lms-filter-search {
+        @apply min-w-0 w-full sm:min-w-[14rem] sm:flex-1;
+    }
+
+    .lms-filter-select-wrap {
+        @apply relative w-full shrink-0 sm:w-auto sm:min-w-[11rem] sm:max-w-[16rem];
+    }
+
+    .lms-filter-select-wrap::after {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        right: 0.875rem;
+        top: 50%;
+        width: 0.5rem;
+        height: 0.5rem;
+        transform: translateY(-50%) rotate(45deg);
+        border-right: 2px solid #94a3b8;
+        border-bottom: 2px solid #94a3b8;
+    }
+
+    .lms-filter-select-wrap .lms-filter-select {
+        @apply w-full;
+    }
+
+    .lms-filter-select {
+        @apply truncate bg-white;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-image: none !important;
+        background-color: transparent;
+        padding-right: 2.5rem; /* space for custom chevron */
+    }
+
+    .lms-filter-bar--gradebook .lms-filter-select-wrap {
+        @apply sm:min-w-[18rem] sm:max-w-xl;
+    }
+
+    .lms-filter-bar > .lms-btn-secondary,
+    .lms-filter-bar > .lms-btn-primary {
+        @apply w-full justify-center sm:w-auto sm:shrink-0;
+    }
+
+    .lms-hub-list {
+        @apply grid gap-4;
+    }
+
+    .lms-hub-list--cards,
+    .lms-hub-list--submissions {
+        @apply sm:grid-cols-2 lg:grid-cols-3;
+    }
+
+    .lms-grade-badge {
+        @apply inline-flex flex-col items-center justify-center rounded-xl border-2 px-2.5 py-1.5 text-center font-bold;
+    }
+
+    .lms-grade-badge--sm {
+        @apply min-w-[2.75rem] border px-2 py-1 text-xs shadow-sm;
+    }
+
+    .lms-grade-badge--sm .lms-grade-badge-letter {
+        @apply text-base;
+    }
+
+    .lms-grade-badge--md {
+        @apply min-w-[4rem] px-3 py-2;
+    }
+
+    .lms-grade-badge-letter {
+        @apply text-lg leading-none;
+    }
+
+    .lms-grade-badge-score {
+        @apply text-[10px] font-semibold opacity-80;
+    }
+
+    .lms-grade-badge-empty {
+        @apply text-slate-400;
+    }
+
+    .lms-grade--a { @apply border-emerald-200 bg-emerald-50 text-emerald-800; }
+    .lms-grade--b { @apply border-sky-200 bg-sky-50 text-sky-800; }
+    .lms-grade--c { @apply border-amber-200 bg-amber-50 text-amber-800; }
+    .lms-grade--d { @apply border-orange-200 bg-orange-50 text-orange-800; }
+    .lms-grade--f { @apply border-red-200 bg-red-50 text-red-800; }
+    .lms-grade--none { @apply border-slate-200 bg-slate-50 text-slate-500; }
+
+    .lms-grade-summary {
+        @apply flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3;
+    }
+
+    .lms-feedback-box {
+        @apply rounded-xl border border-violet-100 bg-violet-50/80 p-3 text-sm text-violet-900;
+    }
+
+    .lms-gradebook-scroll {
+        @apply -mx-5 overflow-x-auto px-5 pb-1;
+        scrollbar-width: thin;
+        scrollbar-color: #d1d9e6 transparent;
+    }
+
+    .lms-gradebook-scroll::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .lms-gradebook-scroll::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-slate-300;
+    }
+
+    .lms-gradebook-table {
+        @apply w-full border-collapse text-sm;
+    }
+
+    .lms-gradebook-table thead th {
+        @apply border-b border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold text-slate-600;
+    }
+
+    .lms-gradebook-table tbody td {
+        @apply border-b border-slate-100 px-4 py-3 align-middle;
+    }
+
+    .lms-gradebook-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .lms-gradebook-col-student {
+        @apply min-w-[10rem] whitespace-nowrap;
+    }
+
+    .lms-gradebook-col-assignment {
+        @apply min-w-[7.5rem] max-w-[9rem] text-center;
+    }
+
+    .lms-gradebook-table thead .lms-gradebook-col-assignment {
+        @apply text-center font-medium normal-case leading-snug;
+    }
+
+    .lms-gradebook-col-avg {
+        @apply min-w-[4.5rem] text-center font-semibold text-slate-700;
+    }
+
+    .lms-gradebook-grade-wrap {
+        @apply flex justify-center;
+    }
+
+    .lms-gradebook-avg-chip {
+        @apply inline-flex rounded-lg border px-2 py-1 text-xs font-bold;
+    }
+
+    .lms-gradebook-status {
+        @apply text-xs text-slate-500;
+    }
+
+    .lms-gradebook-dash {
+        @apply text-slate-300;
+    }
+
+    .lms-reports-grid {
+        @apply grid gap-4 lg:grid-cols-2;
+    }
+
+    .lms-panel--reports {
+        @apply overflow-hidden border-slate-200/80 bg-gradient-to-br from-white via-white to-brand-50/20;
+    }
+
+    .lms-report-status-body {
+        @apply flex flex-col gap-4;
+    }
+
+    .lms-report-empty-note {
+        @apply rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-500;
+    }
+
+    .lms-report-stat-grid {
+        @apply grid grid-cols-2 gap-3;
+    }
+
+    .lms-report-stat-card {
+        @apply flex flex-col rounded-xl border border-slate-200/90 bg-white px-4 py-3.5 shadow-sm;
+        border-top-width: 3px;
+    }
+
+    .lms-report-stat-card.is-submitted {
+        @apply border-t-sky-400;
+    }
+
+    .lms-report-stat-card.is-late {
+        @apply border-t-amber-400;
+    }
+
+    .lms-report-stat-card.is-needs-revision {
+        @apply border-t-violet-400;
+    }
+
+    .lms-report-stat-card.is-reviewed {
+        @apply border-t-emerald-400;
+    }
+
+    .lms-report-stat-value {
+        @apply text-2xl font-extrabold leading-none text-slate-900;
+    }
+
+    .lms-report-stat-label {
+        @apply mt-1.5 text-sm font-semibold text-slate-700;
+    }
+
+    .lms-report-stat-pct {
+        @apply mt-1 text-xs font-medium text-slate-400;
+    }
+
+    .lms-report-pill {
+        @apply inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200;
+    }
+
+    .lms-course-breakdown {
+        @apply flex flex-col gap-2;
+    }
+
+    .lms-course-breakdown-row {
+        @apply flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3;
+    }
+
+    .lms-course-breakdown-stats {
+        @apply flex flex-wrap gap-2;
+    }
+
+    .lms-announcement-feed {
+        @apply grid gap-4;
+    }
+
+    .lms-announcement-card {
+        @apply rounded-2xl border border-isarva-border bg-white p-5 shadow-isarva;
+    }
+
+    .lms-announcement-card.is-pinned {
+        @apply border-amber-200 ring-1 ring-amber-100;
+    }
+
+    .lms-announcement-card-head {
+        @apply mb-3 flex flex-wrap items-start justify-between gap-3;
+    }
+
+    .lms-announcement-title {
+        @apply text-lg font-bold text-isarva-heading;
+    }
+
+    .lms-announcement-meta {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .lms-announcement-body {
+        @apply text-sm leading-relaxed text-slate-700;
+    }
+
+    .lms-calendar-page {
+        @apply space-y-4;
+    }
+
+    .lms-calendar-nav {
+        @apply flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-isarva-border bg-white px-4 py-3 shadow-isarva;
+    }
+
+    .lms-calendar-layout {
+        @apply grid gap-4 xl:grid-cols-[1.2fr_1fr];
+    }
+
+    .lms-calendar-grid-panel {
+        @apply rounded-2xl border border-isarva-border bg-white p-4 shadow-isarva;
+    }
+
+    .lms-calendar-event {
+        @apply flex items-start gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-brand-200 hover:bg-brand-50/40;
+    }
+
+    .lms-calendar-event-date {
+        @apply flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-800;
+    }
+
+    .lms-settings-grid,
+    .lms-help-grid {
+        @apply grid gap-4 lg:grid-cols-2;
+    }
+
+    .lms-help-card {
+        @apply overflow-hidden rounded-2xl border border-isarva-border bg-white shadow-isarva;
+    }
+
+    .lms-help-card-visual {
+        @apply relative h-28 overflow-hidden;
+    }
+
+    .lms-help-card-visual .lms-banner {
+        @apply absolute inset-0 h-full w-full rounded-none;
+    }
+
+    .lms-help-question {
+        @apply px-5 pt-4 text-base font-bold text-isarva-heading;
+    }
+
+    .lms-help-answer {
+        @apply px-5 pb-5 pt-2 text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .lms-notify {
+        @apply relative;
+    }
+
+    .lms-notify-trigger {
+        @apply relative;
+    }
+
+    .lms-notify-trigger.has-unread {
+        @apply border-brand-200 bg-brand-50 text-brand-700;
+    }
+
+    .lms-notify-badge {
+        @apply absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-white ring-2 ring-white;
+    }
+
+    .lms-notify-panel {
+        @apply absolute right-0 top-full z-50 mt-3 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/10;
+    }
+
+    .lms-notify-panel-hero {
+        @apply flex items-start justify-between gap-3 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-4;
+    }
+
+    .lms-notify-panel-eyebrow {
+        @apply text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300;
+    }
+
+    .lms-notify-panel-title {
+        @apply text-base font-bold text-white;
+    }
+
+    .lms-notify-mark-all {
+        @apply shrink-0 rounded-lg border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-white/20;
+    }
+
+    .lms-notify-list {
+        @apply max-h-80 overflow-y-auto bg-slate-50/50;
+    }
+
+    .lms-notify-item {
+        @apply flex w-full items-start gap-3 border-b border-slate-100 bg-white px-4 py-3 text-left transition hover:bg-brand-50/40;
+    }
+
+    .lms-notify-item-icon {
+        @apply mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl;
+    }
+
+    .lms-notify-item-icon.is-assignment {
+        @apply bg-sky-100 text-sky-700;
+    }
+
+    .lms-notify-item-icon.is-submission {
+        @apply bg-violet-100 text-violet-700;
+    }
+
+    .lms-notify-item-icon.is-grade {
+        @apply bg-emerald-100 text-emerald-700;
+    }
+
+    .lms-notify-item-icon.is-due {
+        @apply bg-amber-100 text-amber-700;
+    }
+
+    .lms-notify-item-icon.is-default {
+        @apply bg-slate-100 text-slate-600;
+    }
+
+    .lms-notify-item-content {
+        @apply min-w-0 flex-1;
+    }
+
+    .lms-notify-item-title {
+        @apply block text-[11px] font-bold uppercase tracking-wide text-brand-600;
+    }
+
+    .lms-notify-item-body {
+        @apply block truncate text-sm font-semibold text-slate-800;
+    }
+
+    .lms-notify-item-time {
+        @apply mt-0.5 block text-xs text-slate-500;
+    }
+
+    .lms-notify-item-dot {
+        @apply mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-500;
+    }
+
+    .lms-notify-empty {
+        @apply flex flex-col items-center px-6 py-10 text-center;
+    }
+
+    .lms-notify-empty-icon {
+        @apply mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600;
+    }
+
+    .lms-notify-empty-title {
+        @apply text-sm font-bold text-slate-800;
+    }
+
+    .lms-notify-empty-text {
+        @apply mt-1 text-xs text-slate-500;
+    }
+
+    .lms-notify-footer {
+        @apply flex items-center justify-center gap-1 border-t border-slate-100 bg-white px-4 py-3 text-xs font-bold text-brand-600 transition hover:bg-slate-50;
+    }
+
+    .lms-notify-page-list {
+        @apply divide-y divide-slate-100 overflow-hidden rounded-2xl border border-isarva-border bg-white shadow-isarva;
+    }
+
+    .lms-notify-page-item.is-unread {
+        @apply bg-brand-50/30;
+    }
+
+    .lms-notify-page-item button {
+        @apply px-5 py-4 hover:bg-slate-50;
+    }
+
+    .lms-notify-page-type {
+        @apply block text-xs font-bold uppercase tracking-wide text-brand-600;
+    }
+
+    .lms-notify-page-title {
+        @apply block text-sm font-semibold text-slate-900;
+    }
+
+    .lms-notify-page-time {
+        @apply block text-xs text-slate-500;
+    }
+
+    .lms-resubmit-banner {
+        @apply rounded-xl border border-violet-200 bg-violet-50 px-4 py-3;
     }
 
 }

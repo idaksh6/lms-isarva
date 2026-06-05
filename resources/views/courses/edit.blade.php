@@ -45,6 +45,13 @@
         <div class="lms-form-actions">
             <button type="submit" class="lms-btn-primary">Save changes</button>
             <a href="{{ route('courses.show', $course) }}" class="lms-btn-secondary">Cancel</a>
+            @can('delete', $course)
+                <form method="POST" action="{{ route('courses.destroy', $course) }}" class="ml-auto" onsubmit="return confirm('Delete or archive this course? Courses with submissions are archived only.')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="lms-btn-danger">Delete course</button>
+                </form>
+            @endcan
         </div>
     </form>
 </div>

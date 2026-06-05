@@ -64,7 +64,7 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 | Secret | Example |
 |--------|---------|
 | `SSH_HOST` | `139.84.143.214` |
-| `SSH_USER` | `root` (or your SSH user) |
+| `SSH_USER` | `lmsis1337` |
 | `SSH_PRIVATE_KEY` | Full contents of `~/.ssh/lms_deploy` (private key) |
 | `SSH_APP_DIR` | `/home/lms.isarvait.com` |
 
