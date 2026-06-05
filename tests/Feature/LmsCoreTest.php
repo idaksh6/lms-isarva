@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Enums\SubmissionStatus;
 use App\Enums\UserRole;
+use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Submission;
 use App\Models\User;
+use App\Notifications\AnnouncementPublishedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class LmsCoreTest extends TestCase
@@ -94,6 +97,51 @@ class LmsCoreTest extends TestCase
             ->assertRedirect();
 
         $this->assertFalse($student->fresh()->is_active);
+    }
+
+    public function test_publishing_course_announcement_notifies_enrolled_students(): void
+    {
+        Notification::fake();
+
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $this->actingAs($lecturer)
+            ->post(route('announcements.store'), [
+                'course_id' => $course->id,
+                'title' => 'Due date extended',
+                'body' => 'Submit by next Friday.',
+                'is_pinned' => '1',
+            ])
+            ->assertRedirect();
+
+        Notification::assertSentTo($student, AnnouncementPublishedNotification::class);
+        Notification::assertNotSentTo($lecturer, AnnouncementPublishedNotification::class);
+        $this->assertDatabaseHas('announcements', [
+            'course_id' => $course->id,
+            'title' => 'Due date extended',
+            'is_pinned' => true,
+        ]);
+    }
+
+    public function test_publishing_global_announcement_notifies_other_users(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $student = $this->makeStudent();
+
+        $this->actingAs($admin)
+            ->post(route('announcements.store'), [
+                'title' => 'System maintenance',
+                'body' => 'Portal will be down tonight.',
+            ])
+            ->assertRedirect();
+
+        Notification::assertSentTo($student, AnnouncementPublishedNotification::class);
+        Notification::assertNotSentTo($admin, AnnouncementPublishedNotification::class);
     }
 
     public function test_gradebook_requires_staff_role(): void

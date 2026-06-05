@@ -13,7 +13,7 @@
             ['q' => 'How do I submit an assignment?', 'a' => 'Open the course → assignment → Submit work. Upload one file and optional notes. You can resubmit only if your lecturer requests a revision.', 'icon' => 'assignment'],
             ['q' => 'Where do I see my grades?', 'a' => 'Open your submission from the assignment or Submissions page. Scores and lecturer feedback appear after review.', 'icon' => 'analytics'],
             ['q' => 'How do lecturers grade work?', 'a' => 'Open a submission, enter a score (0–100), add feedback, and choose Grade, Request revision, or Mark reviewed.', 'icon' => 'notebook'],
-            ['q' => 'What are announcements?', 'a' => 'Lecturers and admins post course or global updates on the Announcements page. Pinned posts stay at the top.', 'icon' => 'books'],
+            ['q' => 'What are announcements?', 'a' => 'Lecturers and admins post course or global updates on the Announcements page. New posts also appear in your notification bell (and email if enabled). Pinned posts stay at the top of the list.', 'icon' => 'books'],
             ['q' => 'How do due-date reminders work?', 'a' => 'The system sends in-app and email reminders 24 hours before a due date if you have not submitted.', 'icon' => 'laptop'],
             ['q' => 'Who can export reports?', 'a' => 'Admins and lecturers can download CSV gradebook and report files from the Gradebook and Reports pages.', 'icon' => 'analytics'],
         ] as $faq)

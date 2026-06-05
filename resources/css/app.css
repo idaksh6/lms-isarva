@@ -2371,8 +2371,97 @@
         padding-right: 2.5rem; /* space for custom chevron */
     }
 
-    .lms-filter-bar--gradebook .lms-filter-select-wrap {
-        @apply sm:min-w-[18rem] sm:max-w-xl;
+    .lms-gradebook-picker {
+        @apply rounded-2xl border border-brand-200/80 bg-gradient-to-br from-brand-50/60 via-white to-white p-5 shadow-sm sm:p-6;
+    }
+
+    .lms-gradebook-picker-head {
+        @apply mb-5 max-w-2xl;
+    }
+
+    .lms-gradebook-picker-step {
+        @apply inline-flex rounded-full bg-brand-100 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wider text-brand-800;
+    }
+
+    .lms-gradebook-picker-title {
+        @apply mt-2 text-lg font-bold text-slate-900;
+    }
+
+    .lms-gradebook-picker-hint {
+        @apply mt-1 text-sm text-slate-600;
+    }
+
+    .lms-gradebook-picker-form {
+        @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm;
+    }
+
+    .lms-gradebook-picker-label {
+        @apply mb-2 block text-sm font-semibold text-slate-700;
+    }
+
+    .lms-gradebook-picker-row {
+        @apply flex flex-col gap-3 sm:flex-row sm:items-center;
+    }
+
+    .lms-gradebook-picker-select-wrap {
+        @apply min-w-0 flex-1;
+    }
+
+    .lms-gradebook-select {
+        @apply text-sm font-medium;
+    }
+
+    .lms-gradebook-picker-divider {
+        @apply relative my-5 text-center;
+    }
+
+    .lms-gradebook-picker-divider::before {
+        content: '';
+        @apply absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-200;
+    }
+
+    .lms-gradebook-picker-divider span {
+        @apply relative bg-gradient-to-r from-brand-50/60 via-white to-white px-3 text-xs font-semibold uppercase tracking-wide text-slate-400;
+    }
+
+    .lms-gradebook-course-grid {
+        @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-3;
+    }
+
+    .lms-gradebook-course-card {
+        @apply flex flex-col gap-1 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-brand-300 hover:bg-brand-50/40 hover:shadow-md;
+    }
+
+    .lms-gradebook-course-code {
+        @apply text-sm font-extrabold text-brand-700;
+    }
+
+    .lms-gradebook-course-title {
+        @apply line-clamp-2 text-sm font-medium leading-snug text-slate-800;
+    }
+
+    .lms-gradebook-course-meta {
+        @apply mt-1 text-xs text-slate-500;
+    }
+
+    .lms-gradebook-picker-empty {
+        @apply text-sm text-slate-500;
+    }
+
+    .lms-gradebook-toolbar {
+        @apply flex flex-col gap-3 rounded-2xl border border-isarva-border bg-white p-4 shadow-sm sm:flex-row sm:items-end sm:justify-between;
+    }
+
+    .lms-gradebook-toolbar-field {
+        @apply min-w-0 flex-1;
+    }
+
+    .lms-gradebook-toolbar-label {
+        @apply mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500;
+    }
+
+    .lms-gradebook-toolbar .lms-filter-select-wrap {
+        @apply max-w-xl;
     }
 
     .lms-filter-bar > .lms-btn-secondary,
@@ -2702,6 +2791,10 @@
 
     .lms-notify-item-icon.is-due {
         @apply bg-amber-100 text-amber-700;
+    }
+
+    .lms-notify-item-icon.is-announcement {
+        @apply bg-amber-100 text-amber-800;
     }
 
     .lms-notify-item-icon.is-default {

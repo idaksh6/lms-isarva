@@ -18,22 +18,65 @@
         @endif
     </x-lms.module-hero>
 
-    <form method="GET" class="lms-filter-bar lms-filter-bar--gradebook">
-        <div class="lms-filter-select-wrap">
-            <label for="gradebook-course" class="sr-only">Select course</label>
-            <select id="gradebook-course" name="course" class="lms-field-input lms-filter-select" onchange="this.form.submit()">
-                <option value="">Select a course…</option>
-                @foreach ($courses as $course)
-                    <option value="{{ $course->id }}" @selected($selectedCourse?->id === $course->id) title="{{ $course->code }} — {{ $course->title }}">
-                        {{ $course->code }} — {{ \Illuminate\Support\Str::limit($course->title, 32) }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        @if ($selectedCourse)
+    @if ($selectedCourse)
+        <form method="GET" class="lms-gradebook-toolbar">
+            <div class="lms-gradebook-toolbar-field">
+                <label for="gradebook-course" class="lms-gradebook-toolbar-label">Viewing course</label>
+                <div class="lms-filter-select-wrap">
+                    <select id="gradebook-course" name="course" class="lms-field-input lms-filter-select lms-gradebook-select" onchange="this.form.submit()">
+                        @foreach ($courses as $course)
+                            <option value="{{ $course->id }}" @selected($selectedCourse->id === $course->id) title="{{ $course->code }} — {{ $course->title }}">
+                                {{ $course->code }} — {{ $course->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <a href="{{ route('gradebook.export', ['course' => $selectedCourse->id]) }}" class="lms-btn-primary">Export CSV</a>
-        @endif
-    </form>
+        </form>
+    @else
+        <section class="lms-gradebook-picker">
+            <div class="lms-gradebook-picker-head">
+                <span class="lms-gradebook-picker-step">Step 1</span>
+                <h2 class="lms-gradebook-picker-title">Select a course to open its gradebook</h2>
+                <p class="lms-gradebook-picker-hint">Pick from the list below or use the dropdown — student scores will appear once a course is chosen.</p>
+            </div>
+
+            <form method="GET" class="lms-gradebook-picker-form">
+                <label for="gradebook-course" class="lms-gradebook-picker-label">Course</label>
+                <div class="lms-gradebook-picker-row">
+                    <div class="lms-filter-select-wrap lms-gradebook-picker-select-wrap">
+                        <select id="gradebook-course" name="course" class="lms-field-input lms-filter-select lms-gradebook-select" required onchange="this.form.submit()">
+                            <option value="" disabled selected>Choose a course…</option>
+                            @foreach ($courses as $course)
+                                <option value="{{ $course->id }}" title="{{ $course->code }} — {{ $course->title }}">
+                                    {{ $course->code }} — {{ $course->title }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="lms-btn-primary">Open gradebook</button>
+                </div>
+            </form>
+
+            @if ($courses->isNotEmpty())
+                <div class="lms-gradebook-picker-divider">
+                    <span>Or pick a course</span>
+                </div>
+                <div class="lms-gradebook-course-grid">
+                    @foreach ($courses as $course)
+                        <a href="{{ route('gradebook.index', ['course' => $course->id]) }}" class="lms-gradebook-course-card">
+                            <span class="lms-gradebook-course-code">{{ $course->code }}</span>
+                            <span class="lms-gradebook-course-title">{{ $course->title }}</span>
+                            <span class="lms-gradebook-course-meta">{{ $course->students_count ?? 0 }} students</span>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <p class="lms-gradebook-picker-empty">No active courses available yet.</p>
+            @endif
+        </section>
+    @endif
 
     @if ($selectedCourse && $rows->isNotEmpty())
         <section class="lms-panel">
@@ -95,8 +138,6 @@
         </section>
     @elseif ($selectedCourse)
         <x-lms.empty-state title="No students enrolled" message="Add students to this course to start tracking grades." variant="analytics" />
-    @else
-        <x-lms.empty-state title="Choose a course" message="Select a course above to view the gradebook." variant="analytics" />
     @endif
 </div>
 @endsection

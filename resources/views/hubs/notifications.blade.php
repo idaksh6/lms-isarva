@@ -24,6 +24,7 @@
                     <button type="submit" class="w-full text-left">
                         <span class="lms-notify-page-type">
                             @switch($data['type'] ?? '')
+                                @case('announcement_published') New announcement @break
                                 @case('assignment_published') New assignment @break
                                 @case('submission_received') New submission @break
                                 @case('grade_posted') Grade posted @break
