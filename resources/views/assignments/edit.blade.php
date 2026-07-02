@@ -35,6 +35,8 @@
                class="lms-field-input mt-1.5">
     </div>
 
+    <x-lms.assignment-delivery-fields :assignment="$assignment" />
+
     @if ($assignment->attachments->isNotEmpty())
         <div class="lms-form-field">
             <span class="lms-field-label">Current files</span>

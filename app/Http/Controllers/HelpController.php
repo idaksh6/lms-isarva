@@ -8,6 +8,20 @@ class HelpController extends Controller
 {
     public function index(): View
     {
-        return view('hubs.help');
+        $user = request()->user();
+
+        $visibleTabs = match (true) {
+            $user->isAdmin() => ['student', 'lecturer', 'admin'],
+            $user->isLecturer() => ['student', 'lecturer'],
+            default => ['student'],
+        };
+
+        $defaultTab = match (true) {
+            $user->isAdmin() => 'admin',
+            $user->isLecturer() => 'lecturer',
+            default => 'student',
+        };
+
+        return view('hubs.help', compact('visibleTabs', 'defaultTab'));
     }
 }

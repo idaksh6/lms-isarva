@@ -4,7 +4,8 @@
     use App\Support\FilePreview;
     use App\Support\GradeHelper;
 
-    $previewType = FilePreview::type(null, $submission->file_name);
+    $isExternal = $submission->isExternalLink();
+    $previewType = $isExternal ? null : FilePreview::type(null, $submission->file_name);
     $canReview = auth()->user()->can('review', $submission);
     $isStudent = auth()->user()->isStudent();
 @endphp
@@ -65,6 +66,13 @@
                         </dd>
                     </div>
 
+                    <div class="lms-meta-list-row">
+                        <dt>Delivery</dt>
+                        <dd>
+                            <span class="lms-meta-list-value">{{ $submission->source?->label() ?? 'Uploaded file' }}</span>
+                        </dd>
+                    </div>
+
                     @if ($submission->reviewed_at)
                         <div class="lms-meta-list-row">
                             <dt>Reviewed</dt>
@@ -117,27 +125,37 @@
 
         <section class="lms-panel min-w-0">
             <div class="lms-panel-header">
-                <h2 class="lms-panel-title">Submitted file</h2>
+                <h2 class="lms-panel-title">{{ $isExternal ? 'Submitted link' : 'Submitted file' }}</h2>
             </div>
             <div class="lms-panel-body space-y-4">
-                <x-lms.document-viewer
-                    :name="$submission->file_name"
-                    :stream-url="route('media.submission', $submission)"
-                    :download-url="route('media.submission.download', $submission)"
-                />
+                @if ($isExternal)
+                    <x-lms.external-link-card
+                        :url="$submission->external_url"
+                        :label="$submission->external_label"
+                    />
+                    <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+                        Open the link above to download and review the student's file on Google Drive, Dropbox, or OneDrive. The LMS stores the link only — not the file itself.
+                    </p>
+                @else
+                    <x-lms.document-viewer
+                        :name="$submission->file_name"
+                        :stream-url="route('media.submission', $submission)"
+                        :download-url="route('media.submission.download', $submission)"
+                    />
 
-                <div class="lms-doc-inline-preview">
-                    <p class="mb-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-500">Quick preview</p>
-                    @if ($previewType === 'pdf')
-                        <iframe src="{{ route('media.submission', $submission) }}#toolbar=1" title="{{ $submission->file_name }}" class="lms-doc-iframe lms-doc-iframe--inline"></iframe>
-                    @elseif ($previewType === 'image')
-                        <img src="{{ route('media.submission', $submission) }}" alt="{{ $submission->file_name }}" class="lms-doc-image lms-doc-image--inline">
-                    @else
-                        <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                            Use <strong class="font-semibold text-slate-700">View in app</strong> above for Word documents, or download the file.
-                        </p>
-                    @endif
-                </div>
+                    <div class="lms-doc-inline-preview">
+                        <p class="mb-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-500">Quick preview</p>
+                        @if ($previewType === 'pdf')
+                            <iframe src="{{ route('media.submission', $submission) }}#toolbar=1" title="{{ $submission->file_name }}" class="lms-doc-iframe lms-doc-iframe--inline"></iframe>
+                        @elseif ($previewType === 'image')
+                            <img src="{{ route('media.submission', $submission) }}" alt="{{ $submission->file_name }}" class="lms-doc-image lms-doc-image--inline">
+                        @else
+                            <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                                Use <strong class="font-semibold text-slate-700">View in app</strong> above for Word documents, or download the file.
+                            </p>
+                        @endif
+                    </div>
+                @endif
             </div>
         </section>
     </div>

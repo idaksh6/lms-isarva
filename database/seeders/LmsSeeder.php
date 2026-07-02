@@ -2,11 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SubmissionDeliveryMethod;
+use App\Enums\SubmissionSource;
+use App\Enums\SubmissionStatus;
 use App\Enums\UserRole;
 use App\Models\Answer;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Question;
+use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -80,6 +84,7 @@ class LmsSeeder extends Seeder
             [
                 'created_by' => $lecturer->id,
                 'instructions' => "Implement linear regression from scratch on the provided dataset.\n\nSubmit your Jupyter notebook (.ipynb) with clear markdown explanations and visualizations.",
+                'delivery_method' => SubmissionDeliveryMethod::File,
                 'due_at' => now()->addDays(7),
                 'is_published' => true,
             ]
@@ -90,14 +95,73 @@ class LmsSeeder extends Seeder
             [
                 'created_by' => $lecturer->id,
                 'instructions' => 'Write a 2-page PDF comparing at least three classification metrics on the class dataset.',
+                'delivery_method' => SubmissionDeliveryMethod::File,
                 'due_at' => now()->addDays(14),
                 'is_published' => true,
             ]
         );
 
+        $projectArchiveAssignment = Assignment::query()->updateOrCreate(
+            ['course_id' => $course->id, 'title' => 'Semester Project Package'],
+            [
+                'created_by' => $lecturer->id,
+                'instructions' => "Submit your full semester project as one zip file.\n\n1. Upload your zip to the shared Google Drive folder (link on this page).\n2. Right-click your uploaded file → Share → copy the file link.\n3. Paste that link in the LMS submit form.\n\nInclude: notebook, trained model export, and a short README.",
+                'delivery_method' => SubmissionDeliveryMethod::Link,
+                'drop_folder_url' => 'https://drive.google.com/drive/folders/1DemoDS501ProjectUploads2026',
+                'due_at' => now()->addDays(21),
+                'is_published' => true,
+            ]
+        );
+
+        Assignment::query()->updateOrCreate(
+            ['course_id' => $course2->id, 'title' => 'ETL Pipeline Design'],
+            [
+                'created_by' => $lecturer->id,
+                'instructions' => 'Submit a PDF diagram of your ETL pipeline with brief notes on each stage (extract, transform, load).',
+                'delivery_method' => SubmissionDeliveryMethod::File,
+                'due_at' => now()->addDays(10),
+                'is_published' => true,
+            ]
+        );
+
+        // Remove old cloud-link demo from DS502 if it was seeded before.
+        Assignment::query()
+            ->where('course_id', $course2->id)
+            ->where('title', 'Capstone Project Bundle')
+            ->delete();
+
         $student1 = $students->first();
         $student2 = $students->get(1);
         $student3 = $students->get(2);
+
+        Submission::query()->updateOrCreate(
+            ['assignment_id' => $projectArchiveAssignment->id, 'user_id' => $student1->id],
+            [
+                'source' => SubmissionSource::Link,
+                'external_url' => 'https://drive.google.com/file/d/1DemoStudent1MLProject/view?usp=sharing',
+                'external_label' => 'ml_project_student1.zip',
+                'notes' => 'Notebook + model pickle + README included.',
+                'status' => SubmissionStatus::Submitted,
+                'submitted_at' => now()->subDays(2)->setTime(14, 30),
+            ]
+        );
+
+        Submission::query()->updateOrCreate(
+            ['assignment_id' => $projectArchiveAssignment->id, 'user_id' => $student2->id],
+            [
+                'source' => SubmissionSource::Link,
+                'external_url' => 'https://drive.google.com/file/d/1DemoStudent2MLProject/view?usp=sharing',
+                'external_label' => 'ds501_semester_project.zip',
+                'notes' => 'Updated model evaluation section per feedback.',
+                'status' => SubmissionStatus::Reviewed,
+                'score' => 88,
+                'letter_grade' => 'B',
+                'feedback' => 'Solid work. Consider adding a confusion matrix plot in the README.',
+                'submitted_at' => now()->subDays(4)->setTime(9, 15),
+                'reviewed_at' => now()->subDays(1)->setTime(16, 0),
+                'reviewed_by' => $lecturer->id,
+            ]
+        );
 
         $q1 = Question::query()->updateOrCreate(
             ['title' => 'What file format should we use for the Linear Regression Lab submission?'],
@@ -187,5 +251,8 @@ class LmsSeeder extends Seeder
         $this->command?->info('  Admin:    admin@lms.test');
         $this->command?->info('  Lecturer: lecturer@lms.test');
         $this->command?->info('  Student:  student1@lms.test … student10@lms.test');
+        $this->command?->info('');
+        $this->command?->info('Cloud link demo: DS501 → Semester Project Package (student1 & student2 submitted links)');
+        $this->command?->info('File upload demo: DS501 → Linear Regression Lab, Model Evaluation Report');
     }
 }

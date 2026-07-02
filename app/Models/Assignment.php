@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SubmissionDeliveryMethod;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'created_by',
     'title',
     'instructions',
+    'delivery_method',
+    'drop_folder_url',
     'due_at',
     'attachment_path',
     'attachment_name',
@@ -22,6 +25,7 @@ class Assignment extends Model
     protected function casts(): array
     {
         return [
+            'delivery_method' => SubmissionDeliveryMethod::class,
             'due_at' => 'datetime',
             'is_published' => 'boolean',
         ];
@@ -50,5 +54,19 @@ class Assignment extends Model
     public function isOverdue(): bool
     {
         return $this->due_at !== null && $this->due_at->isPast();
+    }
+
+    public function acceptsFileUpload(): bool
+    {
+        $method = $this->delivery_method ?? SubmissionDeliveryMethod::File;
+
+        return in_array($method, [SubmissionDeliveryMethod::File, SubmissionDeliveryMethod::Both], true);
+    }
+
+    public function acceptsExternalLink(): bool
+    {
+        $method = $this->delivery_method ?? SubmissionDeliveryMethod::File;
+
+        return in_array($method, [SubmissionDeliveryMethod::Link, SubmissionDeliveryMethod::Both], true);
     }
 }

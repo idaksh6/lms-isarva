@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SubmissionDeliveryMethod;
+use App\Enums\SubmissionSource;
 use App\Enums\SubmissionStatus;
 use App\Models\Assignment;
 use App\Models\Submission;
 use App\Notifications\GradePostedNotification;
 use App\Notifications\SubmissionReceivedNotification;
+use App\Rules\ExternalSubmissionUrl;
+use App\Support\ExternalSubmissionLink;
 use App\Support\GradeHelper;
 use App\Support\UploadLimits;
 use Illuminate\Http\RedirectResponse;
@@ -47,59 +51,99 @@ class SubmissionController extends Controller
             return back()->with('error', 'You have already submitted work for this assignment.');
         }
 
+        $method = $assignment->delivery_method ?? SubmissionDeliveryMethod::File;
+        $maxKb = UploadLimits::submissionMaxKilobytes();
         $file = $request->file('file');
+
         if ($file && ! $file->isValid()) {
             return back()
                 ->withInput()
                 ->withErrors(['file' => UploadLimits::fileUploadErrorMessage($file->getError())]);
         }
 
-        $maxKb = UploadLimits::submissionMaxKilobytes();
-
-        $validated = $request->validate([
+        $rules = [
             'notes' => ['nullable', 'string', 'max:5000'],
-            'file' => ['required', 'file', "max:{$maxKb}"],
-        ], [
+            'external_label' => ['nullable', 'string', 'max:255'],
+        ];
+
+        if ($method === SubmissionDeliveryMethod::File) {
+            $rules['file'] = ['required', 'file', "max:{$maxKb}"];
+        } elseif ($method === SubmissionDeliveryMethod::Link) {
+            $rules['external_url'] = ['required', 'url', 'max:2048', new ExternalSubmissionUrl];
+        } else {
+            $rules['file'] = ['required_without:external_url', 'nullable', 'file', "max:{$maxKb}"];
+            $rules['external_url'] = ['required_without:file', 'nullable', 'url', 'max:2048', new ExternalSubmissionUrl];
+        }
+
+        $validated = $request->validate($rules, [
+            'file.required' => 'Please upload your submission file.',
+            'file.required_without' => 'Upload a file or paste a cloud share link.',
             'file.max' => "The file may not be larger than {$maxKb} kilobytes (about ".UploadLimits::submissionMaxMegabytes().' MB).',
             'file.uploaded' => UploadLimits::fileUploadErrorMessage($file?->getError() ?? UPLOAD_ERR_NO_FILE),
+            'external_url.required' => 'Paste the share link to your file on Google Drive, Dropbox, or OneDrive.',
+            'external_url.required_without' => 'Upload a file or paste a cloud share link.',
         ]);
 
-        $file = $request->file('file');
-        $path = $file->store('submissions', 'public');
+        $useFile = $assignment->acceptsFileUpload() && $request->hasFile('file');
+        $useLink = $assignment->acceptsExternalLink() && filled($validated['external_url'] ?? null);
+
+        if (! $useFile && ! $useLink) {
+            return back()
+                ->withInput()
+                ->withErrors($method === SubmissionDeliveryMethod::Link
+                    ? ['external_url' => 'Paste the share link to your uploaded file.']
+                    : ['file' => 'Please upload your submission file.']);
+        }
 
         $status = $assignment->isOverdue()
             ? SubmissionStatus::Late
             : SubmissionStatus::Submitted;
+
+        $payload = [
+            'notes' => $validated['notes'] ?? null,
+            'status' => $status,
+            'submitted_at' => now(),
+            'score' => null,
+            'letter_grade' => null,
+            'feedback' => null,
+            'reviewed_at' => null,
+            'reviewed_by' => null,
+        ];
+
+        if ($useFile) {
+            $file = $request->file('file');
+            $path = $file->store('submissions', 'public');
+
+            $payload['source'] = SubmissionSource::File;
+            $payload['file_path'] = $path;
+            $payload['file_name'] = $file->getClientOriginalName();
+            $payload['external_url'] = null;
+            $payload['external_label'] = null;
+        } else {
+            $externalUrl = $validated['external_url'];
+
+            $payload['source'] = SubmissionSource::Link;
+            $payload['external_url'] = $externalUrl;
+            $payload['external_label'] = ExternalSubmissionLink::labelFromUrl(
+                $externalUrl,
+                $validated['external_label'] ?? null
+            );
+            $payload['file_path'] = null;
+            $payload['file_name'] = null;
+        }
 
         if ($existing) {
             if ($existing->file_path) {
                 Storage::disk('public')->delete($existing->file_path);
             }
 
-            $existing->update([
-                'notes' => $validated['notes'] ?? null,
-                'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'status' => $status,
-                'submitted_at' => now(),
-                'score' => null,
-                'letter_grade' => null,
-                'feedback' => null,
-                'reviewed_at' => null,
-                'reviewed_by' => null,
-            ]);
-
+            $existing->update($payload);
             $submission = $existing;
         } else {
-            $submission = Submission::query()->create([
+            $submission = Submission::query()->create(array_merge($payload, [
                 'assignment_id' => $assignment->id,
                 'user_id' => $request->user()->id,
-                'notes' => $validated['notes'] ?? null,
-                'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'status' => $status,
-                'submitted_at' => now(),
-            ]);
+            ]));
         }
 
         $lecturer = $assignment->course->lecturer;

@@ -31,6 +31,11 @@
             </p>
             <p class="lms-submission-card-assignment">{{ $submission->assignment->title }}</p>
             <p class="lms-submission-card-date">{{ $submission->submitted_at->format('M j, Y · g:i A') }}</p>
+            @if ($submission->isExternalLink())
+                <p class="mt-1 truncate text-xs text-brand-700">{{ $submission->displayName() }} · cloud link</p>
+            @else
+                <p class="mt-1 truncate text-xs text-slate-500">{{ $submission->file_name }}</p>
+            @endif
         </div>
     </div>
 

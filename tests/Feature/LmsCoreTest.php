@@ -75,7 +75,7 @@ class LmsCoreTest extends TestCase
 
         $this->actingAs($student)->get(route('courses.index'))->assertOk();
         $this->actingAs($student)->get(route('calendar.index'))->assertOk();
-        $this->actingAs($student)->get(route('help.index'))->assertOk();
+        $this->actingAs($student)->get(route('help.index'))->assertOk()->assertSee('Back to portal');
         $this->actingAs($student)->get(route('settings.index'))->assertOk();
         $this->actingAs($student)->get(route('announcements.index'))->assertOk();
         $this->actingAs($student)->get(route('questions.index'))->assertOk();
@@ -330,6 +330,94 @@ class LmsCoreTest extends TestCase
             ->assertSessionHasErrors('theme');
 
         $this->assertSame('classic', $student->fresh()->theme);
+    }
+
+    public function test_student_can_submit_external_link_for_link_only_assignment(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Capstone bundle',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::Link,
+            'drop_folder_url' => 'https://drive.google.com/drive/folders/demo-folder',
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($student)
+            ->post(route('assignments.submissions.store', $assignment), [
+                'external_url' => 'https://drive.google.com/file/d/demo-file-id/view?usp=sharing',
+                'external_label' => 'capstone.zip',
+                'notes' => 'Uploaded to shared folder.',
+            ])
+            ->assertRedirect();
+
+        $submission = Submission::query()->where('assignment_id', $assignment->id)->first();
+        $this->assertNotNull($submission);
+        $this->assertSame(\App\Enums\SubmissionSource::Link, $submission->source);
+        $this->assertSame('https://drive.google.com/file/d/demo-file-id/view?usp=sharing', $submission->external_url);
+        $this->assertNull($submission->file_path);
+
+        $this->actingAs($student)
+            ->get(route('submissions.show', $submission))
+            ->assertOk()
+            ->assertSee('Open in Google Drive')
+            ->assertSee('capstone.zip');
+    }
+
+    public function test_external_link_submission_rejects_unsupported_hosts(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Capstone bundle',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::Link,
+            'drop_folder_url' => 'https://drive.google.com/drive/folders/demo-folder',
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($student)
+            ->post(route('assignments.submissions.store', $assignment), [
+                'external_url' => 'https://example.com/files/capstone.zip',
+            ])
+            ->assertSessionHasErrors('external_url');
+    }
+
+    public function test_file_upload_still_works_for_file_only_assignment(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Lab report',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File,
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($student)
+            ->post(route('assignments.submissions.store', $assignment), [
+                'file' => \Illuminate\Http\UploadedFile::fake()->create('lab-report.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect();
+
+        $submission = Submission::query()->where('assignment_id', $assignment->id)->first();
+        $this->assertNotNull($submission);
+        $this->assertSame(\App\Enums\SubmissionSource::File, $submission->source);
+        $this->assertSame('lab-report.pdf', $submission->file_name);
+        $this->assertNull($submission->external_url);
     }
 
     private function makeLecturer(): User

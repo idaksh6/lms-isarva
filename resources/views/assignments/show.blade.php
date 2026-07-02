@@ -65,6 +65,22 @@
                 </section>
             @endif
 
+            @if ($assignment->acceptsExternalLink() && $assignment->drop_folder_url)
+                <section class="lms-panel lms-panel--highlight">
+                    <div class="lms-panel-header">
+                        <h2 class="lms-panel-title">Shared upload folder</h2>
+                    </div>
+                    <div class="lms-panel-body space-y-3">
+                        <p class="text-sm text-isarva-muted">
+                            Students upload their bundle here, then paste the <strong class="font-semibold text-isarva-heading">share link to their file</strong> when submitting.
+                        </p>
+                        <a href="{{ $assignment->drop_folder_url }}" target="_blank" rel="noopener noreferrer" class="lms-btn-secondary inline-flex">
+                            Open shared folder
+                        </a>
+                    </div>
+                </section>
+            @endif
+
             <section class="lms-assignment-submissions-hub">
                 <div class="lms-assignment-submissions-hub-header">
                     <div>
@@ -128,6 +144,22 @@
                     </section>
                 @endif
 
+                @if ($assignment->acceptsExternalLink() && $assignment->drop_folder_url && ! $userSubmission)
+                    <section class="lms-panel lms-panel--highlight">
+                        <div class="lms-panel-header">
+                            <h2 class="lms-panel-title">Shared upload folder</h2>
+                        </div>
+                        <div class="lms-panel-body space-y-3">
+                            <p class="text-sm text-isarva-muted">
+                                Step 1: upload your zip to the shared folder. Step 2: submit the file share link on the submit page.
+                            </p>
+                            <a href="{{ $assignment->drop_folder_url }}" target="_blank" rel="noopener noreferrer" class="lms-btn-secondary inline-flex">
+                                Open shared folder
+                            </a>
+                        </div>
+                    </section>
+                @endif
+
                 @if ($userSubmission)
                     <section class="lms-panel lms-panel--highlight">
                         <div class="lms-panel-header">
@@ -138,11 +170,18 @@
                             <p class="text-sm text-isarva-muted">
                                 Submitted {{ $userSubmission->submitted_at->format('l, F j, Y · g:i A') }}
                             </p>
-                            <x-lms.document-viewer
-                                :name="$userSubmission->file_name"
-                                :stream-url="route('media.submission', $userSubmission)"
-                                :download-url="route('media.submission.download', $userSubmission)"
-                            />
+                            @if ($userSubmission->isExternalLink())
+                                <x-lms.external-link-card
+                                    :url="$userSubmission->external_url"
+                                    :label="$userSubmission->external_label"
+                                />
+                            @else
+                                <x-lms.document-viewer
+                                    :name="$userSubmission->file_name"
+                                    :stream-url="route('media.submission', $userSubmission)"
+                                    :download-url="route('media.submission.download', $userSubmission)"
+                                />
+                            @endif
                             <a href="{{ route('submissions.show', $userSubmission) }}" class="lms-btn-primary text-sm">View full submission</a>
                         </div>
                     </section>

@@ -20,6 +20,8 @@ class MediaController extends Controller
     {
         $this->authorize('view', $submission);
 
+        abort_unless($submission->file_path && Storage::disk('public')->exists($submission->file_path), 404);
+
         $mime = Storage::disk('public')->mimeType($submission->file_path) ?: null;
 
         return $this->inlineFromDisk($submission->file_path, $submission->file_name, $mime);
@@ -35,6 +37,8 @@ class MediaController extends Controller
     public function downloadSubmission(Submission $submission): StreamedResponse
     {
         $this->authorize('view', $submission);
+
+        abort_unless($submission->file_path && Storage::disk('public')->exists($submission->file_path), 404);
 
         return Storage::disk('public')->download($submission->file_path, $submission->file_name);
     }

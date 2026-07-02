@@ -10,7 +10,6 @@
             <span class="lms-stat-chip"><strong>{{ $stats['total'] }}</strong> total</span>
             <span class="lms-stat-chip"><strong>{{ $stats['active'] }}</strong> active</span>
             <span class="lms-stat-chip"><strong>{{ $stats['students'] }}</strong> students</span>
-            <a href="{{ route('admin.users.bulk-import') }}" class="lms-btn-secondary lms-btn-secondary--xs">Import students</a>
             <a href="{{ route('admin.users.create') }}" class="lms-btn-primary lms-btn-primary--xs">Add user</a>
         </div>
     </x-lms.module-hero>

@@ -31,6 +31,8 @@
             <input id="due_at" type="datetime-local" name="due_at" value="{{ old('due_at') }}" class="lms-field-input mt-1.5">
         </div>
 
+        <x-lms.assignment-delivery-fields />
+
         <x-lms.file-upload />
 
         <label class="lms-form-check">

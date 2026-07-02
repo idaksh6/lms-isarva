@@ -14,6 +14,6 @@ return [
         ['label' => 'Calendar', 'route' => 'calendar.index', 'icon' => 'calendar', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Settings', 'route' => 'settings.index', 'icon' => 'cog', 'roles' => ['admin', 'lecturer', 'student']],
-        ['label' => 'Help', 'route' => 'help.index', 'icon' => 'help', 'roles' => ['admin', 'lecturer', 'student']],
+        ['label' => 'User guide', 'route' => 'help.index', 'icon' => 'help', 'roles' => ['admin', 'lecturer', 'student'], 'new_tab' => true],
     ],
 ];

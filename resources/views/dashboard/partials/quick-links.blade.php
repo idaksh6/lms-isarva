@@ -6,19 +6,19 @@
             ['label' => 'Courses', 'route' => 'courses.index'],
             ['label' => 'Users', 'route' => 'admin.users.index'],
             ['label' => 'Reports', 'route' => 'reports.index'],
-            ['label' => 'Calendar', 'route' => 'calendar.index'],
+            ['label' => 'User guide', 'route' => 'help.index', 'new_tab' => true],
         ],
         $user->isLecturer() => [
             ['label' => 'My courses', 'route' => 'courses.index'],
             ['label' => 'Submissions', 'route' => 'submissions.index'],
             ['label' => 'Gradebook', 'route' => 'gradebook.index'],
-            ['label' => 'Calendar', 'route' => 'calendar.index'],
+            ['label' => 'User guide', 'route' => 'help.index', 'new_tab' => true],
         ],
         default => [
             ['label' => 'Assignments', 'route' => 'assignments.index'],
             ['label' => 'My courses', 'route' => 'courses.index'],
             ['label' => 'Calendar', 'route' => 'calendar.index'],
-            ['label' => 'Help', 'route' => 'help.index'],
+            ['label' => 'User guide', 'route' => 'help.index', 'new_tab' => true],
         ],
     };
 @endphp
@@ -31,7 +31,8 @@
     <ul class="corp-quick-links">
         @foreach ($links as $link)
             <li>
-                <a href="{{ route($link['route']) }}" class="corp-quick-link">
+                <a href="{{ route($link['route']) }}" class="corp-quick-link"
+                   @if (! empty($link['new_tab'])) target="_blank" rel="noopener noreferrer" @endif>
                     <span>{{ $link['label'] }}</span>
                     <span aria-hidden="true">→</span>
                 </a>

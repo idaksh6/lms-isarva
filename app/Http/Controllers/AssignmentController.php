@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SubmissionDeliveryMethod;
 use App\Models\Assignment;
 use App\Models\AssignmentAttachment;
 use App\Models\Course;
@@ -10,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AssignmentController extends Controller
@@ -32,6 +34,13 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
+            'delivery_method' => ['required', Rule::enum(SubmissionDeliveryMethod::class)],
+            'drop_folder_url' => [
+                'nullable',
+                'url',
+                'max:2048',
+                Rule::requiredIf(fn () => in_array($request->input('delivery_method'), ['link', 'both'], true)),
+            ],
             'due_at' => ['nullable', 'date'],
             'attachments' => ['nullable', 'array', 'max:5'],
             'attachments.*' => ['file', 'max:10240'],
@@ -42,6 +51,8 @@ class AssignmentController extends Controller
             'created_by' => $request->user()->id,
             'title' => $validated['title'],
             'instructions' => $validated['instructions'] ?? null,
+            'delivery_method' => $validated['delivery_method'],
+            'drop_folder_url' => $validated['drop_folder_url'] ?? null,
             'due_at' => $validated['due_at'] ?? null,
             'is_published' => $request->boolean('is_published', true),
         ]);
@@ -89,6 +100,13 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
+            'delivery_method' => ['required', Rule::enum(SubmissionDeliveryMethod::class)],
+            'drop_folder_url' => [
+                'nullable',
+                'url',
+                'max:2048',
+                Rule::requiredIf(fn () => in_array($request->input('delivery_method'), ['link', 'both'], true)),
+            ],
             'due_at' => ['nullable', 'date'],
             'attachments' => ['nullable', 'array', 'max:5'],
             'attachments.*' => ['file', 'max:10240'],
@@ -98,6 +116,8 @@ class AssignmentController extends Controller
         $assignment->update([
             'title' => $validated['title'],
             'instructions' => $validated['instructions'] ?? null,
+            'delivery_method' => $validated['delivery_method'],
+            'drop_folder_url' => $validated['drop_folder_url'] ?? null,
             'due_at' => $validated['due_at'] ?? null,
             'is_published' => $request->boolean('is_published', $assignment->is_published),
         ]);

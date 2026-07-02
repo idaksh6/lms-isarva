@@ -12,7 +12,6 @@
                 <p class="corp-dash-meta">{{ now()->format('l, F j, Y') }} · Platform overview · Administrator workspace</p>
             </div>
             <div class="corp-dash-actions">
-                <a href="{{ route('admin.users.bulk-import') }}" class="lms-btn-secondary lms-btn-secondary--xs">Import students</a>
                 <a href="{{ route('admin.users.create') }}" class="lms-btn-secondary lms-btn-secondary--xs">Add user</a>
                 <a href="{{ route('courses.create') }}" class="lms-btn-primary lms-btn-primary--xs">Create course</a>
             </div>

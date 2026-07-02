@@ -14,6 +14,14 @@
         </dd>
     </div>
     <div class="lms-assignment-glance-row">
+        <dt>Submission</dt>
+        <dd>
+            <span class="text-sm font-medium text-slate-700">
+                {{ ($assignment->delivery_method ?? \App\Enums\SubmissionDeliveryMethod::File)->shortLabel() }}
+            </span>
+        </dd>
+    </div>
+    <div class="lms-assignment-glance-row">
         <dt>Due date</dt>
         <dd>
             @if ($assignment->due_at)

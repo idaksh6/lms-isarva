@@ -40,7 +40,7 @@
                         };
                     @endphp
                     <a href="{{ route($item['route']) }}"
-                       @click="sidebarOpen = false"
+                       @if (! empty($item['new_tab'])) target="_blank" rel="noopener noreferrer" @else @click="sidebarOpen = false" @endif
                        class="lms-sidebar-link {{ $active ? 'is-active' : '' }}">
                         @include('layouts.partials.nav-icon', ['name' => $item['icon']])
                         <span>{{ $item['label'] }}</span>
