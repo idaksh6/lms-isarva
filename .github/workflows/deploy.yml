@@ -20,7 +20,7 @@ jobs:
 
       - name: Build frontend assets
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm run build
 
       - name: Upload build assets to server
