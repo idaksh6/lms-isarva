@@ -2757,7 +2757,7 @@
 
     /* ——— Corporate dashboard ——— */
     .corp-dashboard {
-        @apply isolate w-full min-w-0 max-w-full space-y-4 overflow-x-clip lg:mx-auto lg:max-w-[1400px];
+        @apply isolate w-full min-w-0 max-w-full space-y-4 overflow-x-clip;
     }
 
     .corp-dash-summary {
