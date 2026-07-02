@@ -10,8 +10,7 @@
 
 <a href="{{ route('courses.show', $course) }}" {{ $attributes->merge(['class' => 'dashboard-course-card group']) }}>
     <div class="dashboard-course-card-thumb">
-        <x-dashboard.course-cover :course="$course" />
-        <span class="dashboard-course-card-code">{{ $course->code }}</span>
+        <x-dashboard.course-cover :course="$course" :animated="false" variant="corporate" />
     </div>
     <div class="dashboard-course-card-body">
         <div class="dashboard-course-card-top">

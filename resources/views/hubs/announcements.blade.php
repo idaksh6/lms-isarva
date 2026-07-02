@@ -5,39 +5,28 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="announcements" variant="books" title="Announcements" subtitle="Important updates from your lecturers and administrators.">
+    <x-lms.module-hero module="announcements" title="Announcements" subtitle="Important updates from your lecturers. Everyone can read them here.">
         <div class="lms-stat-chips">
             <span class="lms-stat-chip"><strong>{{ $announcements->total() }}</strong> posts</span>
         </div>
     </x-lms.module-hero>
 
-    @if (auth()->user()->isAdmin() || auth()->user()->isLecturer())
+    @if (auth()->user()->isLecturer())
         <form method="POST" action="{{ route('announcements.store') }}" class="lms-form-card">
             @csrf
             <div class="lms-form-header">
                 <h2 class="lms-form-title">Post an announcement</h2>
                 <p class="lms-form-desc">Share news with a course or the entire programme.</p>
             </div>
-            @if (auth()->user()->isAdmin())
-                <div class="lms-form-field">
-                    <label class="lms-field-label">Audience</label>
-                    <select name="course_id" class="lms-field-input mt-1.5">
-                        <option value="">All users (global)</option>
-                        @foreach ($courses as $course)
-                            <option value="{{ $course->id }}">{{ $course->code }} — {{ $course->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            @else
-                <div class="lms-form-field">
-                    <label class="lms-field-label">Course</label>
-                    <select name="course_id" class="lms-field-input mt-1.5" required>
-                        @foreach ($courses as $course)
-                            <option value="{{ $course->id }}">{{ $course->code }} — {{ $course->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
+            <div class="lms-form-field">
+                <label class="lms-field-label">Audience</label>
+                <select name="course_id" class="lms-field-input mt-1.5">
+                    <option value="">All users (global)</option>
+                    @foreach ($courses as $course)
+                        <option value="{{ $course->id }}">{{ $course->code }} — {{ $course->title }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="lms-form-field">
                 <label class="lms-field-label">Title</label>
                 <input type="text" name="title" class="lms-field-input mt-1.5" required maxlength="255">
@@ -62,7 +51,7 @@
                 <div class="lms-announcement-card-head">
                     <div>
                         @if ($announcement->is_pinned)
-                            <span class="lms-badge bg-amber-100 text-amber-800">Pinned</span>
+                            <span class="lms-badge bg-brand-100 text-brand-800">Pinned</span>
                         @endif
                         <h3 class="lms-announcement-title">{{ $announcement->title }}</h3>
                         <p class="lms-announcement-meta">

@@ -4,63 +4,73 @@
 @section('page_title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-page">
-    <div class="dashboard-layout">
-        <div class="dashboard-main">
-            <header class="dashboard-welcome">
-                <div>
-                    <p class="dashboard-welcome-eyebrow">Admin dashboard</p>
-                    <h2 class="dashboard-welcome-title">Platform at a glance</h2>
-                    <p class="dashboard-welcome-desc">Monitor programmes, people, and submissions across ISARVA LMS.</p>
-                </div>
-                <div class="dashboard-welcome-actions">
-                    <a href="{{ route('admin.users.create') }}" class="lms-btn-primary">Add user</a>
-                    <a href="{{ route('courses.create') }}" class="lms-btn-primary">Create course</a>
-                </div>
-            </header>
+<div class="corp-dashboard">
+    <section class="corp-dash-summary">
+        <div class="corp-dash-toolbar">
+            <div class="corp-dash-heading">
+                <h1 class="corp-dash-title">Welcome back, {{ auth()->user()->name }}</h1>
+                <p class="corp-dash-meta">{{ now()->format('l, F j, Y') }} · Platform overview · Administrator workspace</p>
+            </div>
+            <div class="corp-dash-actions">
+                <a href="{{ route('admin.users.bulk-import') }}" class="lms-btn-secondary lms-btn-secondary--xs">Import students</a>
+                <a href="{{ route('admin.users.create') }}" class="lms-btn-secondary lms-btn-secondary--xs">Add user</a>
+                <a href="{{ route('courses.create') }}" class="lms-btn-primary lms-btn-primary--xs">Create course</a>
+            </div>
+        </div>
 
-            <x-dashboard.resume-card
+        <div class="corp-kpi-grid">
+            <x-dashboard.kpi-card label="Students" :value="$stats['students']" :sub="$stats['students'].' of '.$stats['total_users'].' users'" icon="users" />
+            <x-dashboard.kpi-card label="Lecturers" :value="$stats['lecturers']" :sub="$stats['lecturers'].' teaching staff'" icon="lecturer" />
+            <x-dashboard.kpi-card label="Active courses" :value="$stats['active_courses']" :sub="$stats['active_courses'].' of '.$stats['courses'].' programmes'" icon="book" />
+            <x-dashboard.kpi-card label="Published tasks" :value="$stats['published_assignments']" :sub="$stats['pending_reviews'].' awaiting review'" icon="clipboard" />
+        </div>
+    </section>
+
+    <div class="corp-dash-grid">
+        <div class="corp-dash-primary">
+            <x-dashboard.highlight-card
                 :course="$featuredCourse"
                 :progress="$featuredProgress"
                 subtitle="Featured programme"
             />
 
-            <section class="dashboard-section">
-                <div class="dashboard-section-head">
-                    <h2 class="dashboard-section-title">Overview</h2>
-                </div>
-                <div class="dashboard-stats-grid">
-                    <x-dashboard.stat-ring label="Students" :value="$stats['students']" :sub="$stats['students'].' of '.$stats['total_users'].' users'" :percent="$stats['students_pct']" tone="sky" />
-                    <x-dashboard.stat-ring label="Lecturers" :value="$stats['lecturers']" :sub="$stats['lecturers'].' teaching staff'" :percent="$stats['lecturers_pct']" tone="rose" />
-                    <x-dashboard.stat-ring label="Active courses" :value="$stats['active_courses']" :sub="$stats['active_courses'].' of '.$stats['courses'].' programmes'" :percent="$stats['active_courses_pct']" tone="brand" />
-                    <x-dashboard.stat-ring label="Published tasks" :value="$stats['published_assignments']" :sub="$stats['pending_reviews'].' awaiting review'" :percent="$stats['published_pct']" tone="orange" />
-                </div>
-            </section>
+            @include('dashboard.partials.analytics')
 
-            <section class="dashboard-section dashboard-panel">
-                <div class="dashboard-section-head">
+            <section class="corp-panel">
+                <div class="corp-panel-head">
                     <div>
-                        <h2 class="dashboard-section-title-lg">Recent courses</h2>
-                        <p class="dashboard-section-desc">Programmes with live enrolments and assignments.</p>
+                        <h2 class="corp-panel-title">Recent programmes</h2>
+                        <p class="corp-panel-desc">Courses with active enrolments and assignments.</p>
                     </div>
-                    <a href="{{ route('courses.index') }}" class="lms-text-link">View all →</a>
+                    <a href="{{ route('courses.index') }}" class="corp-panel-link">View all</a>
                 </div>
-
-                <div class="dashboard-course-grid">
-                    @forelse ($recentCourses as $course)
-                        <x-dashboard.course-card
-                            :course="$course"
-                            :progress="\App\Support\DashboardMetrics::adminCourseProgress($course)"
-                            :meta="$course->lecturer->name.' · '.$course->students_count.' students · '.$course->assignments_count.' tasks'"
-                        />
-                    @empty
-                        <div class="dashboard-course-grid-empty">
-                            <x-lms.empty-state title="No courses yet" message="Create a programme module to see it here." variant="books">
-                                <a href="{{ route('courses.create') }}" class="lms-btn-primary">Create course</a>
-                            </x-lms.empty-state>
-                        </div>
-                    @endforelse
-                </div>
+                @if ($recentCourses->isNotEmpty())
+                    <div class="corp-table-wrap">
+                        <table class="corp-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Course</th>
+                                    <th>Progress</th>
+                                    <th><span class="sr-only">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($recentCourses as $course)
+                                    <x-dashboard.course-table-row
+                                        :course="$course"
+                                        :progress="\App\Support\DashboardMetrics::adminCourseProgress($course)"
+                                        :meta="$course->lecturer->name.' · '.$course->students_count.' students · '.$course->assignments_count.' tasks'"
+                                    />
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <x-lms.empty-state title="No courses yet" message="Create a programme module to see it listed here." variant="books">
+                        <a href="{{ route('courses.create') }}" class="lms-btn-primary">Create course</a>
+                    </x-lms.empty-state>
+                @endif
             </section>
         </div>
 

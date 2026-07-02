@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentHubController;
 use App\Http\Controllers\CalendarController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubmissionController;
@@ -75,6 +77,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy'])
         ->name('announcements.destroy');
 
+    Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
+    Route::get('questions/create', [QuestionController::class, 'create'])->name('questions.create');
+    Route::post('questions', [QuestionController::class, 'store'])->name('questions.store');
+    Route::get('questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
+    Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+    Route::post('questions/{question}/answers', [AnswerController::class, 'store'])->name('questions.answers.store');
+    Route::patch('questions/{question}/answers/{answer}/accept', [AnswerController::class, 'accept'])->name('questions.answers.accept');
+    Route::delete('answers/{answer}', [AnswerController::class, 'destroy'])->name('answers.destroy');
+
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
@@ -100,6 +111,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::get('users/bulk-import', [AdminUserController::class, 'bulkImportForm'])->name('users.bulk-import');
+        Route::post('users/bulk-import', [AdminUserController::class, 'bulkImportStore'])->name('users.bulk-import.store');
         Route::post('users', [AdminUserController::class, 'store'])->name('users.store');
         Route::get('users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
         Route::patch('users/{user}', [AdminUserController::class, 'update'])->name('users.update');

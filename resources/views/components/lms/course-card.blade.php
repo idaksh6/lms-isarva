@@ -15,12 +15,10 @@
 
 <a href="{{ route('courses.show', $course) }}" {{ $attributes->merge(['class' => 'lms-course-card group']) }}>
     <div class="lms-course-card-cover">
-        <x-dashboard.course-cover :course="$course" :large="true" />
-        <div class="lms-course-card-cover-overlay" aria-hidden="true"></div>
+        <x-dashboard.course-cover :course="$course" :large="true" :animated="false" variant="corporate" />
         <div class="lms-course-card-cover-badges">
-            <span class="lms-course-card-code">{{ $course->code }}</span>
             @if ($enrolled !== null)
-                <span class="lms-course-card-enrolled">{{ $enrolled }} enrolled</span>
+                <span class="lms-course-card-enrolled ml-auto">{{ $enrolled }} enrolled</span>
             @endif
         </div>
         @if (isset($course->is_active) && ! $course->is_active)
@@ -59,7 +57,7 @@
                 <x-lms.mini-ring label="Progress" :value="$completionPct" tone="brand" />
             </div>
             <div class="lms-course-card-metric">
-                <x-lms.mini-ring label="Activity" :value="$activityPct" tone="sky" />
+                <x-lms.mini-ring label="Activity" :value="$activityPct" tone="slate" />
             </div>
         </div>
     </div>

@@ -5,11 +5,12 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="users" variant="sky" title="People & accounts" subtitle="Manage administrators, lecturers, and students across your LMS.">
+    <x-lms.module-hero module="users" title="People & accounts" subtitle="Manage administrators, lecturers, and students across your LMS.">
         <div class="lms-stat-chips">
             <span class="lms-stat-chip"><strong>{{ $stats['total'] }}</strong> total</span>
             <span class="lms-stat-chip"><strong>{{ $stats['active'] }}</strong> active</span>
             <span class="lms-stat-chip"><strong>{{ $stats['students'] }}</strong> students</span>
+            <a href="{{ route('admin.users.bulk-import') }}" class="lms-btn-secondary lms-btn-secondary--xs">Import students</a>
             <a href="{{ route('admin.users.create') }}" class="lms-btn-primary lms-btn-primary--xs">Add user</a>
         </div>
     </x-lms.module-hero>
@@ -31,7 +32,7 @@
                 <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
             </select>
         </div>
-        <button type="submit" class="lms-btn-secondary">Filter</button>
+        <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Filter</button>
     </form>
 
     <section class="lms-user-list-section">

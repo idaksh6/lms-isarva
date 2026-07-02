@@ -29,6 +29,11 @@
         </form>
 
         <div class="lms-topbar-right">
+            <a href="{{ route('courses.index') }}" class="lms-icon-btn md:hidden" title="Search courses">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </a>
             <div class="topbar-datetime hidden sm:flex"
                  x-data="{
                     h: '00', m: '00', s: '00', dateStr: '',

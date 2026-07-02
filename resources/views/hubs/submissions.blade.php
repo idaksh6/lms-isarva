@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="submissions" variant="analytics" title="Submissions inbox" subtitle="Track student work, review status, and open files quickly.">
+    <x-lms.module-hero module="submissions" title="Submissions inbox" subtitle="Track student work, review status, and open files quickly.">
         <div class="lms-stat-chips">
             <span class="lms-stat-chip"><strong>{{ $stats['total'] }}</strong> total</span>
             <span class="lms-stat-chip"><strong>{{ $stats['pending_review'] }}</strong> awaiting review</span>
@@ -23,19 +23,46 @@
                 @endforeach
             </select>
         </div>
-        <button type="submit" class="lms-btn-secondary">Filter</button>
+        <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Filter</button>
     </form>
 
-    <div class="lms-hub-list lms-hub-list--submissions">
-        @forelse ($submissions as $submission)
-            <x-lms.submission-list-item :submission="$submission" />
-        @empty
-            <x-lms.empty-state title="No submissions yet" message="Submissions appear here when students upload their work." variant="analytics" />
-        @endforelse
-    </div>
+    <section class="corp-panel">
+        <div class="corp-panel-head">
+            <div>
+                <h2 class="corp-panel-title">Student submissions</h2>
+                <p class="corp-panel-desc">{{ $submissions->total() }} results · open a row to review or grade work</p>
+            </div>
+        </div>
 
-    @if ($submissions->hasPages())
-        <div>{{ $submissions->links() }}</div>
-    @endif
+        @if ($submissions->isNotEmpty())
+            <div class="corp-table-wrap">
+                <table class="corp-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Assignment</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th class="corp-table-col--md">Grade</th>
+                            <th><span class="sr-only">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($submissions as $submission)
+                            <x-lms.submission-table-row :submission="$submission" />
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($submissions->hasPages())
+                <div class="border-t border-isarva-border px-4 py-3 sm:px-5">
+                    {{ $submissions->links() }}
+                </div>
+            @endif
+        @else
+            <x-lms.empty-state title="No submissions yet" message="Submissions appear here when students upload their work." variant="inbox" />
+        @endif
+    </section>
 </div>
 @endsection

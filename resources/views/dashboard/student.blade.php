@@ -4,79 +4,124 @@
 @section('page_title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-page">
-    <div class="dashboard-layout">
-        <div class="dashboard-main">
-            <header class="dashboard-welcome">
-                <div>
-                    <p class="dashboard-welcome-eyebrow">Student dashboard</p>
-                    <h2 class="dashboard-welcome-title">Hi, {{ auth()->user()->name }}</h2>
-                    <p class="dashboard-welcome-desc">Pick up assignments and track progress across your modules.</p>
-                </div>
-                <a href="{{ route('courses.index') }}" class="lms-btn-primary">All courses</a>
-            </header>
+<div class="corp-dashboard">
+    <section class="corp-dash-summary">
+        <div class="corp-dash-toolbar">
+            <div class="corp-dash-heading">
+                <h1 class="corp-dash-title">Welcome back, {{ auth()->user()->name }}</h1>
+                <p class="corp-dash-meta">{{ now()->format('l, F j, Y') }} · Student workspace</p>
+            </div>
+            <div class="corp-dash-actions">
+                <a href="{{ route('courses.index') }}" class="lms-btn-secondary lms-btn-secondary--xs">All courses</a>
+                <a href="{{ route('assignments.index') }}" class="lms-btn-primary lms-btn-primary--xs">Assignments</a>
+            </div>
+        </div>
 
-            <x-dashboard.resume-card
+        <div class="corp-kpi-grid corp-kpi-grid--3">
+            <x-dashboard.kpi-card label="Enrolled courses" :value="$stats['courses']" :sub="$stats['courses'].' active programmes'" icon="book" />
+            <x-dashboard.kpi-card label="Pending work" :value="$stats['pending']" :sub="$stats['pending'].' assignments remaining'" icon="clipboard" />
+            <x-dashboard.kpi-card label="Completion rate" :value="$stats['completion_pct'].'%'" :sub="$stats['submitted'].' of '.$stats['total_assignments'].' submitted'" icon="chart" />
+        </div>
+    </section>
+
+    <div class="corp-dash-grid">
+        <div class="corp-dash-primary">
+            <x-dashboard.highlight-card
                 :course="$featuredCourse"
                 :progress="$featuredProgress"
-                subtitle="Pick up where you left off"
+                subtitle="Current priority"
             />
 
-            <section class="dashboard-section">
-                <div class="dashboard-section-head">
-                    <h2 class="dashboard-section-title">Status</h2>
-                </div>
-                <div class="dashboard-stats-grid dashboard-stats-grid--3">
-                    <x-dashboard.stat-ring label="Enrolled" :value="$stats['courses']" :sub="$stats['courses'].' active courses'" :percent="$stats['courses'] > 0 ? 100 : 0" tone="brand" />
-                    <x-dashboard.stat-ring label="Pending" :value="$stats['pending']" :sub="$stats['pending'].' assignments left'" :percent="$stats['pending_pct']" tone="orange" />
-                    <x-dashboard.stat-ring label="Completed" :value="$stats['completion_pct'].'%'" :sub="$stats['submitted'].' of '.$stats['total_assignments'].' submitted'" :percent="$stats['completion_pct']" tone="sky" />
-                </div>
-            </section>
+            @include('dashboard.partials.analytics')
 
-            <section class="dashboard-section dashboard-panel">
-                <div class="dashboard-section-head">
+            <section class="corp-panel">
+                <div class="corp-panel-head">
                     <div>
-                        <h2 class="dashboard-section-title-lg">My courses</h2>
-                        <p class="dashboard-section-desc">Your enrolled programmes this term.</p>
+                        <h2 class="corp-panel-title">My courses</h2>
+                        <p class="corp-panel-desc">Enrolled programmes and progress summary.</p>
                     </div>
-                    <a href="{{ route('courses.index') }}" class="lms-text-link">View all →</a>
+                    <a href="{{ route('courses.index') }}" class="corp-panel-link">View all</a>
                 </div>
-
-                <div class="dashboard-course-grid">
-                    @forelse ($courses as $course)
-                        @php
-                            $count = $course->assignments_count ?? $course->assignments->count();
-                        @endphp
-                        <x-dashboard.course-card
-                            :course="$course"
-                            :progress="\App\Support\DashboardMetrics::studentCourseProgress(auth()->user(), $course)"
-                            :meta="$course->code.' · '.$count.' assignments'"
-                        />
-                    @empty
-                        <div class="dashboard-course-grid-empty">
-                            <x-lms.empty-state title="No courses assigned yet" message="Your lecturer will enroll you in modules soon." variant="books" />
-                        </div>
-                    @endforelse
-                </div>
+                @if ($courses->isNotEmpty())
+                    <div class="corp-table-wrap">
+                        <table class="corp-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Course</th>
+                                    <th>Progress</th>
+                                    <th><span class="sr-only">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($courses as $course)
+                                    @php
+                                        $count = $course->assignments_count ?? $course->assignments->count();
+                                    @endphp
+                                    <x-dashboard.course-table-row
+                                        :course="$course"
+                                        :progress="\App\Support\DashboardMetrics::studentCourseProgress(auth()->user(), $course)"
+                                        :meta="$count.' assignments'"
+                                    />
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <x-lms.empty-state title="No courses assigned yet" message="Your programme administrator will enroll you in modules." variant="books" />
+                @endif
             </section>
 
             @if ($openAssignments->isNotEmpty())
-                <section class="dashboard-section dashboard-panel">
-                    <h2 class="dashboard-section-title-lg">Open assignments</h2>
-                    <div class="mt-3 space-y-2">
-                        @foreach ($openAssignments->take(5) as $assignment)
-                            <a href="{{ route('assignments.show', $assignment) }}" class="dashboard-assignment-pill">
-                                <div class="min-w-0">
-                                    <p class="truncate text-sm font-semibold text-isarva-heading">{{ $assignment->title }}</p>
-                                    <p class="text-xs text-isarva-muted">{{ $assignment->course->code }}</p>
-                                </div>
-                                @if ($assignment->due_at)
-                                    <span class="shrink-0 text-xs font-semibold {{ $assignment->isOverdue() ? 'text-rose-600' : 'text-amber-600' }}">
-                                        {{ $assignment->isOverdue() ? 'Overdue' : 'Due' }} {{ $assignment->due_at->format('M j') }}
-                                    </span>
-                                @endif
-                            </a>
-                        @endforeach
+                <section class="corp-panel">
+                    <div class="corp-panel-head">
+                        <div>
+                            <h2 class="corp-panel-title">Open assignments</h2>
+                            <p class="corp-panel-desc">Work items requiring your attention.</p>
+                        </div>
+                        <a href="{{ route('assignments.index') }}" class="corp-panel-link">View all</a>
+                    </div>
+                    <div class="corp-table-wrap">
+                        <table class="corp-table">
+                            <thead>
+                                <tr>
+                                    <th>Assignment</th>
+                                    <th>Course</th>
+                                    <th>Due date</th>
+                                    <th>Status</th>
+                                    <th><span class="sr-only">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($openAssignments->take(8) as $assignment)
+                                    <tr class="corp-table-row">
+                                        <td class="corp-table-cell">
+                                            <a href="{{ route('assignments.show', $assignment) }}" class="corp-table-link">
+                                                <span class="corp-table-title">{{ $assignment->title }}</span>
+                                            </a>
+                                        </td>
+                                        <td class="corp-table-cell">
+                                            <span class="corp-code-badge">{{ $assignment->course->code }}</span>
+                                        </td>
+                                        <td class="corp-table-cell corp-table-cell--muted">
+                                            {{ $assignment->due_at?->format('M j, Y') ?? '—' }}
+                                        </td>
+                                        <td class="corp-table-cell">
+                                            @if ($assignment->due_at && $assignment->isOverdue())
+                                                <span class="corp-status corp-status--danger">Overdue</span>
+                                            @elseif ($assignment->due_at)
+                                                <span class="corp-status corp-status--warning">Due soon</span>
+                                            @else
+                                                <span class="corp-status">Open</span>
+                                            @endif
+                                        </td>
+                                        <td class="corp-table-cell corp-table-cell--action">
+                                            <a href="{{ route('assignments.show', $assignment) }}" class="corp-table-action">Review</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             @endif

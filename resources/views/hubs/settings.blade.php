@@ -5,8 +5,7 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="settings" variant="laptop" title="Settings" subtitle="Manage notifications and account preferences.">
-    </x-lms.module-hero>
+    <x-lms.module-hero module="settings" title="Settings" subtitle="Manage notifications and account preferences." />
 
     <div class="lms-settings-grid">
         <form method="POST" action="{{ route('settings.update') }}" class="lms-form-card">

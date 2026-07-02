@@ -10,8 +10,7 @@
     @endphp
     <a href="{{ route('courses.show', $course) }}" class="dashboard-featured group">
         <div class="dashboard-featured-thumb">
-            <x-dashboard.course-cover :course="$course" />
-            <span class="dashboard-featured-code">{{ $course->code }}</span>
+            <x-dashboard.course-cover :course="$course" :animated="false" variant="corporate" />
         </div>
         <div class="dashboard-featured-body">
             <p class="dashboard-featured-eyebrow">{{ $subtitle ?? 'Continue learning' }}</p>

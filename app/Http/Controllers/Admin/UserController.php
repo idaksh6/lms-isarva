@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\BulkStudentImporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -46,6 +47,28 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.users.create');
+    }
+
+    public function bulkImportForm(): View
+    {
+        return view('admin.users.bulk-import');
+    }
+
+    public function bulkImportStore(Request $request, BulkStudentImporter $importer): View|RedirectResponse
+    {
+        $validated = $request->validate([
+            'emails' => ['required', 'string', 'max:50000'],
+        ]);
+
+        $results = $importer->import($validated['emails']);
+
+        if ($results['created'] === [] && $results['skipped'] === [] && $results['invalid'] === []) {
+            return back()
+                ->withInput()
+                ->withErrors(['emails' => 'Enter at least one valid student email address.']);
+        }
+
+        return view('admin.users.bulk-import-results', compact('results'));
     }
 
     public function store(Request $request): RedirectResponse

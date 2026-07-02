@@ -9,7 +9,7 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="gradebook" variant="analytics" title="Gradebook" subtitle="See every student score per assignment and export marks for your records.">
+    <x-lms.module-hero module="gradebook" title="Gradebook" subtitle="See every student score per assignment and export marks for your records.">
         @if ($selectedCourse)
             <div class="lms-stat-chips">
                 <span class="lms-stat-chip"><strong>{{ $selectedCourse->students_count ?? $selectedCourse->students->count() }}</strong> students</span>

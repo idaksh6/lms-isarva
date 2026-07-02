@@ -3,7 +3,7 @@
         <h2 class="text-xl font-bold text-slate-800">Reset password</h2>
         <p class="mt-1 text-sm text-slate-500">We will email you a reset link</p>
 
-        <x-auth-session-status class="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800" :status="session('status')" />
+        <x-auth-session-status class="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-800" :status="session('status')" />
 
         <form method="POST" action="{{ route('password.email') }}" class="mt-5 space-y-4">
             @csrf

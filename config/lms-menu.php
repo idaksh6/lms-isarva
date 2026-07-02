@@ -10,6 +10,7 @@ return [
         ['label' => 'Gradebook', 'route' => 'gradebook.index', 'icon' => 'chart', 'roles' => ['admin', 'lecturer']],
         ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'chart-bar', 'roles' => ['admin', 'lecturer']],
         ['label' => 'Announcements', 'route' => 'announcements.index', 'icon' => 'megaphone', 'roles' => ['admin', 'lecturer', 'student']],
+        ['label' => 'Q&A', 'route' => 'questions.index', 'icon' => 'chat', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Calendar', 'route' => 'calendar.index', 'icon' => 'calendar', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Settings', 'route' => 'settings.index', 'icon' => 'cog', 'roles' => ['admin', 'lecturer', 'student']],

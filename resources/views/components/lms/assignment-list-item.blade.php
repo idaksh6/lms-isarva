@@ -5,9 +5,7 @@
 ])
 
 <a href="{{ route('assignments.show', $assignment) }}" {{ $attributes->merge(['class' => 'lms-assignment-card group']) }}>
-    <div class="lms-assignment-card-visual">
-        <x-lms.illustration variant="assignment" class="lms-banner--assignment-card" />
-    </div>
+    <div class="lms-assignment-card-accent" aria-hidden="true"></div>
     <div class="lms-assignment-card-body">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">

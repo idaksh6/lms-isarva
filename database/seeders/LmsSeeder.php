@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
+use App\Models\Answer;
 use App\Models\Assignment;
 use App\Models\Course;
+use App\Models\Question;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -90,6 +92,94 @@ class LmsSeeder extends Seeder
                 'instructions' => 'Write a 2-page PDF comparing at least three classification metrics on the class dataset.',
                 'due_at' => now()->addDays(14),
                 'is_published' => true,
+            ]
+        );
+
+        $student1 = $students->first();
+        $student2 = $students->get(1);
+        $student3 = $students->get(2);
+
+        $q1 = Question::query()->updateOrCreate(
+            ['title' => 'What file format should we use for the Linear Regression Lab submission?'],
+            [
+                'user_id' => $student1->id,
+                'course_id' => $course->id,
+                'body' => "Hi,\n\nFor the Linear Regression Lab assignment, should we submit a .ipynb notebook only, or is a PDF export also required?\n\nThanks!",
+                'is_resolved' => true,
+                'created_at' => now()->subDays(5)->setTime(10, 15),
+                'updated_at' => now()->subDays(4)->setTime(9, 30),
+            ]
+        );
+
+        Answer::query()->updateOrCreate(
+            ['question_id' => $q1->id, 'user_id' => $lecturer->id, 'body' => "Please submit the Jupyter notebook (.ipynb) as your primary file. A brief PDF summary is optional but appreciated if you include extra visualizations.\n\n— Dr. Sharma"],
+            [
+                'is_accepted' => true,
+                'created_at' => now()->subDays(4)->setTime(14, 20),
+                'updated_at' => now()->subDays(4)->setTime(14, 20),
+            ]
+        );
+
+        Answer::query()->updateOrCreate(
+            ['question_id' => $q1->id, 'user_id' => $student2->id, 'body' => 'I submitted only the .ipynb last term and it was accepted. The autograder checks the notebook cells.'],
+            [
+                'is_accepted' => false,
+                'created_at' => now()->subDays(4)->setTime(16, 45),
+                'updated_at' => now()->subDays(4)->setTime(16, 45),
+            ]
+        );
+
+        $q2 = Question::query()->updateOrCreate(
+            ['title' => 'How do I reset my portal password?'],
+            [
+                'user_id' => $student3->id,
+                'course_id' => null,
+                'body' => "I forgot my LMS password and the reset email hasn't arrived yet. Is there an administrator I should contact?",
+                'is_resolved' => true,
+                'created_at' => now()->subDays(3)->setTime(8, 40),
+                'updated_at' => now()->subDays(2)->setTime(11, 10),
+            ]
+        );
+
+        Answer::query()->updateOrCreate(
+            ['question_id' => $q2->id, 'user_id' => $admin->id, 'body' => "Use the \"Forgot password\" link on the login page — emails can take a few minutes. If nothing arrives after 15 minutes, contact IT support with your registered email address.\n\n— LMS Administrator"],
+            [
+                'is_accepted' => true,
+                'created_at' => now()->subDays(2)->setTime(11, 10),
+                'updated_at' => now()->subDays(2)->setTime(11, 10),
+            ]
+        );
+
+        $q3 = Question::query()->updateOrCreate(
+            ['title' => 'Recommended Python libraries for the ML course?'],
+            [
+                'user_id' => $student2->id,
+                'course_id' => $course->id,
+                'body' => "Besides scikit-learn and pandas, are we allowed to use XGBoost or LightGBM for the model comparison section?",
+                'is_resolved' => false,
+                'created_at' => now()->subDays(2)->setTime(13, 5),
+                'updated_at' => now()->subDays(2)->setTime(13, 5),
+            ]
+        );
+
+        Answer::query()->updateOrCreate(
+            ['question_id' => $q3->id, 'user_id' => $student1->id, 'body' => 'We used XGBoost in the tutorial last week — the lecturer mentioned it is fine as long as you document why you chose it.'],
+            [
+                'is_accepted' => false,
+                'created_at' => now()->subDays(1)->setTime(18, 22),
+                'updated_at' => now()->subDays(1)->setTime(18, 22),
+            ]
+        );
+
+        Question::query()->updateOrCreate(
+            ['title' => 'When does enrollment close for Data Engineering & Pipelines?'],
+            [
+                'user_id' => $student3->id,
+                'course_id' => $course2->id,
+                'body' => "I'm interested in joining DS502 next intake. Is there a deadline to request enrollment through the portal?",
+                'is_resolved' => false,
+                'created_at' => now()->subHours(6),
+                'updated_at' => now()->subHours(6),
             ]
         );
 

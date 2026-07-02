@@ -6,7 +6,7 @@
 
 <a href="{{ route('courses.show', $course) }}" {{ $attributes->merge(['class' => 'dashboard-course-row group']) }}>
     <div class="dashboard-course-row-thumb">
-        <x-dashboard.course-cover :course="$course" />
+        <x-dashboard.course-cover :course="$course" :animated="false" variant="corporate" />
     </div>
     <div class="min-w-0 flex-1">
         <p class="font-semibold text-isarva-heading group-hover:text-brand-600">{{ $course->title }}</p>

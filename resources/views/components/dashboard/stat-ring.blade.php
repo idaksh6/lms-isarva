@@ -16,7 +16,7 @@
         default => 'book',
     };
     $toneSurface = match ($tone) {
-        'orange' => 'border-orange-300 bg-orange-100',
+        'orange' => 'border-brand-200 bg-brand-50',
         'rose' => 'border-rose-300 bg-rose-100',
         'sky' => 'border-sky-300 bg-sky-100',
         default => 'border-emerald-300 bg-emerald-100',

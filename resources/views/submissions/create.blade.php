@@ -11,12 +11,12 @@
 
     @if (! empty($resubmit))
         <div class="lms-resubmit-banner">
-            <p class="text-sm font-semibold text-violet-900">Your lecturer requested a revision. Upload an improved file below.</p>
+            <p class="text-sm font-semibold">Your lecturer requested a revision. Upload an improved file below.</p>
         </div>
     @endif
 
     <div class="lms-submit-context">
-        <x-lms.illustration variant="assignment" class="lms-banner--submit-context" />
+        <div class="lms-submit-context-accent" aria-hidden="true"></div>
         <div class="lms-submit-context-copy">
             <p class="text-xs font-bold uppercase tracking-widest text-brand-700">{{ $assignment->course->code }}</p>
             <h2 class="text-lg font-bold text-isarva-heading">{{ $assignment->title }}</h2>

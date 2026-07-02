@@ -48,10 +48,10 @@
 
         <div class="lms-form-field">
             <p class="lms-field-label">Change password</p>
-            <div class="mt-1.5 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm leading-relaxed text-amber-950">
+            <div class="mt-1.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm leading-relaxed text-brand-950">
                 <p class="font-semibold">Password fields are intentionally empty</p>
-                <p class="mt-1 text-amber-900/90">For security, we never show the current password. Leave both fields blank when you only want to update name, email, or role — the existing password stays the same.</p>
-                <p class="mt-1 text-amber-900/90">Fill in both fields below only if you want to set a new password.</p>
+                <p class="mt-1 text-brand-900/90">For security, we never show the current password. Leave both fields blank when you only want to update name, email, or role — the existing password stays the same.</p>
+                <p class="mt-1 text-brand-900/90">Fill in both fields below only if you want to set a new password.</p>
             </div>
         </div>
 

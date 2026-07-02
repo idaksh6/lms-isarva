@@ -66,6 +66,16 @@ class User extends Authenticatable
         return $this->hasMany(Announcement::class);
     }
 
+    public function questions(): HasMany
+    {
+        return $this->hasMany(Question::class);
+    }
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(Answer::class);
+    }
+
     public function isActive(): bool
     {
         return (bool) $this->is_active;

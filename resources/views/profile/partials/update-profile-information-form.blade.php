@@ -26,8 +26,8 @@
             <x-input-error class="mt-1.5" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2.5">
-                    <p class="text-sm text-amber-900">
+                <div class="mt-3 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2.5">
+                    <p class="text-sm text-brand-900">
                         {{ __('Your email address is unverified.') }}
                         <button form="send-verification" type="submit"
                                 class="font-semibold text-brand-700 underline hover:text-brand-800">

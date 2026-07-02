@@ -7,7 +7,7 @@
     <title>{{ config('app.name') }} — Sign in</title>
     @include('layouts.partials.favicon')
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans">
@@ -43,25 +43,25 @@
                                     Data Science Learning Platform
                                 </p>
                             </div>
-                            <h1 class="mt-5 text-[1.75rem] font-bold leading-snug tracking-tight text-isarva-heading xl:text-[2rem]">
-                                Innovating learning.<br>
-                                <span class="text-brand-600">Powering student success.</span>
+                            <h1 class="mt-5 text-[1.75rem] font-semibold leading-snug tracking-tight text-white xl:text-[2rem]">
+                                Enterprise learning management.<br>
+                                <span class="text-brand-300">Built for professional programmes.</span>
                             </h1>
-                            <p class="mt-4 max-w-md text-[15px] leading-relaxed text-isarva-muted">
-                                At Isarva Infotech, we build digital solutions that help programmes run smoothly—courses, assignments, and submissions in one secure place.
+                            <p class="mt-4 max-w-md text-[15px] leading-relaxed text-slate-300">
+                                A secure, structured platform for courses, assignments, grading, and communications — designed for institutions and corporate training teams.
                             </p>
 
                             <div class="mt-6 flex flex-wrap gap-2">
-                                @foreach (['Courses', 'Assignments', 'Submissions'] as $tag)
-                                    <span class="rounded-lg border border-isarva-border bg-white px-3 py-1.5 text-xs font-medium text-isarva-dark">{{ $tag }}</span>
+                                @foreach (['Courses', 'Assignments', 'Gradebook'] as $tag)
+                                    <span class="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300">{{ $tag }}</span>
                                 @endforeach
                             </div>
                         </div>
 
                         <ul class="mt-8 space-y-3">
                             @foreach (['Browse courses & deadlines', 'Submit assignments online', 'Lecturer review & tracking'] as $item)
-                                <li class="flex items-center gap-3 text-sm text-isarva-dark">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white">
+                                <li class="flex items-center gap-3 text-sm text-slate-300">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand-600 text-white">
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                         </svg>
@@ -71,8 +71,8 @@
                             @endforeach
                         </ul>
 
-                        <div class="mt-8 flex items-center gap-2 text-xs text-isarva-muted">
-                            <span class="inline-flex h-2 w-2 rounded-full bg-brand-600"></span>
+                        <div class="mt-8 flex items-center gap-2 text-xs text-slate-500">
+                            <span class="inline-flex h-2 w-2 rounded-full bg-brand-400"></span>
                             lms.isarvait.com · {{ config('app.name') }}
                         </div>
                     </div>

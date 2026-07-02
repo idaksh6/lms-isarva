@@ -12,9 +12,9 @@
     };
 
     $toneClasses = match ($value) {
-        'admin' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
-        'lecturer' => 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
-        'student' => 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
+        'admin' => 'bg-brand-100 text-brand-800 ring-1 ring-brand-200',
+        'lecturer' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+        'student' => 'bg-brand-50 text-brand-700 ring-1 ring-brand-100',
         default => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
     };
 @endphp

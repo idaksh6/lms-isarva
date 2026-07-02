@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <x-lms.module-hero module="assignments" variant="assignment" title="All assignments" subtitle="Browse every assignment across your courses in one place.">
+    <x-lms.module-hero module="assignments" title="All assignments" subtitle="Browse every assignment across your courses in one place.">
         <div class="lms-stat-chips">
             <span class="lms-stat-chip"><strong>{{ $stats['total'] }}</strong> total</span>
             <span class="lms-stat-chip"><strong>{{ $stats['published'] }}</strong> published</span>
@@ -22,7 +22,7 @@
                 <option value="draft" @selected(request('status') === 'draft')>Draft</option>
             </select>
         </div>
-        <button type="submit" class="lms-btn-secondary">Filter</button>
+        <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Filter</button>
     </form>
 
     <div class="lms-hub-list lms-hub-list--cards">

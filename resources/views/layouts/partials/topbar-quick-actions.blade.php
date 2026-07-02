@@ -2,9 +2,9 @@
     $user = auth()->user();
     $quickLinks = [
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home', 'active' => 'from-brand-500 to-brand-600', 'show' => true],
-        ['label' => 'Courses', 'route' => 'courses.index', 'icon' => 'book', 'active' => 'from-sky-500 to-sky-600', 'show' => true],
-        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'active' => 'from-violet-500 to-violet-600', 'show' => $user->isAdmin()],
-        ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user', 'active' => 'from-orange-500 to-orange-600', 'show' => true],
+        ['label' => 'Courses', 'route' => 'courses.index', 'icon' => 'book', 'active' => 'from-brand-500 to-brand-600', 'show' => true],
+        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'active' => 'from-brand-600 to-brand-700', 'show' => $user->isAdmin()],
+        ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user', 'active' => 'from-brand-500 to-brand-700', 'show' => true],
     ];
 @endphp
 

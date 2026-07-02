@@ -2,9 +2,9 @@
 
 @php
     $themes = [
-        'student' => ['bg' => 'from-emerald-100 via-teal-50 to-white', 'accent' => '#059669', 'ring' => '#a7f3d0'],
-        'lecturer' => ['bg' => 'from-violet-100 via-indigo-50 to-white', 'accent' => '#7c3aed', 'ring' => '#ddd6fe'],
-        'admin' => ['bg' => 'from-sky-100 via-blue-50 to-white', 'accent' => '#2563eb', 'ring' => '#bae6fd'],
+        'student' => ['bg' => 'from-brand-50 via-slate-50 to-white', 'accent' => '#2563eb', 'ring' => '#bfdbfe'],
+        'lecturer' => ['bg' => 'from-slate-100 via-slate-50 to-white', 'accent' => '#475569', 'ring' => '#cbd5e1'],
+        'admin' => ['bg' => 'from-brand-100 via-brand-50 to-white', 'accent' => '#1d4ed8', 'ring' => '#93c5fd'],
     ];
     $theme = $themes[$role] ?? $themes['student'];
 @endphp

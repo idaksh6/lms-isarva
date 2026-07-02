@@ -1,32 +1,19 @@
 @props([
-    'module' => 'assignments',
+    'module' => null,
     'title' => '',
     'subtitle' => '',
-    'variant' => 'assignment',
+    'variant' => null,
 ])
 
-@php
-    use App\Support\ModuleHeroImage;
-    $imageUrl = ModuleHeroImage::url($module);
-    $imageAlt = ModuleHeroImage::alt($module);
-@endphp
-
-<section {{ $attributes->merge(['class' => 'lms-module-hero']) }}>
-    <div class="lms-module-hero-media" aria-hidden="true">
-        <img src="{{ $imageUrl }}" alt="" class="lms-hero-photo" loading="lazy">
-        <div class="lms-hero-theme-overlay" aria-hidden="true"></div>
-        <div class="lms-module-hero-art">
-            <x-lms.illustration :variant="$variant" class="lms-module-hero-illustration" />
-        </div>
-    </div>
-    <div class="lms-module-hero-content">
-        <p class="lms-hero-eyebrow">{{ config('app.name') }}</p>
-        <h1 class="lms-hero-title">{{ $title }}</h1>
+@if ($subtitle || trim($slot ?? '') !== '')
+    <div {{ $attributes->merge(['class' => 'lms-page-toolbar'.( ! $subtitle && trim($slot ?? '') !== '' ? ' lms-page-toolbar--actions-only' : '')]) }}>
         @if ($subtitle)
-            <p class="lms-hero-subtitle">{{ $subtitle }}</p>
+            <p class="lms-page-toolbar-desc">{{ $subtitle }}</p>
         @endif
         @if (trim($slot ?? '') !== '')
-            <div class="lms-module-hero-stats">{{ $slot }}</div>
+            <div class="lms-page-toolbar-actions">
+                {{ $slot }}
+            </div>
         @endif
     </div>
-</section>
+@endif

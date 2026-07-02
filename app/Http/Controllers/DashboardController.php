@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\User;
+use App\Support\DashboardAnalytics;
 use App\Support\DashboardMetrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,6 +25,7 @@ class DashboardController extends Controller
 
             return view('dashboard.admin', [
                 'stats' => $stats,
+                'analytics' => DashboardAnalytics::forUser($user),
                 'recentCourses' => $recentCourses,
                 'featuredCourse' => $recentCourses->first(),
                 'featuredProgress' => $recentCourses->first()
@@ -41,6 +43,7 @@ class DashboardController extends Controller
             return view('dashboard.lecturer', [
                 'courses' => $courses,
                 'stats' => $stats,
+                'analytics' => DashboardAnalytics::forUser($user),
                 'featuredCourse' => $courses->first(),
                 'featuredProgress' => $courses->first()
                     ? DashboardMetrics::lecturerCourseProgress($courses->first())
@@ -75,6 +78,7 @@ class DashboardController extends Controller
         return view('dashboard.student', [
             'courses' => $courses,
             'stats' => DashboardMetrics::studentStats($user, $courses, $openAssignments),
+            'analytics' => DashboardAnalytics::forUser($user, $courses),
             'featuredCourse' => $featured,
             'featuredProgress' => $featured ? DashboardMetrics::studentCourseProgress($user, $featured) : 0,
             'openAssignments' => $openAssignments,

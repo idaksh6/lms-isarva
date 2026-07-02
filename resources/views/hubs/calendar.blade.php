@@ -7,47 +7,61 @@
 @php
     $prev = $date->copy()->subMonth();
     $next = $date->copy()->addMonth();
+    $monthAssignments = $assignmentsByDate->flatten()->sortBy('due_at');
 @endphp
 
 <div class="lms-page-stack">
-    <x-lms.module-hero module="calendar" variant="notebook" title="Assignment calendar" subtitle="See due dates at a glance and plan your week.">
+    <x-lms.module-hero module="calendar" title="Assignment calendar" subtitle="See due dates at a glance and plan your week.">
         <div class="lms-stat-chips">
             <span class="lms-stat-chip"><strong>{{ count($highlightDates) }}</strong> due dates this month</span>
         </div>
     </x-lms.module-hero>
 
-    <div class="lms-calendar-page">
-        <div class="lms-calendar-nav">
-            <a href="{{ route('calendar.index', ['month' => $prev->month, 'year' => $prev->year]) }}" class="lms-btn-secondary">← {{ $prev->format('M Y') }}</a>
-            <h2 class="text-lg font-bold text-isarva-heading">{{ $date->format('F Y') }}</h2>
-            <a href="{{ route('calendar.index', ['month' => $next->month, 'year' => $next->year]) }}" class="lms-btn-secondary">{{ $next->format('M Y') }} →</a>
-        </div>
-
-        <div class="lms-calendar-layout">
-            <div class="lms-calendar-grid-panel">
-                @include('dashboard.partials.calendar', ['highlightDates' => $highlightDates])
+    <div class="corp-calendar-page">
+        <section class="corp-panel corp-panel--calendar">
+            <div class="corp-panel-head">
+                <div>
+                    <h2 class="corp-panel-title">{{ $date->format('F Y') }}</h2>
+                    <p class="corp-panel-desc">Published assignments with due dates</p>
+                </div>
+                <div class="corp-dash-actions">
+                    <a href="{{ route('calendar.index', ['month' => $prev->month, 'year' => $prev->year]) }}" class="lms-btn-secondary lms-btn-secondary--xs">← {{ $prev->format('M Y') }}</a>
+                    <a href="{{ route('calendar.index', ['month' => $next->month, 'year' => $next->year]) }}" class="lms-btn-secondary lms-btn-secondary--xs">{{ $next->format('M Y') }} →</a>
+                </div>
             </div>
 
-            <section class="lms-panel lms-calendar-events">
-                <div class="lms-panel-header">
-                    <h2 class="lms-panel-title">Due this month</h2>
+            <div class="corp-panel-body-calendar">
+                <x-lms.calendar-grid :date="$date" :highlight-dates="$highlightDates" />
+            </div>
+        </section>
+
+        <section class="corp-panel">
+            <div class="corp-panel-head">
+                <div>
+                    <h2 class="corp-panel-title">Due this month</h2>
+                    <p class="corp-panel-desc">{{ $monthAssignments->count() }} assignments scheduled</p>
                 </div>
-                <div class="lms-panel-body space-y-3">
-                    @php $monthAssignments = $assignmentsByDate->flatten()->sortBy('due_at'); @endphp
-                    @forelse ($monthAssignments as $assignment)
-                        <a href="{{ route('assignments.show', $assignment) }}" class="lms-calendar-event">
-                            <span class="lms-calendar-event-date">{{ $assignment->due_at->format('M j') }}</span>
-                            <span class="min-w-0">
-                                <span class="block font-semibold text-slate-900 truncate">{{ $assignment->title }}</span>
-                                <span class="block text-sm text-slate-500">{{ $assignment->course->code }} · {{ $assignment->due_at->format('g:i A') }}</span>
-                            </span>
+            </div>
+
+            <ul class="corp-deadline-list corp-deadline-list--page">
+                @forelse ($monthAssignments as $assignment)
+                    <li>
+                        <a href="{{ route('assignments.show', $assignment) }}" class="corp-deadline-item">
+                            <div class="corp-deadline-date">
+                                <span class="corp-deadline-day">{{ $assignment->due_at->format('d') }}</span>
+                                <span class="corp-deadline-month">{{ $assignment->due_at->format('M') }}</span>
+                            </div>
+                            <div class="corp-deadline-body">
+                                <p class="corp-deadline-title">{{ $assignment->title }}</p>
+                                <p class="corp-deadline-meta">{{ $assignment->course->code }} · {{ $assignment->due_at->format('g:i A') }}</p>
+                            </div>
                         </a>
-                    @empty
-                        <p class="text-sm text-slate-500">No due dates this month.</p>
-                    @endforelse
-                </div>
-            </section>
-        </div>
+                    </li>
+                @empty
+                    <li class="corp-deadline-empty">No due dates this month.</li>
+                @endforelse
+            </ul>
+        </section>
     </div>
 </div>
 @endsection

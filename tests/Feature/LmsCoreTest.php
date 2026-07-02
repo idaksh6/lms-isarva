@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Enums\SubmissionStatus;
 use App\Enums\UserRole;
 use App\Models\Announcement;
+use App\Models\Answer;
 use App\Models\Assignment;
 use App\Models\Course;
+use App\Models\Question;
 use App\Models\Submission;
 use App\Models\User;
 use App\Notifications\AnnouncementPublishedNotification;
@@ -34,6 +36,51 @@ class LmsCoreTest extends TestCase
             ->get(route('assignments.index'))
             ->assertOk()
             ->assertSee('Lab 1');
+    }
+
+    public function test_student_dashboard_loads_with_analytics(): void
+    {
+        $student = $this->makeStudent();
+        $course = $this->makeCourse();
+        $course->students()->attach($student->id);
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $course->lecturer_id,
+            'title' => 'Lab report',
+            'is_published' => true,
+            'due_at' => now()->addWeek(),
+        ]);
+        Submission::query()->create([
+            'assignment_id' => $assignment->id,
+            'user_id' => $student->id,
+            'file_path' => 'submissions/lab.pdf',
+            'file_name' => 'lab.pdf',
+            'status' => SubmissionStatus::Submitted,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Weekly activity')
+            ->assertSee('Review snapshot')
+            ->assertSee('Lab report');
+    }
+
+    public function test_student_can_access_core_hubs(): void
+    {
+        $student = $this->makeStudent();
+        $course = $this->makeCourse();
+        $course->students()->attach($student->id);
+
+        $this->actingAs($student)->get(route('courses.index'))->assertOk();
+        $this->actingAs($student)->get(route('calendar.index'))->assertOk();
+        $this->actingAs($student)->get(route('help.index'))->assertOk();
+        $this->actingAs($student)->get(route('settings.index'))->assertOk();
+        $this->actingAs($student)->get(route('announcements.index'))->assertOk();
+        $this->actingAs($student)->get(route('questions.index'))->assertOk();
+        $this->actingAs($student)->get(route('reports.index'))->assertForbidden();
+        $this->actingAs($student)->get(route('gradebook.index'))->assertForbidden();
     }
 
     public function test_lecturer_can_grade_submission(): void
@@ -130,10 +177,10 @@ class LmsCoreTest extends TestCase
     {
         Notification::fake();
 
-        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $lecturer = $this->makeLecturer();
         $student = $this->makeStudent();
 
-        $this->actingAs($admin)
+        $this->actingAs($lecturer)
             ->post(route('announcements.store'), [
                 'title' => 'System maintenance',
                 'body' => 'Portal will be down tonight.',
@@ -141,7 +188,40 @@ class LmsCoreTest extends TestCase
             ->assertRedirect();
 
         Notification::assertSentTo($student, AnnouncementPublishedNotification::class);
-        Notification::assertNotSentTo($admin, AnnouncementPublishedNotification::class);
+        Notification::assertNotSentTo($lecturer, AnnouncementPublishedNotification::class);
+    }
+
+    public function test_admin_cannot_create_announcements(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->post(route('announcements.store'), [
+                'title' => 'Admin update',
+                'body' => 'Should not be allowed.',
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_bulk_import_students_from_emails(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.bulk-import.store'), [
+                'emails' => "sai.kiran@university.edu\ninvalid-email\nsai.kiran@university.edu",
+            ])
+            ->assertOk()
+            ->assertSee('Sai Kiran')
+            ->assertSee('sai.kiran@university.edu');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'sai.kiran@university.edu',
+            'name' => 'Sai Kiran',
+            'role' => UserRole::Student->value,
+        ]);
+
+        $this->assertDatabaseCount('users', 2);
     }
 
     public function test_gradebook_requires_staff_role(): void
@@ -151,6 +231,44 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)
             ->get(route('gradebook.index'))
             ->assertForbidden();
+    }
+
+    public function test_any_user_can_post_question_and_answer(): void
+    {
+        $student = $this->makeStudent();
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($student)
+            ->post(route('questions.store'), [
+                'course_id' => $course->id,
+                'title' => 'How do I access lab materials?',
+                'body' => 'I cannot find the dataset link on the course page.',
+            ])
+            ->assertRedirect();
+
+        $question = Question::query()->where('title', 'How do I access lab materials?')->first();
+        $this->assertNotNull($question);
+        $this->assertSame($student->id, $question->user_id);
+
+        $this->actingAs($lecturer)
+            ->post(route('questions.answers.store', $question), [
+                'body' => 'Check the Assignments tab — the dataset link is in the lab brief.',
+            ])
+            ->assertRedirect();
+
+        $answer = Answer::query()->where('question_id', $question->id)->first();
+        $this->assertNotNull($answer);
+        $this->assertSame($lecturer->id, $answer->user_id);
+
+        $this->actingAs($student)
+            ->patch(route('questions.answers.accept', [$question, $answer]))
+            ->assertRedirect();
+
+        $question->refresh();
+        $answer->refresh();
+        $this->assertTrue($question->is_resolved);
+        $this->assertTrue($answer->is_accepted);
     }
 
     private function makeLecturer(): User

@@ -36,7 +36,7 @@ class AnnouncementController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $courses = $user->isAdmin() || $user->isLecturer()
+        $courses = $user->isLecturer()
             ? LmsQuery::coursesFor($user)->where('is_active', true)->orderBy('code')->get()
             : collect();
 
@@ -50,12 +50,9 @@ class AnnouncementController extends Controller
 
         if ($request->filled('course_id')) {
             $course = Course::query()->findOrFail($request->integer('course_id'));
-            $this->authorize('create', [Announcement::class, $course]);
-        } else {
-            if (! $user->isAdmin()) {
-                abort(403);
-            }
         }
+
+        $this->authorize('create', [Announcement::class, $course]);
 
         $validated = $request->validate([
             'course_id' => ['nullable', 'exists:courses,id'],

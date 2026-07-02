@@ -45,7 +45,7 @@
                 @if ($userSubmission)
                     <x-status-badge :status="$userSubmission->status" />
                 @elseif ($assignment->is_published)
-                    <span class="text-sm font-medium text-amber-700">Not submitted yet</span>
+                    <span class="text-sm font-medium text-slate-600">Not submitted yet</span>
                 @else
                     <span class="text-sm text-slate-500">—</span>
                 @endif

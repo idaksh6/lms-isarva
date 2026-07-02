@@ -5,8 +5,8 @@
     $circumference = 2 * 3.14159 * 18;
     $offset = $circumference * (1 - $pct / 100);
     $colors = match ($tone) {
-        'orange' => ['ring' => 'text-orange-500', 'trail' => 'text-orange-200'],
-        'sky' => ['ring' => 'text-sky-500', 'trail' => 'text-sky-200'],
+        'orange', 'sky' => ['ring' => 'text-brand-600', 'trail' => 'text-brand-200'],
+        'slate' => ['ring' => 'text-slate-600', 'trail' => 'text-slate-200'],
         default => ['ring' => 'text-brand-600', 'trail' => 'text-brand-200'],
     };
 @endphp
