@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'role' => UserRole::Student,
             'is_active' => true,
             'email_notifications' => true,
+            'theme' => 'classic',
         ];
     }
 

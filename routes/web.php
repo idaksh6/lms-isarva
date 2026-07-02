@@ -90,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::patch('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::patch('settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
 
     Route::get('help', [HelpController::class, 'index'])->name('help.index');
 

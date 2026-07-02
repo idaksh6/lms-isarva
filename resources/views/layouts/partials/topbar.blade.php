@@ -54,6 +54,8 @@
                 </span>
             </div>
 
+            <x-lms.theme-picker :themes="$lmsThemes" :current="$lmsTheme['key']" />
+
             <x-lms.notification-bell />
 
             <a href="{{ route('courses.index') }}" class="lms-icon-btn hidden md:inline-flex" title="Courses">

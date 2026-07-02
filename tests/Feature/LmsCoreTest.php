@@ -271,6 +271,67 @@ class LmsCoreTest extends TestCase
         $this->assertTrue($answer->is_accepted);
     }
 
+    public function test_user_can_update_portal_theme_from_settings(): void
+    {
+        $student = $this->makeStudent();
+
+        $this->actingAs($student)
+            ->get(route('settings.index'))
+            ->assertOk()
+            ->assertSee('Portal theme')
+            ->assertSee('Original ISARVA');
+
+        $this->actingAs($student)
+            ->patch(route('settings.update'), [
+                'email_notifications' => '1',
+                'theme' => 'violet',
+            ])
+            ->assertRedirect(route('settings.index'))
+            ->assertSessionHas('success');
+
+        $student->refresh();
+        $this->assertSame('violet', $student->theme);
+
+        $this->actingAs($student)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('--brand-600: 124 58 237', false)
+            ->assertSee('--sidebar-bg: 24 18 42', false);
+    }
+
+    public function test_user_can_update_theme_from_header_endpoint(): void
+    {
+        $student = $this->makeStudent();
+
+        $this->actingAs($student)
+            ->patchJson(route('settings.theme'), ['theme' => 'forest'])
+            ->assertOk()
+            ->assertJsonPath('theme.key', 'forest');
+
+        $this->assertSame('forest', $student->fresh()->theme);
+
+        $this->actingAs($student)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('lms-theme-picker', false)
+            ->assertSee('--brand-600: 5 150 105', false)
+            ->assertSee('--sidebar-bg: 13 28 24', false);
+    }
+
+    public function test_invalid_theme_is_rejected(): void
+    {
+        $student = $this->makeStudent();
+
+        $this->actingAs($student)
+            ->patch(route('settings.update'), [
+                'email_notifications' => '1',
+                'theme' => 'invalid-theme',
+            ])
+            ->assertSessionHasErrors('theme');
+
+        $this->assertSame('classic', $student->fresh()->theme);
+    }
+
     private function makeLecturer(): User
     {
         return User::factory()->create(['role' => UserRole::Lecturer]);

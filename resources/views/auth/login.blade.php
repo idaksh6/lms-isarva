@@ -1,65 +1,65 @@
 <x-guest-layout>
-    <div>
-        <div class="hidden lg:block">
-            <h2 class="text-2xl font-bold tracking-tight text-isarva-heading">Welcome back</h2>
-            <p class="mt-1.5 text-[15px] text-isarva-muted">Sign in to access {{ config('app.name') }}</p>
-        </div>
+    <div class="auth-login">
+        <header class="auth-login-header">
+            <h2 class="auth-login-title">Welcome back</h2>
+            <p class="auth-login-subtitle">Sign in to your learning workspace</p>
+        </header>
 
-        <x-auth-session-status class="mt-5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800" :status="session('status')" />
+        <x-auth-session-status class="auth-login-status" :status="session('status')" />
 
-        <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
+        <form method="POST" action="{{ route('login') }}" class="auth-login-form">
             @csrf
 
-            <div>
-                <label for="email" class="mb-2 block text-sm font-semibold text-isarva-heading">Email address</label>
-                <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-isarva-muted">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
-                        </svg>
-                    </span>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                           autocomplete="username" class="lms-input lms-input--icon" placeholder="name@university.edu">
-                </div>
-                <x-input-error :messages="$errors->get('email')" class="mt-1.5" />
+            <div class="auth-field">
+                <x-input-label for="email" :value="__('Work email')" class="auth-label" />
+                <x-text-input
+                    id="email"
+                    class="auth-input"
+                    type="email"
+                    name="email"
+                    :value="old('email')"
+                    required
+                    autofocus
+                    autocomplete="username"
+                    placeholder="you@company.com"
+                />
+                <x-input-error :messages="$errors->get('email')" class="auth-error" />
             </div>
 
-            <div>
-                <label for="password" class="mb-2 block text-sm font-semibold text-isarva-heading">Password</label>
-                <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-isarva-muted">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                        </svg>
-                    </span>
-                    <input id="password" type="password" name="password" required autocomplete="current-password"
-                           class="lms-input lms-input--icon" placeholder="Enter your password">
-                </div>
-                <x-input-error :messages="$errors->get('password')" class="mt-1.5" />
+            <div class="auth-field">
+                <x-input-label for="password" :value="__('Password')" class="auth-label" />
+                <x-text-input
+                    id="password"
+                    class="auth-input"
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Enter your password"
+                />
+                <x-input-error :messages="$errors->get('password')" class="auth-error" />
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <label for="remember_me" class="inline-flex cursor-pointer items-center gap-2">
-                    <input id="remember_me" type="checkbox" name="remember"
-                           class="rounded border-isarva-border text-brand-600 focus:ring-brand-500">
-                    <span class="text-sm text-isarva-muted">Remember me</span>
+            <div class="auth-login-options">
+                <label for="remember_me" class="auth-remember">
+                    <input id="remember_me" type="checkbox" class="auth-checkbox" name="remember">
+                    <span>{{ __('Remember me') }}</span>
                 </label>
+
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700">
-                        Forgot password?
+                    <a class="auth-forgot" href="{{ route('password.request') }}">
+                        {{ __('Forgot password?') }}
                     </a>
                 @endif
             </div>
 
-            <button type="submit" class="isarva-btn isarva-btn-block group">
-                Sign in to LMS
-                <span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+            <button type="submit" class="lms-btn-primary auth-submit">
+                <span>{{ __('Sign in') }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
+                </svg>
             </button>
         </form>
-
-        <p class="mt-5 text-center text-sm text-isarva-muted">
-            Need access? Contact your programme administrator.
-        </p>
 
         <x-demo-credentials />
     </div>

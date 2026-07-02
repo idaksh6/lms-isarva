@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\LmsTheme;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer(['layouts.lms', 'layouts.guest'], function ($view): void {
+            $themeKey = Auth::check() ? Auth::user()->theme : LmsTheme::defaultKey();
+
+            $view->with('lmsTheme', LmsTheme::resolve($themeKey));
+            $view->with('lmsThemes', LmsTheme::all());
+        });
     }
 }

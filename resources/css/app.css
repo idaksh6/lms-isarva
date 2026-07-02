@@ -7,6 +7,28 @@
 }
 
 @layer base {
+    :root {
+        --brand-50: 239 246 255;
+        --brand-100: 219 234 254;
+        --brand-200: 191 219 254;
+        --brand-300: 147 197 253;
+        --brand-400: 96 165 250;
+        --brand-500: 37 99 235;
+        --brand-600: 29 78 216;
+        --brand-700: 30 64 175;
+        --brand-800: 30 58 138;
+        --brand-900: 23 37 84;
+        --sidebar-bg: 15 23 42;
+        --sidebar-bg-soft: 30 41 59;
+        --sidebar-border: 51 65 85;
+        --sidebar-text: 148 163 184;
+        --sidebar-text-muted: 100 116 139;
+        --sidebar-hover: 30 41 59;
+        --sidebar-active-border: 59 130 246;
+        --sidebar-active-bg: 30 41 59;
+        --sidebar-accent: 96 165 250;
+    }
+
     html {
         @apply overflow-x-hidden;
     }
@@ -39,7 +61,7 @@
         padding: 0.5rem 1rem;
         border: 1px solid transparent;
         border-radius: 0.375rem;
-        background: #1d4ed8;
+        background: rgb(var(--brand-600));
         color: #fff;
         font-size: 0.8125rem;
         font-weight: 600;
@@ -81,14 +103,14 @@
     .lms-btn-primary:hover,
     a.lms-btn-primary:hover,
     button.lms-btn-primary:hover {
-        background: #1e40af;
+        background: rgb(var(--brand-700));
     }
 
     .isarva-btn:active,
     .lms-btn-primary:active,
     a.lms-btn-primary:active,
     button.lms-btn-primary:active {
-        background: #1e3a8a;
+        background: rgb(var(--brand-800));
     }
 
     .isarva-btn-block {
@@ -232,10 +254,11 @@
         @apply text-center text-xs text-isarva-muted;
     }
 
-    /* Sidebar — corporate dark nav */
+    /* Sidebar — themed dark nav (sidebar vars separate from button brand vars) */
     .lms-sidebar {
-        @apply fixed inset-y-0 left-0 z-50 h-dvh w-[min(240px,85vw)] -translate-x-full bg-slate-900 transition-transform duration-200 ease-out;
+        @apply fixed inset-y-0 left-0 z-50 h-dvh w-[min(240px,85vw)] -translate-x-full transition-transform duration-200 ease-out;
         @apply lg:z-30 lg:w-[240px] lg:max-w-none lg:translate-x-0;
+        background: linear-gradient(180deg, rgb(var(--sidebar-bg)) 0%, rgb(var(--sidebar-bg-soft)) 100%);
     }
 
     .lms-sidebar.is-open {
@@ -243,11 +266,13 @@
     }
 
     .lms-sidebar-inner {
-        @apply flex h-full max-h-dvh w-full flex-col overflow-hidden border-r border-slate-800 px-3 py-4 shadow-xl lg:shadow-none;
+        @apply flex h-full max-h-dvh w-full flex-col overflow-hidden px-3 py-4 shadow-xl lg:shadow-none;
+        border-right: 1px solid rgb(var(--sidebar-border) / 0.85);
     }
 
     .lms-sidebar-brand {
-        @apply mb-5 flex shrink-0 flex-col items-center gap-2 border-b border-slate-800 px-2 pb-4 text-center;
+        @apply mb-5 flex shrink-0 flex-col items-center gap-2 px-2 pb-4 text-center;
+        border-bottom: 1px solid rgb(var(--sidebar-border) / 0.85);
     }
 
     .lms-sidebar-brand img {
@@ -255,13 +280,14 @@
     }
 
     .lms-sidebar-appname {
-        @apply block text-center text-[10px] font-semibold uppercase leading-tight tracking-wider text-slate-400;
+        @apply block text-center text-[10px] font-semibold uppercase leading-tight tracking-wider;
+        color: rgb(var(--sidebar-text) / 0.85);
     }
 
     .lms-sidebar-nav {
         @apply -mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-1 py-2;
         scrollbar-width: thin;
-        scrollbar-color: #334155 transparent;
+        scrollbar-color: rgb(var(--sidebar-border)) transparent;
     }
 
     .lms-sidebar-nav::-webkit-scrollbar {
@@ -274,59 +300,84 @@
 
     .lms-sidebar-nav::-webkit-scrollbar-thumb {
         border-radius: 999px;
-        background: #334155;
+        background: rgb(var(--sidebar-border));
     }
 
     .lms-sidebar-nav::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        background: rgb(var(--sidebar-text-muted));
     }
 
     .lms-sidebar-link {
-        @apply flex w-full items-center gap-3 rounded-md border-l-[3px] border-transparent px-3 py-2.5 text-sm font-medium text-slate-400 transition;
+        @apply flex w-full items-center gap-3 rounded-md border-l-[3px] border-transparent px-3 py-2.5 text-sm font-medium transition;
+        color: rgb(var(--sidebar-text));
     }
 
     .lms-sidebar-link:hover {
-        @apply bg-slate-800/80 text-slate-100;
+        background: rgb(var(--sidebar-hover) / 0.88);
+        color: #fff;
     }
 
     .lms-sidebar-link.is-active {
-        @apply border-brand-500 bg-slate-800 font-semibold text-white;
+        @apply font-semibold text-white;
+        border-color: rgb(var(--sidebar-active-border));
+        background: rgb(var(--sidebar-active-bg) / 0.92);
     }
 
     .lms-sidebar-link.is-active svg {
-        @apply text-brand-400;
+        color: rgb(var(--sidebar-accent));
     }
 
     .lms-sidebar-link.is-soon {
-        @apply cursor-not-allowed text-slate-600 hover:bg-transparent hover:text-slate-600;
+        @apply cursor-not-allowed hover:bg-transparent;
+        color: rgb(var(--sidebar-text-muted) / 0.75);
+    }
+
+    .lms-sidebar-link.is-soon:hover {
+        color: rgb(var(--sidebar-text-muted) / 0.75);
     }
 
     .lms-sidebar-link.is-logout {
-        @apply border-transparent bg-transparent text-slate-400 ring-0;
+        @apply border-transparent bg-transparent ring-0;
+        color: rgb(var(--sidebar-text) / 0.9);
     }
 
     .lms-sidebar-link.is-logout:hover {
-        @apply bg-slate-800 text-slate-200;
+        background: rgb(var(--sidebar-hover) / 0.88);
+        color: #fff;
     }
 
     .lms-sidebar-link.is-logout svg {
-        @apply text-slate-500;
+        color: rgb(var(--sidebar-text-muted));
     }
 
-    .lms-dropdown-logout {
-        @apply text-rose-700 hover:bg-rose-50 hover:text-rose-800 focus:bg-rose-50;
+    .lms-sidebar-close-btn {
+        @apply rounded-md p-1.5 transition;
+        color: rgb(var(--sidebar-text) / 0.8);
+    }
+
+    .lms-sidebar-close-btn:hover {
+        background: rgb(var(--sidebar-hover) / 0.88);
+        color: #fff;
     }
 
     .lms-soon-badge {
-        @apply shrink-0 rounded bg-slate-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500;
+        @apply shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide;
+        background: rgb(var(--sidebar-hover) / 0.9);
+        color: rgb(var(--sidebar-text-muted));
     }
 
     .lms-sidebar-profile {
-        @apply shrink-0 border-t border-slate-800 px-0.5 pt-3;
+        @apply shrink-0 px-0.5 pt-3;
+        border-top: 1px solid rgb(var(--sidebar-border) / 0.85);
     }
 
     .lms-sidebar-profile-card {
-        @apply flex items-center gap-3 rounded-md bg-slate-800/60 px-2.5 py-2.5 transition hover:bg-slate-800;
+        @apply flex items-center gap-3 rounded-md px-2.5 py-2.5 transition;
+        background: rgb(var(--sidebar-hover) / 0.55);
+    }
+
+    .lms-sidebar-profile-card:hover {
+        background: rgb(var(--sidebar-hover) / 0.88);
     }
 
     .lms-sidebar-profile-avatar {
@@ -342,27 +393,35 @@
     }
 
     .lms-sidebar-profile-name {
-        @apply truncate text-sm font-medium text-slate-100;
+        @apply truncate text-sm font-medium text-white;
     }
 
     .lms-sidebar-profile-role {
-        @apply text-[11px] font-medium text-slate-400;
+        @apply text-[11px] font-medium;
+        color: rgb(var(--sidebar-text) / 0.9);
     }
 
     .lms-sidebar-profile-email {
-        @apply truncate text-[11px] text-slate-500;
+        @apply truncate text-[11px];
+        color: rgb(var(--sidebar-text-muted));
     }
 
     .lms-sidebar-profile-id {
-        @apply text-[10px] font-medium text-slate-600;
+        @apply text-[10px] font-medium;
+        color: rgb(var(--sidebar-text-muted) / 0.85);
     }
 
     .lms-sidebar-profile-chevron {
-        @apply h-4 w-4 shrink-0 text-slate-600 transition group-hover:text-slate-400;
+        @apply h-4 w-4 shrink-0 transition;
+        color: rgb(var(--sidebar-text-muted) / 0.85);
     }
 
     .lms-sidebar-profile-card:hover .lms-sidebar-profile-chevron {
-        @apply text-slate-300;
+        color: rgb(var(--sidebar-text));
+    }
+
+    .lms-dropdown-logout {
+        @apply text-rose-700 hover:bg-rose-50 hover:text-rose-800 focus:bg-rose-50;
     }
 
     .lms-sidebar-footer {
@@ -404,6 +463,66 @@
 
     .lms-icon-btn {
         @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-isarva-border bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700;
+    }
+
+    .lms-theme-picker {
+        @apply relative;
+    }
+
+    .lms-theme-picker-trigger {
+        @apply text-brand-600 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700;
+    }
+
+    .lms-theme-picker-menu {
+        @apply absolute end-0 top-[calc(100%+0.5rem)] z-50 w-[min(18rem,calc(100vw-2rem))] rounded-lg border border-isarva-border bg-white p-3 shadow-isarva-lg;
+    }
+
+    .lms-theme-picker-head {
+        @apply border-b border-isarva-border pb-3;
+    }
+
+    .lms-theme-picker-title {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-theme-picker-subtitle {
+        @apply mt-0.5 text-xs text-isarva-muted;
+    }
+
+    .lms-theme-picker-grid {
+        @apply grid grid-cols-2 gap-2 py-3;
+    }
+
+    .lms-theme-picker-swatch {
+        @apply flex items-center gap-2 rounded-md border border-isarva-border bg-white px-2 py-2 text-left transition hover:border-brand-300 hover:bg-slate-50;
+    }
+
+    .lms-theme-picker-swatch.is-active {
+        @apply border-brand-500 ring-2 ring-brand-500/20;
+    }
+
+    .lms-theme-picker-swatch:disabled {
+        @apply cursor-wait opacity-70;
+    }
+
+    .lms-theme-picker-swatch-color {
+        @apply h-8 w-8 shrink-0 rounded-md border border-black/5;
+    }
+
+    .lms-theme-picker-swatch-name {
+        @apply min-w-0 text-xs font-medium leading-tight text-isarva-heading;
+    }
+
+    .lms-theme-picker-foot {
+        @apply border-t border-isarva-border pt-2;
+    }
+
+    .lms-theme-picker-link {
+        @apply text-xs font-medium text-brand-600 hover:text-brand-700;
+    }
+
+    .lms-sidebar-mobile-label {
+        color: rgb(var(--sidebar-text) / 0.85);
     }
 
     .lms-user-chip {
@@ -1220,13 +1339,13 @@
     }
 
     .lms-course-hero-tab--active {
-        color: #1d4ed8;
-        border-bottom-color: #1d4ed8;
+        color: rgb(var(--brand-600));
+        border-bottom-color: rgb(var(--brand-600));
     }
 
     .lms-course-hero-tab--active:hover {
-        color: #1e40af;
-        border-bottom-color: #1e40af;
+        color: rgb(var(--brand-700));
+        border-bottom-color: rgb(var(--brand-700));
     }
 
     .lms-assignment-row {
@@ -1242,25 +1361,25 @@
     .lms-banner--assignment-hero .lms-banner-base,
     .lms-banner--assignment-card .lms-banner-base,
     .lms-banner--submit-context .lms-banner-base {
-        background-image: linear-gradient(125deg, #1e3a8a, #2563eb, #3b82f6, #60a5fa, #1d4ed8, #1e40af);
+        background-image: linear-gradient(125deg, rgb(var(--brand-800)), rgb(var(--brand-500)), rgb(var(--brand-400)), rgb(var(--brand-300)), rgb(var(--brand-600)), rgb(var(--brand-700)));
     }
 
     .lms-banner--assignment .lms-banner-blob--1,
     .lms-banner--assignment-hero .lms-banner-blob--1,
     .lms-banner--assignment-card .lms-banner-blob--1,
-    .lms-banner--submit-context .lms-banner-blob--1 { background: #93c5fd; }
+    .lms-banner--submit-context .lms-banner-blob--1 { background: rgb(var(--brand-300)); }
     .lms-banner--assignment .lms-banner-blob--2,
     .lms-banner--assignment-hero .lms-banner-blob--2,
     .lms-banner--assignment-card .lms-banner-blob--2,
-    .lms-banner--submit-context .lms-banner-blob--2 { background: #60a5fa; }
+    .lms-banner--submit-context .lms-banner-blob--2 { background: rgb(var(--brand-400)); }
     .lms-banner--assignment .lms-banner-blob--3,
     .lms-banner--assignment-hero .lms-banner-blob--3,
     .lms-banner--assignment-card .lms-banner-blob--3,
-    .lms-banner--submit-context .lms-banner-blob--3 { background: #3b82f6; }
+    .lms-banner--submit-context .lms-banner-blob--3 { background: rgb(var(--brand-500)); }
     .lms-banner--assignment .lms-banner-blob--4,
     .lms-banner--assignment-hero .lms-banner-blob--4,
     .lms-banner--assignment-card .lms-banner-blob--4,
-    .lms-banner--submit-context .lms-banner-blob--4 { background: #bfdbfe; }
+    .lms-banner--submit-context .lms-banner-blob--4 { background: rgb(var(--brand-200)); }
 
     .lms-banner.lms-banner--assignment-hero .lms-banner-motif {
         @apply items-center justify-end pr-4 opacity-50 sm:pr-8 md:pr-12;
@@ -1584,24 +1703,22 @@
         @apply border-slate-200 bg-slate-50 text-slate-700;
     }
 
+    /* ── Auth layout (login & guest pages) ── */
     .auth-page {
         @apply relative flex min-h-screen flex-col bg-slate-100;
     }
 
-    .auth-page::before {
-        content: none;
-    }
-
     .auth-card {
-        @apply relative z-10 w-full overflow-hidden rounded-lg border border-isarva-border bg-white shadow-isarva-lg;
+        @apply relative z-10 w-full overflow-hidden rounded-xl border border-isarva-border bg-white shadow-isarva-lg;
     }
 
     .auth-left-panel {
-        @apply relative flex flex-col overflow-hidden border-r border-isarva-border bg-slate-900 p-8 text-white lg:p-10;
+        @apply relative flex flex-col overflow-hidden bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 p-8 text-white lg:p-10 xl:p-12;
     }
 
     .auth-left-panel::before {
-        content: none;
+        content: '';
+        @apply pointer-events-none absolute inset-0 bg-gradient-to-tr from-brand-400/20 via-transparent to-brand-900/30;
     }
 
     .auth-left-panel > * {
@@ -1609,12 +1726,8 @@
         z-index: 1;
     }
 
-    .isarva-pill {
-        @apply inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300;
-    }
-
-    .isarva-pill-dot {
-        @apply h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400;
+    .auth-right-panel {
+        @apply flex flex-col justify-center bg-white p-7 sm:p-9 lg:border-l lg:border-isarva-border lg:p-10 xl:p-12;
     }
 
     .auth-brand-stack {
@@ -1626,7 +1739,128 @@
     }
 
     .auth-tagline {
-        @apply isarva-pill m-0 max-w-full whitespace-nowrap sm:whitespace-normal;
+        @apply isarva-pill m-0 max-w-full whitespace-nowrap border-brand-400/30 bg-brand-900/40 text-brand-100 sm:whitespace-normal;
+    }
+
+    .auth-tagline--light {
+        @apply border-isarva-border bg-slate-50 text-isarva-muted;
+    }
+
+    .auth-brand-headline {
+        @apply mt-5 max-w-md text-[1.75rem] font-bold leading-tight tracking-tight text-white xl:text-[2rem];
+    }
+
+    .auth-brand-accent {
+        @apply text-brand-300;
+    }
+
+    .auth-brand-lead {
+        @apply mt-4 max-w-md text-[15px] leading-relaxed text-brand-100/90;
+    }
+
+    .auth-feature-list {
+        @apply mt-8 space-y-3;
+    }
+
+    .auth-feature-card {
+        @apply flex items-start gap-3 rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm;
+    }
+
+    .auth-feature-icon {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/20 bg-white/10 text-brand-200;
+    }
+
+    .auth-feature-title {
+        @apply text-sm font-semibold text-white;
+    }
+
+    .auth-feature-desc {
+        @apply mt-0.5 text-xs leading-relaxed text-brand-100/80;
+    }
+
+    .auth-left-foot {
+        @apply mt-8 flex items-center gap-2 text-xs text-brand-100/70;
+    }
+
+    .auth-login-header {
+        @apply mb-6;
+    }
+
+    .auth-login-title {
+        @apply text-2xl font-bold tracking-tight text-isarva-heading;
+    }
+
+    .auth-login-subtitle {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .auth-login-status {
+        @apply mb-4 text-sm text-emerald-700;
+    }
+
+    .auth-login-form {
+        @apply space-y-5;
+    }
+
+    .auth-field {
+        @apply space-y-1.5;
+    }
+
+    .auth-label {
+        @apply text-sm font-medium text-slate-700;
+    }
+
+    .auth-input {
+        @apply block w-full rounded-lg border border-isarva-border bg-white px-3.5 py-2.5 text-sm text-isarva-heading shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+    }
+
+    .auth-error {
+        @apply mt-1 text-sm text-red-600;
+    }
+
+    .auth-login-options {
+        @apply flex flex-wrap items-center justify-between gap-3 text-sm;
+    }
+
+    .auth-remember {
+        @apply inline-flex cursor-pointer items-center gap-2 text-slate-600;
+    }
+
+    .auth-checkbox {
+        @apply rounded border-slate-300 text-brand-600 focus:ring-brand-500/30;
+    }
+
+    .auth-forgot {
+        @apply font-medium text-brand-600 hover:text-brand-700;
+    }
+
+    .auth-submit {
+        @apply w-full gap-2 rounded-lg py-2.5 text-sm;
+        background: rgb(var(--brand-600));
+    }
+
+    .auth-submit:hover {
+        background: rgb(var(--brand-700));
+    }
+
+    .auth-submit:active {
+        background: rgb(var(--brand-800));
+    }
+
+    .auth-demo {
+        @apply mt-6 text-center text-xs leading-relaxed text-slate-500;
+    }
+
+    .auth-demo strong {
+        @apply font-medium text-slate-600;
+    }
+
+    .isarva-pill {
+        @apply inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300;
+    }
+
+    .isarva-pill-dot {
+        @apply h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400;
     }
 
     /* Full-bleed animated course banners (mesh blobs) */
@@ -1759,13 +1993,13 @@
     }
 
     .lms-banner--books .lms-banner-base {
-        background-image: linear-gradient(125deg, #172554, #1e3a8a, #2563eb, #3b82f6, #1d4ed8, #1e40af);
+        background-image: linear-gradient(125deg, rgb(var(--brand-900)), rgb(var(--brand-800)), rgb(var(--brand-500)), rgb(var(--brand-400)), rgb(var(--brand-600)), rgb(var(--brand-700)));
     }
 
-    .lms-banner--books .lms-banner-blob--1 { background: #bfdbfe; }
-    .lms-banner--books .lms-banner-blob--2 { background: #60a5fa; }
-    .lms-banner--books .lms-banner-blob--3 { background: #2563eb; }
-    .lms-banner--books .lms-banner-blob--4 { background: #93c5fd; }
+    .lms-banner--books .lms-banner-blob--1 { background: rgb(var(--brand-200)); }
+    .lms-banner--books .lms-banner-blob--2 { background: rgb(var(--brand-400)); }
+    .lms-banner--books .lms-banner-blob--3 { background: rgb(var(--brand-500)); }
+    .lms-banner--books .lms-banner-blob--4 { background: rgb(var(--brand-300)); }
 
     .lms-banner--notebook .lms-banner-base {
         background-image: linear-gradient(125deg, #0f172a, #1e293b, #334155, #475569, #334155, #1e293b);
@@ -1777,13 +2011,13 @@
     .lms-banner--notebook .lms-banner-blob--4 { background: #94a3b8; }
 
     .lms-banner--analytics .lms-banner-base {
-        background-image: linear-gradient(125deg, #172554, #1e40af, #2563eb, #3b82f6, #60a5fa, #1d4ed8);
+        background-image: linear-gradient(125deg, rgb(var(--brand-900)), rgb(var(--brand-700)), rgb(var(--brand-500)), rgb(var(--brand-400)), rgb(var(--brand-300)), rgb(var(--brand-600)));
     }
 
-    .lms-banner--analytics .lms-banner-blob--1 { background: #93c5fd; }
-    .lms-banner--analytics .lms-banner-blob--2 { background: #60a5fa; }
-    .lms-banner--analytics .lms-banner-blob--3 { background: #2563eb; }
-    .lms-banner--analytics .lms-banner-blob--4 { background: #bfdbfe; }
+    .lms-banner--analytics .lms-banner-blob--1 { background: rgb(var(--brand-300)); }
+    .lms-banner--analytics .lms-banner-blob--2 { background: rgb(var(--brand-400)); }
+    .lms-banner--analytics .lms-banner-blob--3 { background: rgb(var(--brand-500)); }
+    .lms-banner--analytics .lms-banner-blob--4 { background: rgb(var(--brand-200)); }
 
     .lms-banner--laptop .lms-banner-base {
         background-image: linear-gradient(125deg, #1e293b, #334155, #475569, #64748b, #475569, #334155);
@@ -1824,7 +2058,7 @@
     }
 
     .lms-course-cover-corporate--brand {
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+        background: linear-gradient(135deg, rgb(var(--brand-800)) 0%, rgb(var(--brand-500)) 55%, rgb(var(--brand-400)) 100%);
     }
 
     .lms-course-cover-corporate--slate {
@@ -2593,6 +2827,46 @@
     .lms-settings-grid,
     .lms-help-grid {
         @apply grid gap-4 lg:grid-cols-2;
+    }
+
+    .lms-theme-grid {
+        @apply grid gap-3 sm:grid-cols-2;
+    }
+
+    .lms-theme-option {
+        @apply relative flex cursor-pointer items-center gap-3 rounded-lg border border-isarva-border bg-white p-3 shadow-sm transition hover:border-brand-300 hover:shadow-md;
+    }
+
+    .lms-theme-option:has(.lms-theme-option-input:checked) {
+        @apply border-brand-500 ring-2 ring-brand-500/20;
+    }
+
+    .lms-theme-option-input {
+        @apply sr-only;
+    }
+
+    .lms-theme-option-preview {
+        @apply h-12 w-12 shrink-0 rounded-md border border-black/5 shadow-inner;
+    }
+
+    .lms-theme-option-copy {
+        @apply min-w-0 flex-1;
+    }
+
+    .lms-theme-option-name {
+        @apply block text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-theme-option-desc {
+        @apply mt-0.5 block text-xs leading-snug text-isarva-muted;
+    }
+
+    .lms-theme-option-check {
+        @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white opacity-0 transition;
+    }
+
+    .lms-theme-option:has(.lms-theme-option-input:checked) .lms-theme-option-check {
+        @apply opacity-100;
     }
 
     .lms-help-card {

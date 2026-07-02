@@ -1,12 +1,15 @@
 @props(['role' => 'student', 'class' => ''])
 
 @php
-    $themes = [
-        'student' => ['bg' => 'from-brand-50 via-slate-50 to-white', 'accent' => '#2563eb', 'ring' => '#bfdbfe'],
+    $roleThemes = [
+        'student' => ['bg' => 'from-brand-50 via-slate-50 to-white'],
         'lecturer' => ['bg' => 'from-slate-100 via-slate-50 to-white', 'accent' => '#475569', 'ring' => '#cbd5e1'],
-        'admin' => ['bg' => 'from-brand-100 via-brand-50 to-white', 'accent' => '#1d4ed8', 'ring' => '#93c5fd'],
+        'admin' => ['bg' => 'from-brand-100 via-brand-50 to-white'],
     ];
-    $theme = $themes[$role] ?? $themes['student'];
+    $palette = \App\Support\LmsTheme::resolve(auth()->user()?->theme)['colors'];
+    $theme = $roleThemes[$role] ?? $roleThemes['student'];
+    $theme['accent'] = $theme['accent'] ?? 'rgb('.$palette['600'].')';
+    $theme['ring'] = $theme['ring'] ?? 'rgb('.$palette['200'].')';
 @endphp
 
 <div {{ $attributes->merge(['class' => 'lms-user-illustration bg-gradient-to-br '.$theme['bg'].' '.$class]) }} aria-hidden="true">
