@@ -61,6 +61,5 @@
             </button>
         </form>
 
-        <x-demo-credentials />
     </div>
 </x-guest-layout>
