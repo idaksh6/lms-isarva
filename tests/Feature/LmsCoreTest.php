@@ -420,6 +420,32 @@ class LmsCoreTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_lecturer_can_publish_draft_assignment_via_edit(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Draft assignment',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File,
+            'is_published' => false,
+        ]);
+
+        $this->actingAs($lecturer)
+            ->patch(route('assignments.update', $assignment), [
+                'title' => 'Draft assignment',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+                'is_published' => '1',
+            ])
+            ->assertRedirect(route('assignments.show', $assignment));
+
+        $fresh = $assignment->fresh();
+        $this->assertTrue($fresh->is_published);
+        $this->assertSame('Draft assignment', $fresh->title);
+    }
+
     public function test_lecturer_can_create_assignment_with_multiple_attachments(): void
     {
         $lecturer = $this->makeLecturer();

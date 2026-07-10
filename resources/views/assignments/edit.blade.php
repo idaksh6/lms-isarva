@@ -9,7 +9,8 @@
     <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-back">← Back to assignment</a>
 </div>
 
-<form method="POST" action="{{ route('assignments.update', $assignment) }}" enctype="multipart/form-data" class="lms-form-card">
+<div class="lms-form-card">
+<form method="POST" action="{{ route('assignments.update', $assignment) }}" enctype="multipart/form-data" id="assignment-edit-form">
     @csrf
     @method('PATCH')
 
@@ -75,17 +76,18 @@
         <input type="checkbox" name="is_published" value="1" id="is_published" @checked(old('is_published', $assignment->is_published))>
         <span class="text-sm font-semibold text-isarva-heading">Published — visible to students</span>
     </label>
-
-    <div class="lms-form-actions">
-        <button type="submit" class="lms-btn-primary">Save changes</button>
-        <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-secondary">Cancel</a>
-        @can('delete', $assignment)
-            <form method="POST" action="{{ route('assignments.destroy', $assignment) }}" class="ml-auto" onsubmit="return confirm('Delete this assignment and all submissions?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="lms-btn-danger">Delete assignment</button>
-            </form>
-        @endcan
-    </div>
 </form>
+
+<div class="lms-form-actions">
+    <button type="submit" form="assignment-edit-form" class="lms-btn-primary">Save changes</button>
+    <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-secondary">Cancel</a>
+    @can('delete', $assignment)
+        <form method="POST" action="{{ route('assignments.destroy', $assignment) }}" class="ml-auto" onsubmit="return confirm('Delete this assignment and all submissions?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="lms-btn-danger">Delete assignment</button>
+        </form>
+    @endcan
+</div>
+</div>
 @endsection
