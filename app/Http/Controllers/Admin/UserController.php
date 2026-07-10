@@ -78,21 +78,23 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'role' => ['required', Rule::enum(UserRole::class)],
-            'student_id' => ['nullable', 'string', 'max:50', 'unique:users,student_id'],
+            'student_id' => [
+                Rule::requiredIf(fn () => $request->input('role') === UserRole::Student->value),
+                'nullable',
+                'string',
+                'max:50',
+                'unique:users,student_id',
+            ],
         ]);
-
-        if ($validated['role'] === UserRole::Student->value && empty($validated['student_id'])) {
-            return back()
-                ->withInput()
-                ->withErrors(['student_id' => 'Student ID is required for student accounts.']);
-        }
 
         User::query()->create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'student_id' => $validated['student_id'] ?? null,
+            'student_id' => $validated['role'] === UserRole::Student->value
+                ? ($validated['student_id'] ?? null)
+                : null,
             'email_verified_at' => now(),
         ]);
 
@@ -113,14 +115,14 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'role' => ['required', Rule::enum(UserRole::class)],
-            'student_id' => ['nullable', 'string', 'max:50', Rule::unique('users', 'student_id')->ignore($user->id)],
+            'student_id' => [
+                Rule::requiredIf(fn () => $request->input('role') === UserRole::Student->value),
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('users', 'student_id')->ignore($user->id),
+            ],
         ]);
-
-        if ($validated['role'] === UserRole::Student->value && empty($validated['student_id'])) {
-            return back()
-                ->withInput()
-                ->withErrors(['student_id' => 'Student ID is required for student accounts.']);
-        }
 
         $user->fill([
             'name' => $validated['name'],

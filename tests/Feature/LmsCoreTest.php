@@ -146,6 +146,27 @@ class LmsCoreTest extends TestCase
         $this->assertFalse($student->fresh()->is_active);
     }
 
+    public function test_admin_cannot_create_student_without_student_id(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.users.create'))
+            ->post(route('admin.users.store'), [
+                'name' => 'Student 1',
+                'email' => 'student1@lms.test',
+                'role' => UserRole::Student->value,
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ])
+            ->assertRedirect(route('admin.users.create'))
+            ->assertSessionHasErrors('student_id');
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'student1@lms.test',
+        ]);
+    }
+
     public function test_publishing_course_announcement_notifies_enrolled_students(): void
     {
         Notification::fake();
