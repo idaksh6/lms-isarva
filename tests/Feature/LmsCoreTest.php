@@ -473,6 +473,43 @@ class LmsCoreTest extends TestCase
         );
     }
 
+    public function test_lecturer_enrollment_page_includes_student_search(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        User::factory()->create([
+            'role' => UserRole::Student,
+            'name' => 'Amala Jothi Alpart',
+            'email' => 'amala@university.edu',
+            'student_id' => '2547031',
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.enrollments.edit', $course))
+            ->assertOk()
+            ->assertSee('Search by name, email, or student ID', false)
+            ->assertSee('Amala Jothi Alpart', false)
+            ->assertSee('2547031', false)
+            ->assertSee('amala@university.edu', false);
+    }
+
+    public function test_lecturer_can_enroll_students_on_course(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+        $student = $this->makeStudent();
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.enrollments.store', $course), [
+                'student_ids' => [$student->id],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertTrue($course->fresh()->students->contains($student));
+    }
+
     public function test_lecturer_cannot_upload_assignment_attachment_over_two_megabytes(): void
     {
         $lecturer = $this->makeLecturer();

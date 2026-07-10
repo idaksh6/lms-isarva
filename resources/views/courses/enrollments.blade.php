@@ -55,20 +55,80 @@
                         <p class="text-sm font-medium text-isarva-muted">All students are already enrolled.</p>
                     </div>
                 @else
-                    <form method="POST" action="{{ route('courses.enrollments.store', $course) }}" class="space-y-4">
+                    <form
+                        method="POST"
+                        action="{{ route('courses.enrollments.store', $course) }}"
+                        class="space-y-4"
+                        x-data="{
+                            query: '',
+                            visibleCount: {{ $availableStudents->count() }},
+                            matches(name, email, studentId) {
+                                const q = this.query.trim().toLowerCase();
+                                if (!q) {
+                                    return true;
+                                }
+
+                                return name.toLowerCase().includes(q)
+                                    || email.toLowerCase().includes(q)
+                                    || (studentId || '').toLowerCase().includes(q);
+                            },
+                            updateVisibleCount() {
+                                this.visibleCount = Array.from(this.$refs.picker.querySelectorAll('[data-enrollment-student]'))
+                                    .filter((item) => item.offsetParent !== null)
+                                    .length;
+                            },
+                        }"
+                        x-init="$watch('query', () => $nextTick(() => updateVisibleCount()))"
+                    >
                         @csrf
-                        <div class="lms-student-picker">
+
+                        <div>
+                            <label for="enrollment-search" class="sr-only">Search students</label>
+                            <input
+                                id="enrollment-search"
+                                type="search"
+                                x-model="query"
+                                placeholder="Search by name, email, or student ID"
+                                class="lms-field-input"
+                                autocomplete="off"
+                            >
+                            <p class="mt-1.5 text-xs text-isarva-muted" x-show="query" x-cloak>
+                                <span x-text="visibleCount"></span> matching student<span x-show="visibleCount !== 1">s</span>
+                            </p>
+                        </div>
+
+                        <div class="lms-student-picker" x-ref="picker">
                             @foreach ($availableStudents as $student)
-                                <label class="lms-student-picker-item">
+                                <label
+                                    class="lms-student-picker-item"
+                                    data-enrollment-student
+                                    x-show="matches(@js($student->name), @js($student->email), @js($student->student_id ?? ''))"
+                                    x-cloak
+                                >
                                     <input type="checkbox" name="student_ids[]" value="{{ $student->id }}">
                                     <span class="lms-student-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</span>
                                     <span class="min-w-0 flex-1">
                                         <span class="block truncate font-medium text-isarva-heading">{{ $student->name }}</span>
-                                        <span class="block truncate text-xs text-isarva-muted">{{ $student->student_id }}</span>
+                                        <span class="block truncate text-xs text-isarva-muted">
+                                            @if ($student->student_id)
+                                                {{ $student->student_id }} · {{ $student->email }}
+                                            @else
+                                                {{ $student->email }}
+                                            @endif
+                                        </span>
                                     </span>
                                 </label>
                             @endforeach
+
+                            <p
+                                class="px-3 py-6 text-center text-sm text-isarva-muted"
+                                x-show="query && visibleCount === 0"
+                                x-cloak
+                            >
+                                No students match your search.
+                            </p>
                         </div>
+
                         <button type="submit" class="lms-btn-primary w-full sm:w-auto">Enroll selected</button>
                     </form>
                 @endif

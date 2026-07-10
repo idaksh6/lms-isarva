@@ -31,16 +31,6 @@
 
         <div class="flex flex-wrap items-center gap-3 border-t border-isarva-border pt-5">
             <x-primary-button>{{ __('Update password') }}</x-primary-button>
-
-            @if (session('status') === 'password-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2500)"
-                    class="text-sm font-medium text-brand-700"
-                >{{ __('Saved.') }}</p>
-            @endif
         </div>
     </form>
 </section>
