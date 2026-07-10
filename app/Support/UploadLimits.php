@@ -9,7 +9,12 @@ class UploadLimits
 
     public const ASSIGNMENT_ATTACHMENT_MAX_COUNT = 3;
 
-    public const ASSIGNMENT_ATTACHMENT_MAX_KB = 10240;
+    public const ASSIGNMENT_ATTACHMENT_MAX_KB = 2048;
+
+    public static function assignmentAttachmentMaxMegabytes(): int
+    {
+        return (int) floor(self::ASSIGNMENT_ATTACHMENT_MAX_KB / 1024);
+    }
 
     public static function submissionMaxKilobytes(): int
     {

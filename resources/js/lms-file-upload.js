@@ -4,7 +4,7 @@ export default function lmsFileUpload(config = {}) {
         selectedFiles: [],
         dragging: false,
         maxFiles: config.maxFiles ?? 3,
-        maxSizeMb: config.maxSizeMb ?? 10,
+        maxSizeMb: config.maxSizeMb ?? 2,
 
         formatSize(bytes) {
             if (bytes < 1024) {

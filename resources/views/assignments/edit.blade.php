@@ -67,7 +67,7 @@
     @if ($slotsLeft > 0)
         <x-lms.file-upload
             :label="$assignment->attachments->isEmpty() ? 'Attachments' : 'Add more files'"
-            :hint="'You can add up to '.$slotsLeft.' more file(s). 10 MB each.'"
+            :hint="'You can add up to '.$slotsLeft.' more file(s). '.\App\Support\UploadLimits::assignmentAttachmentMaxMegabytes().' MB each.'"
             :max-files="$slotsLeft"
         />
     @endif

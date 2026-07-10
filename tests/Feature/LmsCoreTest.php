@@ -473,6 +473,49 @@ class LmsCoreTest extends TestCase
         );
     }
 
+    public function test_lecturer_cannot_upload_assignment_attachment_over_two_megabytes(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->from(route('courses.assignments.create', $course))
+            ->post(route('courses.assignments.store', $course), [
+                'title' => 'Large files',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+                'is_published' => '1',
+                'attachments' => [
+                    \Illuminate\Http\UploadedFile::fake()->create('large.pdf', 3000, 'application/pdf'),
+                ],
+            ])
+            ->assertRedirect(route('courses.assignments.create', $course))
+            ->assertSessionHasErrors('attachments.0');
+
+        $this->assertDatabaseMissing('assignments', ['title' => 'Large files']);
+    }
+
+    public function test_assignment_create_page_renders_attachment_validation_errors(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $response = $this->actingAs($lecturer)
+            ->from(route('courses.assignments.create', $course))
+            ->post(route('courses.assignments.store', $course), [
+                'title' => 'Large files',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+                'is_published' => '1',
+                'attachments' => [
+                    \Illuminate\Http\UploadedFile::fake()->create('large.pdf', 3000, 'application/pdf'),
+                ],
+            ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.assignments.create', $course))
+            ->assertOk()
+            ->assertSee('Each attachment must be 2 MB or smaller.', false);
+    }
+
     public function test_lecturer_cannot_add_more_than_three_assignment_attachments(): void
     {
         $lecturer = $this->makeLecturer();

@@ -3,7 +3,7 @@
     'label' => 'Attachments',
     'hint' => null,
     'maxFiles' => \App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT,
-    'maxSizeMb' => (int) floor(\App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB / 1024),
+    'maxSizeMb' => \App\Support\UploadLimits::assignmentAttachmentMaxMegabytes(),
     'required' => false,
 ])
 
@@ -67,6 +67,5 @@
         </template>
     </ul>
 
-    <x-input-error :messages="$errors->get($name)" class="mt-1.5" />
-    <x-input-error :messages="$errors->get($name.'.*')" class="mt-1.5" />
+    <x-input-error :messages="collect($errors->getMessages())->filter(fn ($_, $key) => $key === $name || str_starts_with($key, $name.'.'))->flatten()->unique()->values()->all()" class="mt-1.5" />
 </div>

@@ -46,6 +46,8 @@ class AssignmentController extends Controller
             'attachments' => ['nullable', 'array', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT],
             'attachments.*' => ['file', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB],
             'is_published' => ['sometimes', 'boolean'],
+        ], [
+            'attachments.*.max' => 'Each attachment must be '.UploadLimits::assignmentAttachmentMaxMegabytes().' MB or smaller.',
         ]);
 
         $assignment = $course->assignments()->create([
@@ -114,6 +116,8 @@ class AssignmentController extends Controller
             'attachments' => ['nullable', 'array', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT],
             'attachments.*' => ['file', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB],
             'is_published' => ['sometimes', 'boolean'],
+        ], [
+            'attachments.*.max' => 'Each attachment must be '.UploadLimits::assignmentAttachmentMaxMegabytes().' MB or smaller.',
         ]);
 
         $assignment->update([
