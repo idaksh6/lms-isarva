@@ -7,6 +7,10 @@ class UploadLimits
     /** App cap for student submission uploads (KB). */
     public const SUBMISSION_MAX_KB = 20480;
 
+    public const ASSIGNMENT_ATTACHMENT_MAX_COUNT = 3;
+
+    public const ASSIGNMENT_ATTACHMENT_MAX_KB = 10240;
+
     public static function submissionMaxKilobytes(): int
     {
         return min(self::SUBMISSION_MAX_KB, self::phpUploadMaxKilobytes());

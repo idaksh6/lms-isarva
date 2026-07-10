@@ -353,6 +353,57 @@ class LmsCoreTest extends TestCase
         $this->assertSame('classic', $student->fresh()->theme);
     }
 
+    public function test_lecturer_can_create_assignment_with_multiple_attachments(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.assignments.store', $course), [
+                'title' => 'Lab resources',
+                'instructions' => 'Read the brief and dataset.',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+                'is_published' => '1',
+                'attachments' => [
+                    \Illuminate\Http\UploadedFile::fake()->create('brief.pdf', 100, 'application/pdf'),
+                    \Illuminate\Http\UploadedFile::fake()->create('dataset.csv', 50, 'text/csv'),
+                ],
+            ])
+            ->assertRedirect();
+
+        $assignment = Assignment::query()->where('title', 'Lab resources')->first();
+        $this->assertNotNull($assignment);
+        $this->assertCount(2, $assignment->attachments);
+        $this->assertEqualsCanonicalizing(
+            ['brief.pdf', 'dataset.csv'],
+            $assignment->attachments->pluck('name')->all()
+        );
+    }
+
+    public function test_lecturer_cannot_add_more_than_three_assignment_attachments(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->from(route('courses.assignments.create', $course))
+            ->post(route('courses.assignments.store', $course), [
+                'title' => 'Too many files',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+                'is_published' => '1',
+                'attachments' => [
+                    \Illuminate\Http\UploadedFile::fake()->create('one.pdf', 10, 'application/pdf'),
+                    \Illuminate\Http\UploadedFile::fake()->create('two.pdf', 10, 'application/pdf'),
+                    \Illuminate\Http\UploadedFile::fake()->create('three.pdf', 10, 'application/pdf'),
+                    \Illuminate\Http\UploadedFile::fake()->create('four.pdf', 10, 'application/pdf'),
+                ],
+            ])
+            ->assertRedirect(route('courses.assignments.create', $course))
+            ->assertSessionHasErrors('attachments');
+
+        $this->assertDatabaseMissing('assignments', ['title' => 'Too many files']);
+    }
+
     public function test_student_can_submit_external_link_for_link_only_assignment(): void
     {
         $lecturer = $this->makeLecturer();

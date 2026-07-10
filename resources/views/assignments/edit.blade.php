@@ -15,7 +15,7 @@
 
     <div class="lms-form-header">
         <h2 class="lms-form-title">Update assignment</h2>
-        <p class="lms-form-desc">Change details or add more resource files (up to 5 total).</p>
+        <p class="lms-form-desc">Change details or add more resource files (up to {{ \App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT }} total).</p>
     </div>
 
     <div class="lms-form-field">
@@ -61,7 +61,7 @@
     @endif
 
     @php
-        $slotsLeft = max(0, 5 - $assignment->attachments->count());
+        $slotsLeft = max(0, \App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT - $assignment->attachments->count());
     @endphp
     @if ($slotsLeft > 0)
         <x-lms.file-upload

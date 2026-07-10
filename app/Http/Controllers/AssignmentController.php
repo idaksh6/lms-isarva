@@ -7,6 +7,7 @@ use App\Models\Assignment;
 use App\Models\AssignmentAttachment;
 use App\Models\Course;
 use App\Notifications\AssignmentPublishedNotification;
+use App\Support\UploadLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -42,8 +43,8 @@ class AssignmentController extends Controller
                 Rule::requiredIf(fn () => in_array($request->input('delivery_method'), ['link', 'both'], true)),
             ],
             'due_at' => ['nullable', 'date'],
-            'attachments' => ['nullable', 'array', 'max:5'],
-            'attachments.*' => ['file', 'max:10240'],
+            'attachments' => ['nullable', 'array', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT],
+            'attachments.*' => ['file', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB],
             'is_published' => ['sometimes', 'boolean'],
         ]);
 
@@ -108,8 +109,8 @@ class AssignmentController extends Controller
                 Rule::requiredIf(fn () => in_array($request->input('delivery_method'), ['link', 'both'], true)),
             ],
             'due_at' => ['nullable', 'date'],
-            'attachments' => ['nullable', 'array', 'max:5'],
-            'attachments.*' => ['file', 'max:10240'],
+            'attachments' => ['nullable', 'array', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT],
+            'attachments.*' => ['file', 'max:'.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB],
             'is_published' => ['sometimes', 'boolean'],
         ]);
 
@@ -124,9 +125,9 @@ class AssignmentController extends Controller
 
         $existingCount = $assignment->attachments()->count();
         $newFiles = $request->file('attachments', []);
-        if ($existingCount + count($newFiles) > 5) {
+        if ($existingCount + count($newFiles) > UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT) {
             return back()
-                ->withErrors(['attachments' => 'An assignment can have at most 5 files. Remove some or upload fewer.'])
+                ->withErrors(['attachments' => 'An assignment can have at most '.UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT.' files. Remove some or upload fewer.'])
                 ->withInput();
         }
 

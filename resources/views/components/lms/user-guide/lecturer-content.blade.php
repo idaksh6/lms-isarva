@@ -58,7 +58,7 @@
             :bullets="[
                 'File upload — students drag a file into the LMS (PDF, notebook, zip, etc.).',
                 'Cloud link — you provide a shared Google Drive folder URL; students upload there and paste the file link back.',
-                'Attach up to five resource files (10 MB each) for briefs, datasets, or templates.',
+                'Attach up to three resource files (10 MB each) for briefs, datasets, or templates.',
                 'Keep Visible to students immediately checked to publish now; uncheck to save as draft.',
             ]"
             mock="new-assignment"

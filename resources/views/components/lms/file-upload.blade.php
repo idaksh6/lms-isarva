@@ -1,11 +1,15 @@
 @props([
     'name' => 'attachments',
     'label' => 'Attachments',
-    'hint' => 'PDF, notebooks, datasets — up to 5 files, 10 MB each',
-    'maxFiles' => 5,
-    'maxSizeMb' => 10,
+    'hint' => null,
+    'maxFiles' => \App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_COUNT,
+    'maxSizeMb' => (int) floor(\App\Support\UploadLimits::ASSIGNMENT_ATTACHMENT_MAX_KB / 1024),
     'required' => false,
 ])
+
+@php
+    $hint ??= 'PDF, notebooks, datasets — up to '.$maxFiles.' files, '.$maxSizeMb.' MB each';
+@endphp
 
 <div
     {{ $attributes->merge(['class' => 'lms-form-field']) }}
@@ -17,6 +21,7 @@
     @endif
 
     <div
+        x-show="files.length < maxFiles"
         class="lms-file-upload-zone"
         :class="{ 'lms-file-upload-zone--drag': dragging }"
         @click="$refs.input.click()"
@@ -42,6 +47,8 @@
         <span class="lms-file-upload-title">Drop files here or <span class="text-brand-600">browse</span></span>
         <span class="lms-file-upload-meta">Up to {{ $maxFiles }} files · {{ $maxSizeMb }} MB each</span>
     </div>
+
+    <p x-show="files.length >= maxFiles" x-cloak class="lms-field-hint">Maximum of {{ $maxFiles }} files attached. Remove one to add another.</p>
 
     <ul x-show="files.length > 0" x-cloak class="lms-file-upload-list">
         <template x-for="(file, index) in files" :key="index">
