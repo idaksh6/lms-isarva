@@ -9,6 +9,10 @@ class AssignmentPolicy
 {
     public function view(User $user, Assignment $assignment): bool
     {
+        if ($user->isStudent() && ! $assignment->is_published) {
+            return false;
+        }
+
         return app(CoursePolicy::class)->view($user, $assignment->course);
     }
 

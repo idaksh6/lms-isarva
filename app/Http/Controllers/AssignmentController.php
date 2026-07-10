@@ -55,7 +55,7 @@ class AssignmentController extends Controller
             'delivery_method' => $validated['delivery_method'],
             'drop_folder_url' => $validated['drop_folder_url'] ?? null,
             'due_at' => $validated['due_at'] ?? null,
-            'is_published' => $request->boolean('is_published', true),
+            'is_published' => $request->boolean('is_published'),
         ]);
 
         $this->storeUploadedAttachments($assignment, $request->file('attachments', []));
@@ -66,7 +66,9 @@ class AssignmentController extends Controller
 
         return redirect()
             ->route('assignments.show', $assignment)
-            ->with('success', 'Assignment published to students.');
+            ->with('success', $assignment->is_published
+                ? 'Assignment published to students.'
+                : 'Assignment saved as draft.');
     }
 
     public function show(Assignment $assignment): View
@@ -120,7 +122,7 @@ class AssignmentController extends Controller
             'delivery_method' => $validated['delivery_method'],
             'drop_folder_url' => $validated['drop_folder_url'] ?? null,
             'due_at' => $validated['due_at'] ?? null,
-            'is_published' => $request->boolean('is_published', $assignment->is_published),
+            'is_published' => $request->boolean('is_published'),
         ]);
 
         $existingCount = $assignment->attachments()->count();

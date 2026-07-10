@@ -353,6 +353,73 @@ class LmsCoreTest extends TestCase
         $this->assertSame('classic', $student->fresh()->theme);
     }
 
+    public function test_lecturer_can_save_assignment_as_draft(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.assignments.store', $course), [
+                'title' => 'Draft assignment',
+                'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File->value,
+            ])
+            ->assertRedirect();
+
+        $assignment = Assignment::query()->where('title', 'Draft assignment')->first();
+        $this->assertNotNull($assignment);
+        $this->assertFalse($assignment->is_published);
+    }
+
+    public function test_student_cannot_see_draft_assignment_on_course_page(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Hidden draft',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File,
+            'is_published' => false,
+        ]);
+
+        Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Published task',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File,
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('courses.show', $course))
+            ->assertOk()
+            ->assertSee('Published task')
+            ->assertDontSee('Hidden draft');
+    }
+
+    public function test_student_cannot_open_draft_assignment(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Hidden draft',
+            'delivery_method' => \App\Enums\SubmissionDeliveryMethod::File,
+            'is_published' => false,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('assignments.show', $assignment))
+            ->assertForbidden();
+    }
+
     public function test_lecturer_can_create_assignment_with_multiple_attachments(): void
     {
         $lecturer = $this->makeLecturer();

@@ -83,7 +83,15 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course);
 
-        $course->load(['lecturer', 'assignments' => fn ($q) => $q->latest(), 'students']);
+        $user = request()->user();
+
+        $course->load([
+            'lecturer',
+            'assignments' => fn ($q) => $user->isStudent()
+                ? $q->where('is_published', true)->latest()
+                : $q->latest(),
+            'students',
+        ]);
 
         $submissionsByAssignment = collect();
         if (request()->user()->isStudent()) {
