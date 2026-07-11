@@ -7,7 +7,8 @@
 <div class="lms-page-stack">
     <x-lms.course-hero :course="$course" active="edit" />
 
-    <form method="POST" action="{{ route('courses.update', $course) }}" class="lms-form-card">
+    <div class="lms-form-card">
+    <form method="POST" action="{{ route('courses.update', $course) }}" id="course-edit-form">
         @csrf
         @method('PATCH')
 
@@ -36,23 +37,26 @@
                         <option value="{{ $lecturer->id }}" @selected(old('lecturer_id', $course->lecturer_id) == $lecturer->id)>{{ $lecturer->name }}</option>
                     @endforeach
                 </select>
+                <x-input-error :messages="$errors->get('lecturer_id')" class="mt-1.5" />
             </div>
         @endif
         <label class="lms-form-check">
             <input type="checkbox" name="is_active" value="1" id="is_active" @checked(old('is_active', $course->is_active))>
             <span class="text-sm font-medium text-slate-700">Course is active</span>
         </label>
-        <div class="lms-form-actions">
-            <button type="submit" class="lms-btn-primary">Save changes</button>
-            <a href="{{ route('courses.show', $course) }}" class="lms-btn-secondary">Cancel</a>
-            @can('delete', $course)
-                <form method="POST" action="{{ route('courses.destroy', $course) }}" class="ml-auto" onsubmit="return confirm('Delete or archive this course? Courses with submissions are archived only.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="lms-btn-danger">Delete course</button>
-                </form>
-            @endcan
-        </div>
     </form>
+
+    <div class="lms-form-actions">
+        <button type="submit" form="course-edit-form" class="lms-btn-primary">Save changes</button>
+        <a href="{{ route('courses.show', $course) }}" class="lms-btn-secondary">Cancel</a>
+        @can('delete', $course)
+            <form method="POST" action="{{ route('courses.destroy', $course) }}" class="ml-auto" onsubmit="return confirm('Delete or archive this course? Courses with submissions are archived only.')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="lms-btn-danger">Delete course</button>
+            </form>
+        @endcan
+    </div>
+    </div>
 </div>
 @endsection

@@ -5,7 +5,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT"
+PUBLIC="${ROOT}/public"
+cd "$PUBLIC"
 
 HOST="${1:-127.0.0.1}"
 PORT="${2:-8000}"

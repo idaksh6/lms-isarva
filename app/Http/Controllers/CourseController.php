@@ -60,12 +60,28 @@ class CourseController extends Controller
             'code' => ['required', 'string', 'max:20', 'unique:courses,code'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'lecturer_id' => ['nullable', 'exists:users,id'],
+            'lecturer_id' => [
+                $request->user()->isAdmin() ? 'required' : 'nullable',
+                'exists:users,id',
+            ],
         ]);
 
-        $lecturerId = $request->user()->isAdmin()
-            ? ($validated['lecturer_id'] ?? $request->user()->id)
-            : $request->user()->id;
+        if ($request->user()->isAdmin()) {
+            $lecturer = User::query()
+                ->where('id', $validated['lecturer_id'])
+                ->where('role', 'lecturer')
+                ->first();
+
+            if (! $lecturer) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['lecturer_id' => 'Select an active lecturer account for this course.']);
+            }
+
+            $lecturerId = $lecturer->id;
+        } else {
+            $lecturerId = $request->user()->id;
+        }
 
         $course = Course::query()->create([
             'code' => strtoupper($validated['code']),

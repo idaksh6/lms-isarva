@@ -473,6 +473,49 @@ class LmsCoreTest extends TestCase
         );
     }
 
+    public function test_admin_can_update_course_without_deleting_it(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($admin)
+            ->patch(route('courses.update', $course), [
+                'code' => $course->code,
+                'title' => 'Updated course title',
+                'lecturer_id' => $lecturer->id,
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('courses.show', $course));
+
+        $fresh = $course->fresh();
+        $this->assertSame('Updated course title', $fresh->title);
+        $this->assertDatabaseHas('courses', ['id' => $course->id]);
+    }
+
+    public function test_admin_must_assign_lecturer_when_creating_course(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $lecturer = $this->makeLecturer();
+
+        $this->actingAs($admin)
+            ->post(route('courses.store'), [
+                'code' => 'ADM101',
+                'title' => 'Admin created module',
+                'lecturer_id' => $lecturer->id,
+            ])
+            ->assertRedirect();
+
+        $course = Course::query()->where('code', 'ADM101')->first();
+        $this->assertNotNull($course);
+        $this->assertSame($lecturer->id, $course->lecturer_id);
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertSee('Admin created module');
+    }
+
     public function test_lecturer_enrollment_page_includes_student_search(): void
     {
         $lecturer = $this->makeLecturer();
