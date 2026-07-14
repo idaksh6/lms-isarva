@@ -99,6 +99,14 @@
         font-size: 0.75rem;
     }
 
+    .lms-btn-primary--sm,
+    a.lms-btn-primary--sm,
+    button.lms-btn-primary--sm {
+        @apply inline-flex items-center gap-1.5;
+        padding: 0.4375rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
     .isarva-btn:hover,
     .lms-btn-primary:hover,
     a.lms-btn-primary:hover,
@@ -519,10 +527,6 @@
 
     .lms-theme-picker-link {
         @apply text-xs font-medium text-brand-600 hover:text-brand-700;
-    }
-
-    .lms-sidebar-mobile-label {
-        color: rgb(var(--sidebar-text) / 0.85);
     }
 
     .lms-user-chip {
@@ -2793,11 +2797,546 @@
     }
 
     .corp-calendar-page {
-        @apply grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px];
+        @apply grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px];
+    }
+
+    .corp-calendar-dual {
+        @apply space-y-4;
+    }
+
+    .corp-calendar-month-bar {
+        @apply flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5;
+    }
+
+    .corp-cal-month-copy {
+        @apply min-w-0;
+    }
+
+    .corp-calendar-month-title {
+        @apply text-lg font-semibold text-isarva-heading;
+    }
+
+    .corp-calendar-month-desc {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .corp-cal-block {
+        @apply overflow-hidden;
+    }
+
+    .corp-cal-block--sessions .corp-cal-block-head {
+        @apply border-l-4 border-l-brand-500;
+    }
+
+    .corp-cal-block--due .corp-cal-block-head {
+        @apply border-l-4 border-l-rose-500;
+    }
+
+    .corp-cal-block-head {
+        @apply flex items-center gap-3 border-b border-isarva-border bg-slate-50/80 px-4 py-3.5 sm:px-5;
+    }
+
+    .corp-cal-block-icon {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-isarva-border bg-white text-slate-600 shadow-sm;
+    }
+
+    .corp-cal-block-icon--sessions {
+        @apply text-brand-700;
+    }
+
+    .corp-cal-block-icon--due {
+        @apply text-rose-700;
+    }
+
+    .corp-cal-block-copy {
+        @apply min-w-0 flex-1;
+    }
+
+    .corp-cal-block-title {
+        @apply text-base font-semibold text-isarva-heading;
+    }
+
+    .corp-cal-block-desc {
+        @apply mt-0.5 text-sm text-isarva-muted;
+    }
+
+    .corp-sidebar-badge--due {
+        @apply border-rose-200 bg-rose-50 text-rose-800;
+    }
+
+    .corp-cal-block-body {
+        @apply bg-white px-0 pb-0 pt-0;
+    }
+
+    .corp-cal-block-split {
+        @apply grid items-stretch md:grid-cols-2;
+    }
+
+    .corp-cal-col-label {
+        @apply mb-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400;
+    }
+
+    .corp-cal-block-calendar {
+        @apply min-w-0 border-b border-isarva-border p-4 sm:p-5 md:border-b-0 md:border-r;
+    }
+
+    .corp-cal-block-side {
+        @apply flex min-h-[280px] min-w-0 flex-col bg-slate-50/40 p-4 sm:p-5;
+    }
+
+    .corp-cal-day-panel {
+        @apply h-full rounded-lg border border-isarva-border bg-white px-4 py-4 shadow-sm;
+    }
+
+    .corp-cal-day-panel--sessions {
+        @apply border-l-4 border-l-cyan-500;
+    }
+
+    .corp-cal-day-panel--due {
+        @apply border-l-4 border-l-rose-500;
+    }
+
+    .corp-cal-day-panel-head {
+        @apply mb-3 flex items-start justify-between gap-3 border-b border-isarva-border pb-3;
+    }
+
+    .corp-cal-day-panel-title {
+        @apply text-base font-semibold text-isarva-heading;
+    }
+
+    .corp-cal-day-panel-meta {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .corp-cal-preview {
+        @apply h-full rounded-lg border border-isarva-border bg-white px-4 py-4 shadow-sm;
+    }
+
+    .corp-cal-preview--sessions {
+        @apply border-l-4 border-l-cyan-500;
+    }
+
+    .corp-cal-preview--due {
+        @apply border-l-4 border-l-rose-500;
+    }
+
+    .corp-cal-block .corp-cal-cards {
+        @apply space-y-0 divide-y divide-isarva-border rounded-lg border border-isarva-border bg-white;
+    }
+
+    .corp-cal-block .corp-cal-card {
+        @apply rounded-none border-0 bg-white px-4 py-3.5 shadow-none;
+    }
+
+    .corp-cal-block .corp-cal-card--link:hover {
+        @apply bg-slate-50 shadow-none;
+    }
+
+    .corp-cal-block .corp-cal-card--online,
+    .corp-cal-block .corp-cal-card--offline,
+    .corp-cal-block .corp-cal-card--due {
+        @apply bg-white;
+    }
+
+    .corp-cal-block .corp-cal-card-date {
+        @apply rounded-md border-isarva-border bg-slate-50;
+    }
+
+    .corp-cal-block .corp-cal-card-icon {
+        @apply rounded-md border border-isarva-border bg-slate-50 text-slate-600 ring-0;
+    }
+
+    .corp-cal-cards--scroll {
+        @apply max-h-[360px] overflow-y-auto;
+    }
+
+    .corp-calendar--split .corp-calendar-legend {
+        @apply mb-4 rounded-lg border-isarva-border bg-slate-50 px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 shadow-none;
+    }
+
+    .corp-calendar--split .corp-calendar-weekdays {
+        @apply mb-2 gap-1 border-b border-isarva-border pb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400;
+    }
+
+    .corp-calendar--split .corp-calendar-grid {
+        @apply gap-1;
+    }
+
+    .corp-calendar--split .corp-calendar-day {
+        @apply h-11 gap-0.5 rounded-md border border-transparent bg-white text-xs font-semibold shadow-none;
+    }
+
+    .corp-calendar--split .corp-calendar-dot {
+        @apply h-1.5 w-1.5 ring-1 ring-white;
+    }
+
+    .corp-cal-empty--side {
+        @apply flex h-full min-h-[280px] flex-col items-center justify-center rounded-lg border border-dashed border-isarva-border bg-white px-4 py-8 text-center;
+    }
+
+    .corp-calendar--compact .corp-calendar-legend {
+        @apply mb-4 py-3;
+    }
+
+    .corp-calendar--compact .corp-calendar-day {
+        @apply h-11;
+    }
+
+    .corp-calendar--compact .corp-calendar-grid {
+        @apply gap-1;
+    }
+
+    .corp-panel--calendar-side {
+        @apply min-h-0;
     }
 
     .corp-panel--calendar .corp-panel-body-calendar {
-        @apply px-4 pb-5 pt-1 sm:px-5;
+        @apply px-4 pb-6 pt-2 sm:px-6;
+    }
+
+    .corp-cal-nav {
+        @apply flex items-center gap-2;
+    }
+
+    .corp-cal-nav-btn {
+        @apply inline-flex items-center gap-1.5 rounded-md border border-isarva-border bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm transition hover:border-brand-300 hover:bg-brand-50/60 hover:text-brand-800;
+    }
+
+    .corp-cal-side-eyebrow {
+        @apply text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600;
+    }
+
+    .corp-cal-side-body {
+        @apply space-y-1 px-4 pb-5 sm:px-5;
+    }
+
+    .corp-cal-side-heading {
+        @apply mb-3 flex items-center gap-2 border-b border-isarva-border pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500;
+    }
+
+    .corp-cal-side-heading::before {
+        content: "";
+        @apply h-2 w-2 shrink-0 rounded-sm;
+    }
+
+    .corp-cal-side-heading--session::before {
+        @apply bg-cyan-500;
+    }
+
+    .corp-cal-side-heading--due::before {
+        @apply bg-rose-500;
+    }
+
+    .corp-calendar-legend-today {
+        @apply text-brand-700;
+    }
+
+    .corp-calendar-legend-due {
+        @apply text-rose-700;
+    }
+
+    .corp-calendar-legend-online {
+        @apply text-cyan-700;
+    }
+
+    .corp-calendar-legend-offline {
+        @apply text-violet-700;
+    }
+
+    .corp-cal-cards {
+        @apply list-none space-y-2 p-0;
+    }
+
+    .corp-cal-card {
+        @apply flex items-start gap-3 rounded-xl border border-isarva-border bg-white p-3.5 shadow-sm;
+    }
+
+    .corp-cal-card--link {
+        @apply transition duration-150;
+    }
+
+    .corp-cal-card--link.corp-cal-card--online:hover {
+        @apply border-cyan-300 bg-cyan-50 shadow-md;
+    }
+
+    .corp-cal-card--link.corp-cal-card--offline:hover {
+        @apply border-violet-300 bg-violet-50 shadow-md;
+    }
+
+    .corp-cal-card--link.corp-cal-card--due:hover {
+        @apply border-rose-300 bg-rose-50 shadow-md;
+    }
+
+    .corp-cal-card--online {
+        @apply border-cyan-200 bg-cyan-50/80;
+    }
+
+    .corp-cal-card--offline {
+        @apply border-violet-200 bg-violet-50/80;
+    }
+
+    .corp-cal-card--due {
+        @apply border-rose-200 bg-rose-50/80;
+    }
+
+    .corp-cal-card--online .corp-cal-card-icon {
+        @apply bg-cyan-100 text-cyan-700 ring-cyan-200;
+    }
+
+    .corp-cal-card--offline .corp-cal-card-icon {
+        @apply bg-violet-100 text-violet-700 ring-violet-200;
+    }
+
+    .corp-cal-card--due .corp-cal-card-icon {
+        @apply bg-rose-100 text-rose-700 ring-rose-200;
+    }
+
+    .corp-cal-card-date {
+        @apply flex w-12 shrink-0 flex-col items-center justify-center rounded-lg border py-2 text-center;
+    }
+
+    .corp-cal-card-date--online {
+        @apply border-cyan-300 bg-cyan-100;
+    }
+
+    .corp-cal-card-date--online .corp-cal-card-date-day {
+        @apply text-cyan-900;
+    }
+
+    .corp-cal-card-date--offline {
+        @apply border-violet-300 bg-violet-100;
+    }
+
+    .corp-cal-card-date--offline .corp-cal-card-date-day {
+        @apply text-violet-900;
+    }
+
+    .corp-cal-card-date--due {
+        @apply border-rose-300 bg-rose-100;
+    }
+
+    .corp-cal-card-date--due .corp-cal-card-date-day {
+        @apply text-rose-900;
+    }
+
+    .corp-cal-card-icon {
+        @apply mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1;
+    }
+
+    .corp-cal-card-date-day {
+        @apply text-base font-bold leading-none;
+    }
+
+    .corp-cal-card-date-month {
+        @apply mt-0.5 text-[10px] font-semibold uppercase text-slate-500;
+    }
+
+    .corp-cal-card-body {
+        @apply min-w-0 flex-1;
+    }
+
+    .corp-cal-card-top {
+        @apply flex items-start justify-between gap-2;
+    }
+
+    .corp-cal-card-title {
+        @apply text-sm font-semibold leading-snug text-isarva-heading;
+    }
+
+    .corp-cal-card-title--link {
+        @apply text-brand-700 hover:text-brand-800 hover:underline;
+    }
+
+    .corp-cal-card-meta {
+        @apply mt-1 text-xs leading-relaxed text-isarva-muted;
+    }
+
+    .corp-cal-card-action {
+        @apply mt-2 inline-flex items-center text-xs font-semibold text-brand-700 hover:text-brand-800 hover:underline;
+    }
+
+    .corp-cal-card-location {
+        @apply mt-1.5 text-xs font-medium text-isarva-heading;
+    }
+
+    .corp-cal-empty {
+        @apply rounded-lg border border-dashed border-isarva-border bg-slate-50/50 px-4 py-8 text-center;
+    }
+
+    .corp-cal-empty-title {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .corp-cal-empty-desc {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .corp-cal-empty--inline {
+        @apply border-0 bg-transparent px-1 py-6;
+    }
+
+    .corp-schedule-list {
+        @apply list-none divide-y divide-isarva-border p-0;
+    }
+
+    .corp-schedule-row {
+        @apply flex items-center gap-4 px-5 py-4 transition hover:bg-slate-50/80 sm:px-6;
+    }
+
+    .corp-schedule-date {
+        @apply flex w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-isarva-border bg-slate-50 py-2.5 text-center;
+    }
+
+    .corp-schedule-date-day {
+        @apply text-lg font-bold leading-none text-isarva-heading;
+    }
+
+    .corp-schedule-date-month {
+        @apply mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-500;
+    }
+
+    .corp-schedule-main {
+        @apply min-w-0 flex-1;
+    }
+
+    .corp-schedule-top {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .corp-schedule-title {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .corp-schedule-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide;
+    }
+
+    .corp-schedule-badge--sm {
+        @apply px-2 py-0.5 text-[9px];
+    }
+
+    .corp-calendar--split .corp-calendar-day.is-today {
+        @apply border-brand-400 bg-brand-50/70 text-brand-800 ring-1 ring-brand-200;
+    }
+
+    .corp-calendar--split .corp-calendar-day.has-due:not(.is-today):not(.is-selected) {
+        @apply border-rose-200 bg-rose-50/40 text-rose-900;
+    }
+
+    .corp-calendar--split .corp-calendar-day.has-online:not(.is-today):not(.is-selected) {
+        @apply border-cyan-200 bg-cyan-50/40 text-cyan-900;
+    }
+
+    .corp-calendar--split .corp-calendar-day.has-offline:not(.is-today):not(.is-selected) {
+        @apply border-violet-200 bg-violet-50/40 text-violet-900;
+    }
+
+    .corp-calendar--split .corp-calendar-day.has-mixed:not(.is-today):not(.is-selected) {
+        @apply border-slate-200 bg-slate-50 text-slate-800;
+    }
+
+    .corp-calendar--split .corp-calendar-day.is-selected {
+        @apply border-brand-600 bg-brand-600 text-white ring-2 ring-brand-200;
+    }
+
+    .corp-schedule-badge--online {
+        @apply border border-cyan-200 bg-cyan-50 text-cyan-800;
+    }
+
+    .corp-schedule-badge--offline {
+        @apply border border-violet-200 bg-violet-50 text-violet-800;
+    }
+
+    .corp-schedule-meta {
+        @apply mt-1 text-xs text-isarva-muted;
+    }
+
+    .corp-schedule-sep {
+        @apply mx-1 text-slate-300;
+    }
+
+    .corp-schedule-link {
+        @apply font-semibold text-brand-700 hover:text-brand-800 hover:underline;
+    }
+
+    .corp-schedule-actions {
+        @apply flex shrink-0 items-center gap-2;
+    }
+
+    .corp-session-form-section {
+        @apply border-t border-isarva-border px-5 py-6 first:border-t-0 sm:px-6 sm:py-7;
+    }
+
+    .corp-session-form-label {
+        @apply mb-1 text-xs font-bold uppercase tracking-wide text-slate-400;
+    }
+
+    .corp-session-form-hint {
+        @apply mb-5 max-w-2xl text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .corp-datetime-grid {
+        @apply grid gap-5 md:grid-cols-2 md:gap-6;
+    }
+
+    .corp-datetime-field {
+        @apply rounded-xl border border-isarva-border bg-slate-50/60 p-4 sm:p-5;
+    }
+
+    .corp-datetime-label {
+        @apply mb-3 block text-sm font-semibold text-isarva-heading;
+    }
+
+    .corp-datetime-optional {
+        @apply ml-1 text-xs font-medium normal-case text-isarva-muted;
+    }
+
+    .corp-datetime-input {
+        @apply w-full rounded-lg border border-isarva-border bg-white px-3.5 py-3 text-sm text-isarva-heading shadow-sm transition focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    }
+
+    .lms-form-grid-2 {
+        @apply grid gap-5 md:grid-cols-2 md:gap-6;
+    }
+
+    .corp-mode-grid {
+        @apply grid gap-3 sm:grid-cols-2;
+    }
+
+    .corp-mode-option {
+        @apply relative flex cursor-pointer items-center gap-3 rounded-xl border border-isarva-border bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md;
+    }
+
+    .corp-mode-option:has(.corp-mode-option-input:checked) {
+        @apply border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/15;
+    }
+
+    .corp-mode-option-input {
+        @apply sr-only;
+    }
+
+    .corp-mode-option-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500;
+    }
+
+    .corp-mode-option--online:has(.corp-mode-option-input:checked) .corp-mode-option-icon {
+        @apply bg-emerald-100 text-emerald-700;
+    }
+
+    .corp-mode-option--offline:has(.corp-mode-option-input:checked) .corp-mode-option-icon {
+        @apply bg-slate-200 text-slate-700;
+    }
+
+    .corp-mode-option-copy {
+        @apply min-w-0 flex-1;
+    }
+
+    .corp-mode-option-name {
+        @apply block text-sm font-semibold text-isarva-heading;
+    }
+
+    .corp-mode-option-desc {
+        @apply mt-0.5 block text-xs text-isarva-muted;
     }
 
     .corp-deadline-list--page {
@@ -3145,11 +3684,211 @@
     }
 
     .corp-dash-grid {
-        @apply grid w-full min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px];
+        @apply w-full min-w-0;
     }
 
     .corp-dash-primary {
         @apply min-w-0 w-full max-w-full space-y-4 overflow-x-clip;
+    }
+
+    .corp-dash-calendars {
+        @apply mb-1 grid gap-4 lg:grid-cols-2;
+    }
+
+    #calendar-sessions,
+    #calendar-due-dates {
+        scroll-margin-top: 5.5rem;
+    }
+
+    .corp-dash-cal-panel {
+        @apply flex min-h-0 min-w-0 flex-col;
+    }
+
+    .corp-dash-cal-panel--sessions .corp-dash-cal-head {
+        @apply border-l-4 border-l-brand-500;
+    }
+
+    .corp-dash-cal-panel--due .corp-dash-cal-head {
+        @apply border-l-4 border-l-rose-500;
+    }
+
+    .corp-dash-cal-stack {
+        @apply flex min-h-0 flex-1 flex-col;
+    }
+
+    .corp-dash-cal-calendar {
+        @apply min-w-0 border-b border-isarva-border p-4 sm:p-5;
+    }
+
+    .corp-dash-cal-side {
+        @apply flex min-w-0 flex-col bg-slate-50/40 p-4 sm:p-5;
+    }
+
+    .corp-dash-cal-link {
+        @apply mt-3 block border-t border-isarva-border pt-3 text-center text-xs font-semibold uppercase tracking-wide text-brand-700 hover:text-brand-800;
+    }
+
+    .corp-deadline-list--dash {
+        @apply mt-1;
+    }
+
+    .corp-dash-quicklinks {
+        @apply mt-1 overflow-hidden;
+    }
+
+    .corp-dash-quicklinks .corp-dash-cal-head {
+        @apply border-l-4 border-l-slate-300;
+    }
+
+    .corp-dash-quicklinks-grid {
+        @apply grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 sm:p-5;
+    }
+
+    .corp-dash-quicklink {
+        @apply flex items-center justify-between rounded-lg border border-isarva-border bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-800;
+    }
+
+    .corp-dash-quicklink span:last-child {
+        @apply text-xs text-slate-400;
+    }
+
+    .corp-calendar--dash .corp-calendar-legend {
+        @apply mb-3 rounded-lg border-isarva-border bg-slate-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 shadow-none;
+    }
+
+    .corp-calendar--dash .corp-calendar-weekdays {
+        @apply mb-2 gap-1 text-[10px];
+    }
+
+    .corp-calendar--dash .corp-calendar-grid {
+        @apply gap-1;
+    }
+
+    .corp-calendar--dash .corp-calendar-day {
+        @apply h-9 gap-0.5 rounded-lg text-[10px] font-semibold shadow-none;
+    }
+
+    .corp-calendar--dash .corp-calendar-dot {
+        @apply h-1.5 w-1.5 ring-1 ring-white;
+    }
+
+    .corp-calendar--dash .corp-calendar-day.has-due:not(.is-today):not(.is-selected) {
+        @apply border-rose-200 bg-rose-50/50 text-rose-900;
+    }
+
+    .corp-calendar--dash .corp-calendar-day.has-online:not(.is-today):not(.is-selected) {
+        @apply border-cyan-200 bg-cyan-50/50 text-cyan-900;
+    }
+
+    .corp-calendar--dash .corp-calendar-day.has-offline:not(.is-today):not(.is-selected) {
+        @apply border-violet-200 bg-violet-50/50 text-violet-900;
+    }
+
+    .corp-calendar--dash .corp-calendar-day.is-today {
+        @apply border-brand-400 bg-brand-50 text-brand-800 ring-1 ring-brand-200;
+    }
+
+    .corp-sidebar-panel--calendar {
+        @apply p-3.5;
+    }
+
+    .corp-sidebar-panel--sessions {
+        @apply border-l-2 border-l-brand-500;
+    }
+
+    .corp-sidebar-panel--due {
+        @apply border-l-2 border-l-rose-500;
+    }
+
+    .corp-sidebar-panel-link {
+        @apply mt-3 block border-t border-isarva-border pt-3 text-center text-xs font-semibold uppercase tracking-wide text-brand-700 hover:text-brand-800;
+    }
+
+    .corp-deadline-list--compact {
+        @apply mt-3 border-t border-isarva-border pt-2;
+    }
+
+    .corp-deadline-date--session {
+        @apply border-cyan-200 bg-cyan-50;
+    }
+
+    .corp-deadline-date--online {
+        @apply border-cyan-300 bg-cyan-50;
+    }
+
+    .corp-deadline-date--online .corp-deadline-day {
+        @apply text-cyan-900;
+    }
+
+    .corp-deadline-date--online .corp-deadline-month {
+        @apply text-cyan-700;
+    }
+
+    .corp-deadline-date--offline {
+        @apply border-violet-300 bg-violet-50;
+    }
+
+    .corp-deadline-date--offline .corp-deadline-day {
+        @apply text-violet-900;
+    }
+
+    .corp-deadline-date--offline .corp-deadline-month {
+        @apply text-violet-700;
+    }
+
+    .corp-deadline-date--due {
+        @apply border-rose-300 bg-rose-50;
+    }
+
+    .corp-deadline-date--due .corp-deadline-day {
+        @apply text-rose-900;
+    }
+
+    .corp-deadline-date--due .corp-deadline-month {
+        @apply text-rose-700;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-legend {
+        @apply mb-2 gap-x-2 gap-y-1 rounded-md bg-slate-50 px-2 py-1.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500 shadow-none;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-legend-stat {
+        @apply hidden;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-key {
+        @apply h-2 w-2 rounded-sm;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-weekdays {
+        @apply mb-1 gap-0.5 text-[8px];
+    }
+
+    .corp-calendar--sidebar .corp-calendar-grid {
+        @apply gap-0.5;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-day {
+        @apply h-7 gap-0 rounded-md text-[10px] font-semibold shadow-none;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-dot {
+        @apply h-1 w-1 ring-0;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-day.has-due:not(.is-today):not(.is-selected),
+    .corp-calendar--sidebar .corp-calendar-day.has-online:not(.is-today):not(.is-selected),
+    .corp-calendar--sidebar .corp-calendar-day.has-offline:not(.is-today):not(.is-selected),
+    .corp-calendar--sidebar .corp-calendar-day.has-mixed:not(.is-today):not(.is-selected) {
+        @apply border-slate-200 bg-slate-50 text-slate-700;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-day.is-today {
+        @apply border-brand-400 bg-brand-50 text-brand-800 ring-1 ring-brand-200;
+    }
+
+    .corp-calendar--sidebar .corp-calendar-day.is-selected {
+        @apply border-brand-600 bg-brand-600 text-white ring-1 ring-brand-200;
     }
 
     .corp-dash-sidebar {
@@ -3394,6 +4133,54 @@
         @apply flex gap-3 rounded-md px-2 py-2.5 transition hover:bg-slate-50;
     }
 
+    .corp-deadline-item--online {
+        @apply hover:bg-cyan-50/70;
+    }
+
+    .corp-deadline-item--online .corp-deadline-body {
+        @apply border-l-cyan-200;
+    }
+
+    .corp-deadline-item--offline {
+        @apply hover:bg-violet-50/70;
+    }
+
+    .corp-deadline-item--offline .corp-deadline-body {
+        @apply border-l-violet-200;
+    }
+
+    .corp-deadline-item--due {
+        @apply hover:bg-rose-50/70;
+    }
+
+    .corp-deadline-item--due .corp-deadline-body {
+        @apply border-l-rose-300;
+    }
+
+    .corp-deadline-body--due {
+        @apply border-l-rose-300;
+    }
+
+    .corp-deadline-mode {
+        @apply font-semibold;
+    }
+
+    .corp-deadline-mode--online {
+        @apply text-cyan-700;
+    }
+
+    .corp-deadline-mode--offline {
+        @apply text-violet-700;
+    }
+
+    .corp-deadline-mode--due {
+        @apply text-rose-700;
+    }
+
+    .corp-deadline-meta--due {
+        @apply text-rose-600/90;
+    }
+
     .corp-deadline-date {
         @apply flex w-11 shrink-0 flex-col items-center justify-center rounded border border-isarva-border bg-slate-50 py-1.5 text-center;
     }
@@ -3423,55 +4210,166 @@
     }
 
     .corp-calendar-legend {
-        @apply mb-4 flex flex-wrap items-center gap-4 text-[11px] text-slate-600;
+        @apply mb-5 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-isarva-border bg-white px-4 py-3.5 text-[11px] font-semibold text-slate-600 shadow-sm;
     }
 
     .corp-calendar-legend li {
         @apply flex items-center gap-2;
     }
 
+    .corp-calendar-legend-stat {
+        @apply ml-auto text-[10px] font-bold uppercase tracking-wide text-slate-400;
+    }
+
     .corp-calendar-key {
-        @apply h-3 w-3 rounded-sm border border-isarva-border;
+        @apply h-3.5 w-3.5 rounded;
     }
 
     .corp-calendar-key--today {
-        @apply border-brand-600 bg-brand-600;
+        @apply border-2 border-brand-500 bg-brand-100;
     }
 
     .corp-calendar-key--due {
-        @apply border-brand-300 bg-brand-50;
+        @apply bg-rose-500;
+    }
+
+    .corp-calendar-key--online {
+        @apply bg-cyan-500;
+    }
+
+    .corp-calendar-key--offline {
+        @apply bg-violet-500;
     }
 
     .corp-calendar-weekdays {
-        @apply mb-2 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400;
+        @apply mb-2 grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400;
     }
 
     .corp-calendar-grid {
-        @apply grid grid-cols-7 gap-1;
+        @apply grid grid-cols-7 gap-1.5;
     }
 
     .corp-calendar-cell {
-        @apply flex items-center justify-center;
+        @apply flex items-stretch justify-center;
     }
 
     .corp-calendar-day {
-        @apply flex h-8 w-8 items-center justify-center rounded text-xs font-medium text-slate-700;
+        @apply relative flex h-12 w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-transparent bg-white px-1 py-1.5 text-xs font-bold text-slate-700 no-underline transition-all duration-150;
     }
 
     .corp-panel--calendar .corp-calendar-day {
-        @apply h-9 w-9 text-sm;
+        @apply h-[3.75rem];
+    }
+
+    .corp-calendar-day-num {
+        @apply relative z-[1] leading-none;
+    }
+
+    .corp-calendar-dots {
+        @apply relative z-[1] flex items-center gap-1;
+    }
+
+    .corp-calendar-dot {
+        @apply h-2 w-2 rounded-full ring-2 ring-white;
+    }
+
+    .corp-calendar-dot--due {
+        @apply bg-rose-500;
+    }
+
+    .corp-calendar-dot--online {
+        @apply bg-cyan-500;
+    }
+
+    .corp-calendar-dot--offline {
+        @apply bg-violet-500;
     }
 
     .corp-calendar-day.is-outside {
-        @apply text-slate-300;
+        @apply bg-slate-50/50 text-slate-300;
     }
 
+    .corp-calendar-day.is-outside .corp-calendar-dot {
+        @apply opacity-50;
+    }
+
+    /* Today — soft brand blue, not black */
     .corp-calendar-day.is-today {
-        @apply bg-brand-600 font-semibold text-white;
+        @apply border-brand-500 bg-brand-50 text-brand-800 shadow-sm ring-2 ring-brand-200;
     }
 
-    .corp-calendar-day.has-event {
-        @apply border border-brand-200 bg-brand-50 font-semibold text-brand-800;
+    a.corp-calendar-day.is-today:hover {
+        @apply border-brand-600 bg-brand-100 text-brand-900;
+    }
+
+    /* Due date — red */
+    .corp-calendar-day.has-due:not(.is-today):not(.is-selected) {
+        @apply border-rose-300 bg-rose-50 text-rose-900;
+    }
+
+    a.corp-calendar-day.has-due:not(.is-today):not(.is-selected):hover {
+        @apply border-rose-400 bg-rose-100 text-rose-950 shadow-sm;
+    }
+
+    /* Online class — cyan */
+    .corp-calendar-day.has-online:not(.is-today):not(.is-selected) {
+        @apply border-cyan-300 bg-cyan-50 text-cyan-900;
+    }
+
+    a.corp-calendar-day.has-online:not(.is-today):not(.is-selected):hover {
+        @apply border-cyan-400 bg-cyan-100 text-cyan-950 shadow-sm;
+    }
+
+    /* Offline class — violet */
+    .corp-calendar-day.has-offline:not(.is-today):not(.is-selected) {
+        @apply border-violet-300 bg-violet-50 text-violet-900;
+    }
+
+    a.corp-calendar-day.has-offline:not(.is-today):not(.is-selected):hover {
+        @apply border-violet-400 bg-violet-100 text-violet-950 shadow-sm;
+    }
+
+    /* Multiple event types — neutral with dots */
+    .corp-calendar-day.has-mixed:not(.is-today):not(.is-selected) {
+        @apply border-slate-300 bg-slate-50 text-slate-800;
+    }
+
+    a.corp-calendar-day.has-mixed:not(.is-today):not(.is-selected):hover {
+        @apply border-slate-400 bg-slate-100 text-slate-900 shadow-sm;
+    }
+
+    /* Selected date */
+    .corp-calendar-day.is-selected {
+        @apply border-brand-600 bg-brand-600 text-white shadow-lg ring-4 ring-brand-200;
+    }
+
+    .corp-calendar-day.is-selected .corp-calendar-dot--due {
+        @apply bg-rose-200 ring-brand-600;
+    }
+
+    .corp-calendar-day.is-selected .corp-calendar-dot--online {
+        @apply bg-cyan-200 ring-brand-600;
+    }
+
+    .corp-calendar-day.is-selected .corp-calendar-dot--offline {
+        @apply bg-violet-200 ring-brand-600;
+    }
+
+    a.corp-calendar-day.is-selected:hover {
+        @apply border-brand-700 bg-brand-700 text-white;
+    }
+
+    /* Plain days hover */
+    a.corp-calendar-day:not(.is-today):not(.is-selected):not(.has-due):not(.has-online):not(.has-offline):not(.has-mixed):hover {
+        @apply border-slate-200 bg-slate-100 text-slate-900;
+    }
+
+    .corp-cal-cards--flush .corp-cal-card--flat {
+        @apply rounded-none border-x-0 border-t-0 shadow-none first:rounded-t-lg last:rounded-b-lg last:border-b-0;
+    }
+
+    .corp-cal-card--flat {
+        @apply border-b border-isarva-border;
     }
 
     /* ——— Dashboard charts (2-up) ——— */
@@ -3520,7 +4418,11 @@
     }
 
     .corp-chart-tooltip {
-        @apply pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100;
+        @apply pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-10 min-w-[6.5rem] -translate-x-1/2 whitespace-normal rounded-md bg-slate-800 px-2 py-1 text-center text-[10px] font-medium text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100;
+    }
+
+    .corp-chart-tooltip-range {
+        @apply mt-0.5 block text-[9px] font-normal leading-snug text-slate-300;
     }
 
     .corp-chart-tooltip::after {
@@ -3528,7 +4430,7 @@
     }
 
     .corp-chart-bar-label {
-        @apply text-center text-[10px] font-medium leading-tight text-slate-500;
+        @apply text-center text-[9px] font-medium leading-tight text-slate-500;
     }
 
     .corp-chart-snapshot {

@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SessionDeliveryMode;
 use App\Enums\SubmissionDeliveryMethod;
 use App\Enums\SubmissionSource;
 use App\Enums\SubmissionStatus;
 use App\Enums\UserRole;
 use App\Models\Answer;
 use App\Models\Assignment;
+use App\Models\ClassSession;
 use App\Models\Course;
 use App\Models\Question;
 use App\Models\Submission;
@@ -121,6 +123,49 @@ class LmsSeeder extends Seeder
                 'delivery_method' => SubmissionDeliveryMethod::File,
                 'due_at' => now()->addDays(10),
                 'is_published' => true,
+            ]
+        );
+
+        ClassSession::query()->updateOrCreate(
+            [
+                'course_id' => $course->id,
+                'starts_at' => now()->setDate(now()->year, now()->month, 18)->setTime(10, 0),
+            ],
+            [
+                'created_by' => $lecturer->id,
+                'title' => 'ML Lecture — Supervised learning',
+                'ends_at' => now()->setDate(now()->year, now()->month, 18)->setTime(11, 30),
+                'mode' => SessionDeliveryMode::Online,
+                'meeting_link' => 'https://meet.google.com/demo-ds501-lecture',
+                'notes' => 'Join 5 minutes early. Slides will be shared after class.',
+            ]
+        );
+
+        ClassSession::query()->updateOrCreate(
+            [
+                'course_id' => $course->id,
+                'starts_at' => now()->setDate(now()->year, now()->month, 18)->setTime(14, 0),
+            ],
+            [
+                'created_by' => $lecturer->id,
+                'title' => 'Lab session — Linear regression workshop',
+                'ends_at' => now()->setDate(now()->year, now()->month, 18)->setTime(16, 0),
+                'mode' => SessionDeliveryMode::Offline,
+                'location' => 'Room 204, Data Science Block',
+            ]
+        );
+
+        ClassSession::query()->updateOrCreate(
+            [
+                'course_id' => $course2->id,
+                'starts_at' => now()->addDays(4)->setTime(9, 30),
+            ],
+            [
+                'created_by' => $lecturer->id,
+                'title' => 'Data pipelines overview',
+                'ends_at' => now()->addDays(4)->setTime(11, 0),
+                'mode' => SessionDeliveryMode::Online,
+                'meeting_link' => 'https://meet.google.com/demo-ds502-pipelines',
             ]
         );
 
@@ -254,5 +299,6 @@ class LmsSeeder extends Seeder
         $this->command?->info('');
         $this->command?->info('Cloud link demo: DS501 → Semester Project Package (student1 & student2 submitted links)');
         $this->command?->info('File upload demo: DS501 → Linear Regression Lab, Model Evaluation Report');
+        $this->command?->info('Class schedule demo: Calendar → click 18th for online + offline classes');
     }
 }

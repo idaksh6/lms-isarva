@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Assignment;
+use App\Models\ClassSession;
 use App\Models\Course;
 use App\Models\Submission;
 use App\Models\User;
@@ -44,6 +45,25 @@ class LmsQuery
                 ->where('user_id', $user->id)
                 ->with(['assignment.course'])
                 ->latest('submitted_at'),
+        };
+    }
+
+    public static function classSessionsFor(User $user): Builder
+    {
+        return match (true) {
+            $user->isAdmin() => ClassSession::query()
+                ->with(['course.lecturer'])
+                ->orderBy('starts_at'),
+            $user->isLecturer() => ClassSession::query()
+                ->whereHas('course', fn ($q) => $q->where('lecturer_id', $user->id))
+                ->with(['course'])
+                ->orderBy('starts_at'),
+            default => ClassSession::query()
+                ->whereHas('course', fn ($q) => $q
+                    ->where('is_active', true)
+                    ->whereHas('students', fn ($s) => $s->where('users.id', $user->id)))
+                ->with(['course'])
+                ->orderBy('starts_at'),
         };
     }
 

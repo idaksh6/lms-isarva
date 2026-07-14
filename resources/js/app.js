@@ -5,6 +5,7 @@ import lmsFileUpload from './lms-file-upload';
 import lmsSingleFileUpload from './lms-single-file-upload';
 import lmsThemePicker from './lms-theme-picker';
 import lmsUserGuide from './lms-user-guide';
+import './lms-calendar-scroll';
 
 window.Alpine = Alpine;
 

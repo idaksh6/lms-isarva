@@ -8,6 +8,7 @@
         request()->routeIs('courses.edit') => 'edit',
         request()->routeIs('courses.enrollments.*') => 'enrollments',
         request()->routeIs('courses.assignments.create') => 'assignment',
+        request()->routeIs('courses.sessions.*', 'class-sessions.*') => 'sessions',
         default => 'show',
     };
 
@@ -82,6 +83,14 @@
                ])
                @if ($active === 'assignment') aria-current="page" @endif>
                 New assignment
+            </a>
+            <a href="{{ route('courses.sessions.index', $course) }}"
+               @class([
+                   'lms-course-hero-tab',
+                   'lms-course-hero-tab--active' => $active === 'sessions',
+               ])
+               @if ($active === 'sessions') aria-current="page" @endif>
+                Class schedule
             </a>
         </nav>
     @endcan

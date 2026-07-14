@@ -109,6 +109,12 @@ class CourseController extends Controller
             'students',
         ]);
 
+        $upcomingSessions = $course->classSessions()
+            ->where('starts_at', '>=', now()->startOfDay())
+            ->orderBy('starts_at')
+            ->limit(5)
+            ->get();
+
         $submissionsByAssignment = collect();
         if (request()->user()->isStudent()) {
             $submissionsByAssignment = request()->user()
@@ -118,7 +124,7 @@ class CourseController extends Controller
                 ->keyBy('assignment_id');
         }
 
-        return view('courses.show', compact('course', 'submissionsByAssignment'));
+        return view('courses.show', compact('course', 'submissionsByAssignment', 'upcomingSessions'));
     }
 
     public function edit(Course $course): View

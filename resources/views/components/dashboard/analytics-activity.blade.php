@@ -13,10 +13,10 @@
                     : 8;
                 $countLabel = $item['value'] === 1 ? '1 submission' : $item['value'].' submissions';
             @endphp
-            <div class="corp-chart-bar group" role="listitem">
+            <div class="corp-chart-bar group" role="listitem" title="{{ $item['range'] ?? $item['label'] }} · {{ $countLabel }}">
                 <div class="corp-chart-bar-track">
                     <div class="corp-chart-bar-fill {{ $item['value'] > 0 ? '' : 'corp-chart-bar-fill--empty' }}" style="height: {{ $height }}%"></div>
-                    <span class="corp-chart-tooltip" role="tooltip">{{ $countLabel }}</span>
+                    <span class="corp-chart-tooltip" role="tooltip">{{ $countLabel }}<span class="corp-chart-tooltip-range">{{ $item['range'] ?? $item['label'] }}</span></span>
                 </div>
                 <span class="corp-chart-bar-label">{{ $item['label'] }}</span>
             </div>

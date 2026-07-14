@@ -5,7 +5,10 @@
 <div class="corp-charts-row">
     <section class="corp-panel corp-panel--chart">
         <div class="corp-panel-head corp-panel-head--compact">
-            <h2 class="corp-panel-title">Weekly activity</h2>
+            <div>
+                <h2 class="corp-panel-title">Weekly activity</h2>
+                <p class="corp-panel-desc">Submissions grouped by week, based on submitted date.</p>
+            </div>
             @if ($reportsUrl)
                 <a href="{{ $reportsUrl }}" class="corp-panel-link">Reports</a>
             @endif

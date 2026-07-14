@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Enums\SessionDeliveryMode;
 use App\Enums\SubmissionStatus;
 use App\Enums\UserRole;
 use App\Models\Announcement;
 use App\Models\Answer;
 use App\Models\Assignment;
+use App\Models\ClassSession;
 use App\Models\Course;
 use App\Models\Question;
 use App\Models\Submission;
@@ -81,6 +83,75 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)->get(route('questions.index'))->assertOk();
         $this->actingAs($student)->get(route('reports.index'))->assertForbidden();
         $this->actingAs($student)->get(route('gradebook.index'))->assertForbidden();
+    }
+
+    public function test_lecturer_can_schedule_class_session_and_student_sees_it_on_calendar_day(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $startsAt = now()->addDays(4)->setTime(10, 0);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.sessions.store', $course), [
+                'title' => 'Week 4 lecture',
+                'starts_at' => $startsAt->format('Y-m-d\TH:i'),
+                'ends_at' => $startsAt->copy()->addHours(2)->format('Y-m-d\TH:i'),
+                'mode' => SessionDeliveryMode::Online->value,
+                'meeting_link' => 'https://meet.google.com/abc-defg-hij',
+            ])
+            ->assertRedirect(route('courses.sessions.index', $course));
+
+        $session = ClassSession::query()->first();
+        $this->assertNotNull($session);
+        $this->assertSame(SessionDeliveryMode::Online, $session->mode);
+
+        $date = $startsAt->format('Y-m-d');
+
+        $this->actingAs($student)
+            ->get(route('calendar.index', [
+                'month' => $startsAt->month,
+                'year' => $startsAt->year,
+                'date' => $date,
+            ]))
+            ->assertOk()
+            ->assertSee('Week 4 lecture')
+            ->assertSee('Online')
+            ->assertSee('Join online class');
+    }
+
+    public function test_offline_class_requires_location(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.sessions.store', $course), [
+                'starts_at' => now()->addDay()->format('Y-m-d\TH:i'),
+                'mode' => SessionDeliveryMode::Offline->value,
+            ])
+            ->assertSessionHasErrors('location');
+    }
+
+    public function test_lecturer_cannot_edit_another_courses_class_session(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $otherLecturer = $this->makeLecturer();
+        $course = $this->makeCourse($otherLecturer);
+
+        $session = ClassSession::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $otherLecturer->id,
+            'starts_at' => now()->addDay()->setTime(9, 0),
+            'mode' => SessionDeliveryMode::Online,
+            'meeting_link' => 'https://meet.google.com/other-class',
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('class-sessions.edit', $session))
+            ->assertForbidden();
     }
 
     public function test_lecturer_can_grade_submission(): void

@@ -24,6 +24,51 @@
     </section>
 @endif
 
+@if ($upcomingSessions->isNotEmpty())
+    <section class="lms-panel mb-6">
+        <div class="lms-panel-header">
+            <div class="flex items-center gap-2">
+                <h2 class="lms-panel-title">Upcoming classes</h2>
+                <span class="lms-panel-count">{{ $upcomingSessions->count() }}</span>
+            </div>
+            <a href="{{ route('calendar.index') }}" class="lms-btn-secondary lms-btn-secondary--sm">Open calendar</a>
+        </div>
+        <div class="lms-panel-body p-0">
+            <ul class="corp-cal-cards corp-cal-cards--flush">
+                @foreach ($upcomingSessions as $session)
+                    <li>
+                        <div @class([
+                            'corp-cal-card corp-cal-card--flat',
+                            'corp-cal-card--online' => $session->mode === \App\Enums\SessionDeliveryMode::Online,
+                            'corp-cal-card--offline' => $session->mode === \App\Enums\SessionDeliveryMode::Offline,
+                        ])>
+                            <div @class([
+                                'corp-cal-card-date',
+                                'corp-cal-card-date--online' => $session->mode === \App\Enums\SessionDeliveryMode::Online,
+                                'corp-cal-card-date--offline' => $session->mode === \App\Enums\SessionDeliveryMode::Offline,
+                            ])>
+                                <span class="corp-cal-card-date-day">{{ $session->starts_at->format('d') }}</span>
+                                <span class="corp-cal-card-date-month">{{ $session->starts_at->format('M') }}</span>
+                            </div>
+                            <div class="corp-cal-card-body">
+                                <div class="corp-cal-card-top">
+                                    <p class="corp-cal-card-title">{{ $session->displayTitle() }}</p>
+                                    <span @class([
+                                        'corp-schedule-badge corp-schedule-badge--sm',
+                                        'corp-schedule-badge--online' => $session->mode === \App\Enums\SessionDeliveryMode::Online,
+                                        'corp-schedule-badge--offline' => $session->mode === \App\Enums\SessionDeliveryMode::Offline,
+                                    ])>{{ $session->mode->label() }}</span>
+                                </div>
+                                <p class="corp-cal-card-meta">{{ $session->timeRangeLabel() }}@if ($session->location) · {{ $session->location }}@endif</p>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </section>
+@endif
+
 <section class="lms-panel">
     <div class="lms-panel-header">
         <h2 class="lms-panel-title">Assignments</h2>

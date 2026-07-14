@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SessionDeliveryMode;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\User;
 use App\Support\DashboardAnalytics;
 use App\Support\DashboardMetrics;
+use App\Support\LmsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -17,7 +19,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $upcoming = $this->upcomingAssignments($user);
-        $highlightDates = $upcoming->pluck('due_at')->filter()->map(fn ($d) => $d->format('Y-m-d'))->unique()->values();
+        $calendar = $this->monthCalendarSnapshot($user);
 
         if ($user->isAdmin()) {
             $recentCourses = Course::query()->with('lecturer')->withCount(['students', 'assignments'])->latest()->take(6)->get();
@@ -32,7 +34,7 @@ class DashboardController extends Controller
                     ? DashboardMetrics::adminCourseProgress($recentCourses->first())
                     : 0,
                 'upcoming' => $upcoming,
-                'highlightDates' => $highlightDates,
+                ...$calendar,
             ]);
         }
 
@@ -49,7 +51,7 @@ class DashboardController extends Controller
                     ? DashboardMetrics::lecturerCourseProgress($courses->first())
                     : 0,
                 'upcoming' => $upcoming,
-                'highlightDates' => $highlightDates,
+                ...$calendar,
             ]);
         }
 
@@ -83,7 +85,7 @@ class DashboardController extends Controller
             'featuredProgress' => $featured ? DashboardMetrics::studentCourseProgress($user, $featured) : 0,
             'openAssignments' => $openAssignments,
             'upcoming' => $upcoming,
-            'highlightDates' => $highlightDates,
+            ...$calendar,
         ]);
     }
 
@@ -104,5 +106,57 @@ class DashboardController extends Controller
         }
 
         return $query->take(6)->get();
+    }
+
+    /**
+     * @return array{
+     *     sessionEventsByDate: array<string, array{online: bool, offline: bool}>,
+     *     dueEventsByDate: array<string, array{due: bool}>,
+     *     upcomingSessions: Collection
+     * }
+     */
+    private function monthCalendarSnapshot(User $user): array
+    {
+        $month = now();
+        $rangeStart = $month->copy()->startOfMonth()->startOfWeek()->startOfDay();
+        $rangeEnd = $month->copy()->endOfMonth()->endOfWeek()->endOfDay();
+
+        $assignments = LmsQuery::assignmentsFor($user)
+            ->where('is_published', true)
+            ->whereNotNull('due_at')
+            ->whereBetween('due_at', [$rangeStart, $rangeEnd])
+            ->get();
+
+        $sessions = LmsQuery::classSessionsFor($user)
+            ->whereBetween('starts_at', [$rangeStart, $rangeEnd])
+            ->with('course')
+            ->orderBy('starts_at')
+            ->get();
+
+        $sessionEventsByDate = [];
+        foreach ($sessions->groupBy(fn ($s) => $s->starts_at->format('Y-m-d')) as $day => $daySessions) {
+            $sessionEventsByDate[$day] = [
+                'online' => $daySessions->contains(fn ($s) => $s->mode === SessionDeliveryMode::Online),
+                'offline' => $daySessions->contains(fn ($s) => $s->mode === SessionDeliveryMode::Offline),
+            ];
+        }
+
+        $dueEventsByDate = [];
+        foreach ($assignments->groupBy(fn ($a) => $a->due_at->format('Y-m-d'))->keys() as $day) {
+            $dueEventsByDate[$day] = ['due' => true];
+        }
+
+        $upcomingSessions = LmsQuery::classSessionsFor($user)
+            ->where('starts_at', '>=', now()->startOfDay())
+            ->with('course')
+            ->orderBy('starts_at')
+            ->take(4)
+            ->get();
+
+        return [
+            'sessionEventsByDate' => $sessionEventsByDate,
+            'dueEventsByDate' => $dueEventsByDate,
+            'upcomingSessions' => $upcomingSessions,
+        ];
     }
 }

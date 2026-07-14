@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SessionDeliveryMode;
 use App\Support\LmsQuery;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,23 +20,106 @@ class CalendarController extends Controller
         $start = $date->copy()->startOfMonth()->startOfWeek();
         $end = $date->copy()->endOfMonth()->endOfWeek();
 
+        $rangeStart = $start->copy()->startOfDay();
+        $rangeEnd = $end->copy()->endOfDay();
+
         $assignments = LmsQuery::assignmentsFor($user)
             ->where('is_published', true)
             ->whereNotNull('due_at')
-            ->whereBetween('due_at', [$start->copy()->startOfDay(), $end->copy()->endOfDay()])
+            ->whereBetween('due_at', [$rangeStart, $rangeEnd])
             ->with('course')
             ->orderBy('due_at')
             ->get()
             ->groupBy(fn ($a) => $a->due_at->format('Y-m-d'));
 
-        $highlightDates = $assignments->keys()->all();
+        $sessions = LmsQuery::classSessionsFor($user)
+            ->whereBetween('starts_at', [$rangeStart, $rangeEnd])
+            ->with('course')
+            ->orderBy('starts_at')
+            ->get()
+            ->groupBy(fn ($s) => $s->starts_at->format('Y-m-d'));
+
+        $sessionEventsByDate = [];
+        foreach ($sessions as $day => $daySessions) {
+            $sessionEventsByDate[$day] = [
+                'online' => $daySessions->contains(fn ($s) => $s->mode === SessionDeliveryMode::Online),
+                'offline' => $daySessions->contains(fn ($s) => $s->mode === SessionDeliveryMode::Offline),
+            ];
+        }
+
+        $dueEventsByDate = [];
+        foreach ($assignments->keys() as $day) {
+            $dueEventsByDate[$day] = ['due' => true];
+        }
+
+        $selectedSessionDate = $this->parseDateParam($request->string('session_date')->toString());
+        $selectedDueDate = $this->parseDateParam($request->string('due_date')->toString());
+
+        // Backward compatibility: legacy ?date= still opens the session calendar day.
+        if (! $selectedSessionDate && ! $selectedDueDate) {
+            $legacyDate = $this->parseDateParam($request->string('date')->toString());
+            if ($legacyDate) {
+                $key = $legacyDate->format('Y-m-d');
+                if ($sessions->has($key)) {
+                    $selectedSessionDate = $legacyDate;
+                } elseif ($assignments->has($key)) {
+                    $selectedDueDate = $legacyDate;
+                } else {
+                    $selectedSessionDate = $legacyDate;
+                }
+            }
+        }
+
+        $selectedSessionSessions = collect();
+        if ($selectedSessionDate) {
+            $key = $selectedSessionDate->format('Y-m-d');
+            $selectedSessionSessions = $sessions->get($key, collect());
+        }
+
+        $selectedDueAssignments = collect();
+        if ($selectedDueDate) {
+            $key = $selectedDueDate->format('Y-m-d');
+            $selectedDueAssignments = $assignments->get($key, collect());
+        }
+
+        $monthAssignments = $assignments->flatten()->sortBy('due_at');
+        $monthSessions = $sessions->flatten()->sortBy('starts_at');
+
+        $calendarQuery = array_filter([
+            'month' => $month,
+            'year' => $year,
+            'session_date' => $selectedSessionDate?->format('Y-m-d'),
+            'due_date' => $selectedDueDate?->format('Y-m-d'),
+        ]);
 
         return view('hubs.calendar', [
             'date' => $date,
             'start' => $start,
             'end' => $end,
             'assignmentsByDate' => $assignments,
-            'highlightDates' => $highlightDates,
+            'sessionsByDate' => $sessions,
+            'sessionEventsByDate' => $sessionEventsByDate,
+            'dueEventsByDate' => $dueEventsByDate,
+            'monthAssignments' => $monthAssignments,
+            'monthSessions' => $monthSessions,
+            'selectedSessionDate' => $selectedSessionDate,
+            'selectedDueDate' => $selectedDueDate,
+            'selectedSessionSessions' => $selectedSessionSessions,
+            'selectedDueAssignments' => $selectedDueAssignments,
+            'calendarQuery' => $calendarQuery,
         ]);
+    }
+
+    private function parseDateParam(string $value): ?Carbon
+    {
+        if ($value === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->startOfDay();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

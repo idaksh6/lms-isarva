@@ -6,6 +6,7 @@ use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentHubController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
@@ -45,6 +46,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('courses.assignments.create');
     Route::post('courses/{course}/assignments', [AssignmentController::class, 'store'])
         ->name('courses.assignments.store');
+
+    Route::get('courses/{course}/sessions', [ClassSessionController::class, 'index'])
+        ->name('courses.sessions.index');
+    Route::get('courses/{course}/sessions/create', [ClassSessionController::class, 'create'])
+        ->name('courses.sessions.create');
+    Route::post('courses/{course}/sessions', [ClassSessionController::class, 'store'])
+        ->name('courses.sessions.store');
+    Route::get('class-sessions/{classSession}/edit', [ClassSessionController::class, 'edit'])
+        ->name('class-sessions.edit');
+    Route::patch('class-sessions/{classSession}', [ClassSessionController::class, 'update'])
+        ->name('class-sessions.update');
+    Route::delete('class-sessions/{classSession}', [ClassSessionController::class, 'destroy'])
+        ->name('class-sessions.destroy');
 
     Route::get('assignments', [AssignmentHubController::class, 'index'])->name('assignments.index');
     Route::get('assignments/{assignment}', [AssignmentController::class, 'show'])

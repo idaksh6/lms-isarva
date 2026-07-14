@@ -69,7 +69,7 @@ class DashboardAnalytics
     }
 
     /**
-     * @return array<int, array{label: string, value: int}>
+     * @return array<int, array{label: string, range: string, value: int}>
      */
     private static function weeklyActivity(Builder $query): array
     {
@@ -78,9 +78,13 @@ class DashboardAnalytics
         for ($i = 5; $i >= 0; $i--) {
             $start = now()->subWeeks($i)->startOfWeek();
             $end = now()->subWeeks($i)->endOfWeek();
+            $range = $start->isSameMonth($end)
+                ? $start->format('M j').'–'.$end->format('j')
+                : $start->format('M j').' – '.$end->format('M j');
 
             $weeks[] = [
-                'label' => $i === 0 ? 'This wk' : $start->format('M j'),
+                'label' => $i === 0 ? 'This week' : $range,
+                'range' => $start->format('M j').' – '.$end->format('M j, Y'),
                 'value' => (clone $query)->whereBetween('submitted_at', [$start, $end])->count(),
             ];
         }

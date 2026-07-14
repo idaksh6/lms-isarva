@@ -7,9 +7,8 @@
 
 <aside class="lms-sidebar" :class="{ 'is-open': sidebarOpen }" @keydown.escape.window="sidebarOpen = false">
     <div class="lms-sidebar-inner">
-        <div class="flex items-center justify-between lg:hidden">
-            <span class="text-xs font-semibold lms-sidebar-mobile-label">Menu</span>
-            <button type="button" @click="sidebarOpen = false" class="lms-sidebar-close-btn" aria-label="Close">
+        <div class="flex items-center justify-end lg:hidden">
+            <button type="button" @click="sidebarOpen = false" class="lms-sidebar-close-btn" aria-label="Close menu">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>

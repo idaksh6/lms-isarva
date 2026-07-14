@@ -35,6 +35,8 @@
 
             @include('dashboard.partials.analytics')
 
+            @include('dashboard.partials.calendars-primary')
+
             <section class="corp-panel">
                 <div class="corp-panel-head">
                     <div>
@@ -72,8 +74,8 @@
                 @endif
             </section>
         </div>
-
-        @include('dashboard.partials.aside', ['upcoming' => $upcoming, 'highlightDates' => $highlightDates])
     </div>
+
+    @include('dashboard.partials.quick-links')
 </div>
 @endsection
