@@ -2,10 +2,12 @@
     'course',
     'meta' => '',
     'progress' => 0,
+    'tasks' => null,
 ])
 
 @php
     $pct = min(100, max(0, (int) $progress));
+    $taskCount = $tasks ?? $course->assignments_count ?? null;
 @endphp
 
 <tr {{ $attributes->merge(['class' => 'corp-table-row group']) }}>
@@ -21,12 +23,16 @@
         </a>
     </td>
     <td class="corp-table-cell corp-table-cell--progress">
-        <div class="corp-progress-inline">
-            <div class="corp-progress-track corp-progress-track--sm" role="presentation">
-                <div class="corp-progress-fill" style="width: {{ $pct }}%"></div>
+        @if ($taskCount === 0)
+            <span class="corp-progress-empty">No tasks yet</span>
+        @else
+            <div class="corp-progress-inline">
+                <div class="corp-progress-track corp-progress-track--sm" role="presentation">
+                    <div class="corp-progress-fill" style="width: {{ $pct }}%"></div>
+                </div>
+                <span class="corp-progress-pct">{{ $pct }}%</span>
             </div>
-            <span class="corp-progress-pct">{{ $pct }}%</span>
-        </div>
+        @endif
     </td>
     <td class="corp-table-cell corp-table-cell--action">
         <a href="{{ route('courses.show', $course) }}" class="corp-table-action">Open</a>

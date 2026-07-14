@@ -58,7 +58,7 @@ class DashboardMetrics
             ->count();
 
         if ($published === 0) {
-            return $course->students_count > 0 ? 50 : 0;
+            return 0;
         }
 
         $assignmentIds = Assignment::query()
