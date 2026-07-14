@@ -10,8 +10,10 @@
     <div class="lms-page-grid-2">
         <section class="lms-panel">
             <div class="lms-panel-header">
-                <h2 class="lms-panel-title">Enrolled students</h2>
-                <span class="lms-panel-count">{{ $course->students->count() }}</span>
+                <div class="lms-panel-heading">
+                    <h2 class="lms-panel-title">Enrolled students</h2>
+                    <span class="lms-panel-count">{{ $course->students->count() }}</span>
+                </div>
             </div>
             <div class="lms-panel-body">
                 @if ($course->students->isEmpty())
@@ -44,10 +46,12 @@
 
         <section class="lms-panel">
             <div class="lms-panel-header">
-                <h2 class="lms-panel-title">Add students</h2>
-                @if ($availableStudents->isNotEmpty())
-                    <span class="lms-panel-count">{{ $availableStudents->count() }} available</span>
-                @endif
+                <div class="lms-panel-heading">
+                    <h2 class="lms-panel-title">Add students</h2>
+                    @if ($availableStudents->isNotEmpty())
+                        <span class="lms-panel-count">{{ $availableStudents->count() }} available</span>
+                    @endif
+                </div>
             </div>
             <div class="lms-panel-body">
                 @if ($availableStudents->isEmpty())
@@ -58,7 +62,7 @@
                     <form
                         method="POST"
                         action="{{ route('courses.enrollments.store', $course) }}"
-                        class="space-y-4"
+                        class="lms-enrollment-form"
                         x-data="{
                             query: '',
                             visibleCount: {{ $availableStudents->count() }},
@@ -105,17 +109,14 @@
                                     x-show="matches(@js($student->name), @js($student->email), @js($student->student_id ?? ''))"
                                     x-cloak
                                 >
-                                    <input type="checkbox" name="student_ids[]" value="{{ $student->id }}">
-                                    <span class="lms-student-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</span>
-                                    <span class="min-w-0 flex-1">
+                                    <input type="checkbox" name="student_ids[]" value="{{ $student->id }}" class="mt-1 shrink-0 sm:mt-0">
+                                    <span class="lms-student-avatar shrink-0">{{ strtoupper(substr($student->name, 0, 1)) }}</span>
+                                    <span class="lms-student-picker-copy">
                                         <span class="block truncate font-medium text-isarva-heading">{{ $student->name }}</span>
-                                        <span class="block truncate text-xs text-isarva-muted">
-                                            @if ($student->student_id)
-                                                {{ $student->student_id }} · {{ $student->email }}
-                                            @else
-                                                {{ $student->email }}
-                                            @endif
-                                        </span>
+                                        @if ($student->student_id)
+                                            <span class="lms-student-picker-meta">{{ $student->student_id }}</span>
+                                        @endif
+                                        <span class="lms-student-picker-meta">{{ $student->email }}</span>
                                     </span>
                                 </label>
                             @endforeach

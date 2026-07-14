@@ -9,7 +9,7 @@
 
     <section class="lms-panel">
         <div class="lms-panel-header">
-            <div class="flex items-center gap-2">
+            <div class="lms-panel-heading">
                 <h2 class="lms-panel-title">Class schedule</h2>
                 <span class="lms-panel-count">{{ $sessions->count() }}</span>
             </div>

@@ -21,7 +21,7 @@
         <p class="lms-form-desc">Set the date, time, and delivery mode. Students will see this on the calendar.</p>
     </div>
 
-    <div class="corp-session-form-section">
+    <div class="corp-session-form-section corp-session-form-section--first">
         <h3 class="corp-session-form-label">Session details</h3>
         <div class="lms-form-field">
             <label for="title" class="lms-field-label">Title <span class="text-isarva-muted font-normal">(optional)</span></label>

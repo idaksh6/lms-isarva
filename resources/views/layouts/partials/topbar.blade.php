@@ -1,4 +1,12 @@
 <header class="lms-topbar">
+    @php
+        $topbarTitle = match (true) {
+            $__env->hasSection('page_title') => trim($__env->yieldContent('page_title')),
+            request()->routeIs('dashboard') => e('Dashboard'),
+            $__env->hasSection('title') => trim($__env->yieldContent('title')),
+            default => e(config('app.name')),
+        };
+    @endphp
     <div class="lms-topbar-row">
         <div class="lms-topbar-left">
             <button type="button"
@@ -8,15 +16,7 @@
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
 
-            <h1 class="lms-page-title">
-                @hasSection('page_title')
-                    @yield('page_title')
-                @elseif (request()->routeIs('dashboard'))
-                    Dashboard
-                @else
-                    @yield('title', config('app.name'))
-                @endif
-            </h1>
+            <h1 class="lms-page-title" title="{!! $topbarTitle !!}">{!! $topbarTitle !!}</h1>
         </div>
 
         <form action="{{ route('courses.index') }}" method="GET" class="lms-search">
