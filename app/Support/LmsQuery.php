@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Assessment;
 use App\Models\Assignment;
 use App\Models\ClassSession;
 use App\Models\Course;
@@ -64,6 +65,26 @@ class LmsQuery
                     ->whereHas('students', fn ($s) => $s->where('users.id', $user->id)))
                 ->with(['course'])
                 ->orderBy('starts_at'),
+        };
+    }
+
+    public static function assessmentsFor(User $user): Builder
+    {
+        return match (true) {
+            $user->isAdmin() => Assessment::query()
+                ->with(['course.lecturer'])
+                ->latest(),
+            $user->isLecturer() => Assessment::query()
+                ->whereHas('course', fn ($q) => $q->where('lecturer_id', $user->id))
+                ->with(['course'])
+                ->latest(),
+            default => Assessment::query()
+                ->where('is_published', true)
+                ->whereHas('course', fn ($q) => $q
+                    ->where('is_active', true)
+                    ->whereHas('students', fn ($s) => $s->where('users.id', $user->id)))
+                ->with(['course'])
+                ->latest(),
         };
     }
 

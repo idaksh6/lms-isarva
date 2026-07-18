@@ -191,10 +191,10 @@
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                 </div>
                 <div class="corp-cal-block-copy">
-                    <h3 class="corp-cal-block-title">Assignment due dates</h3>
-                    <p class="corp-cal-block-desc">Deadlines only — separate from class days so nothing gets crowded.</p>
+                    <h3 class="corp-cal-block-title">Due dates</h3>
+                    <p class="corp-cal-block-desc">Assignment and assessment deadlines — separate from class days.</p>
                 </div>
-                <span class="corp-sidebar-badge corp-sidebar-badge--due">{{ $monthAssignments->count() }} due</span>
+                <span class="corp-sidebar-badge corp-sidebar-badge--due">{{ $monthAssignments->count() + $monthAssessments->count() }} due</span>
             </div>
 
             <div class="corp-cal-block-body">
@@ -215,7 +215,7 @@
                     </div>
 
                     <aside class="corp-cal-block-side">
-                        <p class="corp-cal-col-label">Assignment details</p>
+                        <p class="corp-cal-col-label">Deadline details</p>
                         @if ($selectedDueDate)
                             <div class="corp-cal-day-panel corp-cal-day-panel--due">
                                 <div class="corp-cal-day-panel-head">
@@ -223,13 +223,13 @@
                                         <p class="corp-cal-side-eyebrow">Selected due day</p>
                                         <h4 class="corp-cal-day-panel-title">{{ $selectedDueDate->format('l, F j') }}</h4>
                                         <p class="corp-cal-day-panel-meta">
-                                            {{ $selectedDueAssignments->count() }} assignment{{ $selectedDueAssignments->count() === 1 ? '' : 's' }} due
+                                            {{ $selectedDueAssignments->count() + $selectedDueAssessments->count() }} item{{ ($selectedDueAssignments->count() + $selectedDueAssessments->count()) === 1 ? '' : 's' }} due
                                         </p>
                                     </div>
                                     <a href="{{ route('calendar.index', $clearDueQuery) }}" class="lms-btn-secondary lms-btn-secondary--xs">Clear</a>
                                 </div>
 
-                                @if ($selectedDueAssignments->isNotEmpty())
+                                @if ($selectedDueAssignments->isNotEmpty() || $selectedDueAssessments->isNotEmpty())
                                     <ul class="corp-cal-cards corp-cal-cards--scroll">
                                         @foreach ($selectedDueAssignments as $assignment)
                                             <li class="corp-cal-card corp-cal-card--due">
@@ -238,19 +238,30 @@
                                                 </div>
                                                 <div class="corp-cal-card-body">
                                                     <a href="{{ route('assignments.show', $assignment) }}" class="corp-cal-card-title corp-cal-card-title--link">{{ $assignment->title }}</a>
-                                                    <p class="corp-cal-card-meta">{{ $assignment->course->code }} · Due {{ $assignment->due_at->format('g:i A') }}</p>
+                                                    <p class="corp-cal-card-meta">{{ $assignment->course->code }} · Assignment · Due {{ $assignment->due_at->format('g:i A') }}</p>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                        @foreach ($selectedDueAssessments as $assessment)
+                                            <li class="corp-cal-card corp-cal-card--due">
+                                                <div class="corp-cal-card-icon" aria-hidden="true">
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </div>
+                                                <div class="corp-cal-card-body">
+                                                    <a href="{{ route('assessments.show', $assessment) }}" class="corp-cal-card-title corp-cal-card-title--link">{{ $assessment->title }}</a>
+                                                    <p class="corp-cal-card-meta">{{ $assessment->course->code }} · Assessment · Due {{ $assessment->due_at->format('g:i A') }}</p>
                                                 </div>
                                             </li>
                                         @endforeach
                                     </ul>
                                 @else
                                     <div class="corp-cal-empty corp-cal-empty--inline">
-                                        <p class="corp-cal-empty-title">No assignments due on this date</p>
+                                        <p class="corp-cal-empty-title">Nothing due on this date</p>
                                         <p class="corp-cal-empty-desc">Pick another day on the calendar.</p>
                                     </div>
                                 @endif
                             </div>
-                        @elseif ($monthAssignments->isNotEmpty())
+                        @elseif ($monthAssignments->isNotEmpty() || $monthAssessments->isNotEmpty())
                             <div class="corp-cal-preview corp-cal-preview--due">
                                 <h4 class="corp-cal-side-heading corp-cal-side-heading--due">Due this month</h4>
                                 <ul class="corp-cal-cards corp-cal-cards--scroll">
@@ -263,7 +274,21 @@
                                                 </div>
                                                 <div class="corp-cal-card-body">
                                                     <p class="corp-cal-card-title">{{ $assignment->title }}</p>
-                                                    <p class="corp-cal-card-meta">{{ $assignment->course->code }} · {{ $assignment->due_at->format('g:i A') }}</p>
+                                                    <p class="corp-cal-card-meta">{{ $assignment->course->code }} · Assignment · {{ $assignment->due_at->format('g:i A') }}</p>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                    @foreach ($monthAssessments as $assessment)
+                                        <li>
+                                            <a href="{{ route('calendar.index', array_merge($dueGridQuery, ['due_date' => $assessment->due_at->format('Y-m-d')])) }}" class="corp-cal-card corp-cal-card--due corp-cal-card--link">
+                                                <div class="corp-cal-card-date corp-cal-card-date--due">
+                                                    <span class="corp-cal-card-date-day">{{ $assessment->due_at->format('d') }}</span>
+                                                    <span class="corp-cal-card-date-month">{{ $assessment->due_at->format('M') }}</span>
+                                                </div>
+                                                <div class="corp-cal-card-body">
+                                                    <p class="corp-cal-card-title">{{ $assessment->title }}</p>
+                                                    <p class="corp-cal-card-meta">{{ $assessment->course->code }} · Assessment · {{ $assessment->due_at->format('g:i A') }}</p>
                                                 </div>
                                             </a>
                                         </li>
@@ -273,7 +298,7 @@
                         @else
                             <div class="corp-cal-empty corp-cal-empty--side">
                                 <p class="corp-cal-empty-title">No due dates this month</p>
-                                <p class="corp-cal-empty-desc">Select a date when assignments are due.</p>
+                                <p class="corp-cal-empty-desc">Select a date when assignments or assessments are due.</p>
                             </div>
                         @endif
                     </aside>

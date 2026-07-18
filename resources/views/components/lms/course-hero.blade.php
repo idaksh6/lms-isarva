@@ -8,6 +8,8 @@
         request()->routeIs('courses.edit') => 'edit',
         request()->routeIs('courses.enrollments.*') => 'enrollments',
         request()->routeIs('courses.assignments.create') => 'assignment',
+        request()->routeIs('courses.assessments.*', 'assessments.*') => 'assessments',
+        request()->routeIs('courses.materials.*', 'course-materials.*') => 'materials',
         request()->routeIs('courses.sessions.*', 'class-sessions.*') => 'sessions',
         default => 'show',
     };
@@ -75,6 +77,22 @@
                ])
                @if ($active === 'enrollments') aria-current="page" @endif>
                 Manage students
+            </a>
+            <a href="{{ route('courses.materials.index', $course) }}"
+               @class([
+                   'lms-course-hero-tab',
+                   'lms-course-hero-tab--active' => $active === 'materials',
+               ])
+               @if ($active === 'materials') aria-current="page" @endif>
+                Class materials
+            </a>
+            <a href="{{ route('courses.assessments.index', $course) }}"
+               @class([
+                   'lms-course-hero-tab',
+                   'lms-course-hero-tab--active' => $active === 'assessments',
+               ])
+               @if ($active === 'assessments') aria-current="page" @endif>
+                Assessments
             </a>
             <a href="{{ route('courses.assignments.create', $course) }}"
                @class([

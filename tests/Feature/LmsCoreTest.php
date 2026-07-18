@@ -779,6 +779,215 @@ class LmsCoreTest extends TestCase
         $this->assertNull($submission->external_url);
     }
 
+    public function test_lecturer_can_add_course_material_and_student_can_view_index(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.materials.store', $course), [
+                'category' => 'notes',
+                'title' => 'Week 1 slides',
+                'external_url' => 'https://example.com/slides',
+            ])
+            ->assertRedirect(route('courses.materials.index', $course));
+
+        $this->actingAs($student)
+            ->get(route('courses.materials.index', $course))
+            ->assertOk()
+            ->assertSee('Week 1 slides');
+    }
+
+    public function test_lecturer_can_edit_course_material_without_deleting_it(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.materials.store', $course), [
+                'category' => 'notes',
+                'title' => 'Original title',
+                'external_url' => 'https://example.com/original',
+            ])
+            ->assertRedirect(route('courses.materials.index', $course));
+
+        $material = \App\Models\CourseMaterial::query()->where('course_id', $course->id)->firstOrFail();
+
+        $this->actingAs($lecturer)
+            ->patch(route('course-materials.update', $material), [
+                'category' => 'notes',
+                'title' => 'Updated title',
+                'external_url' => 'https://example.com/updated',
+            ])
+            ->assertRedirect(route('courses.materials.index', $course))
+            ->assertSessionHas('success', 'Material updated.');
+
+        $this->assertDatabaseHas('course_materials', [
+            'id' => $material->id,
+            'title' => 'Updated title',
+            'external_url' => 'https://example.com/updated',
+        ]);
+    }
+
+    public function test_create_material_rejects_file_over_size_limit(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->from(route('courses.materials.create', $course))
+            ->post(route('courses.materials.store', $course), [
+                'category' => 'notes',
+                'title' => 'Too large',
+                'file' => \Illuminate\Http\UploadedFile::fake()->create('big.pdf', 4000, 'application/pdf'),
+            ])
+            ->assertRedirect(route('courses.materials.create', $course))
+            ->assertSessionHasErrors('file');
+    }
+
+    public function test_create_material_requires_file_or_link(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $this->actingAs($lecturer)
+            ->from(route('courses.materials.create', $course))
+            ->post(route('courses.materials.store', $course), [
+                'category' => 'notes',
+                'title' => 'Missing attachment',
+            ])
+            ->assertRedirect(route('courses.materials.create', $course))
+            ->assertSessionHasErrors(['file', 'external_url']);
+    }
+
+    public function test_lecturer_can_publish_assessment_and_student_gets_score_without_answers(): void
+    {
+        Notification::fake();
+
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.assessments.store', $course), [
+                'title' => 'Quiz 1',
+                'question_count' => 2,
+                'marks_per_question' => 2,
+            ])
+            ->assertRedirect();
+
+        $assessment = \App\Models\Assessment::query()->where('course_id', $course->id)->firstOrFail();
+
+        $questions = [];
+        for ($i = 0; $i < 2; $i++) {
+            $questions[] = [
+                'prompt' => 'Question '.($i + 1),
+                'correct' => 1,
+                'options' => [
+                    ['label' => 'Correct'],
+                    ['label' => 'Wrong A'],
+                    ['label' => 'Wrong B'],
+                    ['label' => 'Wrong C'],
+                ],
+            ];
+        }
+
+        $this->actingAs($lecturer)
+            ->patch(route('assessments.update', $assessment), [
+                'title' => 'Quiz 1',
+                'questions' => $questions,
+            ])
+            ->assertRedirect(route('assessments.edit', $assessment));
+
+        $this->actingAs($lecturer)
+            ->post(route('assessments.publish', $assessment))
+            ->assertRedirect(route('assessments.show', $assessment));
+
+        Notification::assertSentTo($student, \App\Notifications\AssessmentPublishedNotification::class);
+
+        $assessment->load('questions.options');
+        $firstQuestion = $assessment->questions->first();
+        $lastQuestion = $assessment->questions->last();
+        $correctOption = $firstQuestion->options->firstWhere('is_correct', true);
+        $wrongOption = $lastQuestion->options->firstWhere('is_correct', false);
+
+        $this->actingAs($student)
+            ->post(route('assessments.attempt.store', $assessment), [
+                'answers' => [
+                    $firstQuestion->id => $correctOption->id,
+                    $lastQuestion->id => $wrongOption->id,
+                ],
+            ])
+            ->assertRedirect(route('assessments.result', $assessment));
+
+        $this->actingAs($student)
+            ->get(route('assessments.result', $assessment))
+            ->assertOk()
+            ->assertSee('2 / 4')
+            ->assertDontSee('Question 1')
+            ->assertDontSee('Question 2');
+
+        $this->actingAs($lecturer)
+            ->get(route('assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('Student results')
+            ->assertSee($student->name)
+            ->assertSee('2 / 4')
+            ->assertSee('1/1');
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.assessments.index', $course))
+            ->assertOk()
+            ->assertSee('View results')
+            ->assertSee('1 / 1 students');
+    }
+
+    public function test_timetable_csv_import_creates_class_sessions(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+        $course->update(['semester' => '2026-S1']);
+
+        $csv = "title,starts_at,ends_at,mode,meeting_link,location,semester\n";
+        $csv .= "Lecture 1,2026-08-01 10:00:00,2026-08-01 11:00:00,online,https://meet.example.com,,2026-S1\n";
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.sessions.timetable.import', $course), [
+                'timetable' => \Illuminate\Http\UploadedFile::fake()->createWithContent('timetable.csv', $csv),
+            ])
+            ->assertRedirect(route('courses.sessions.index', $course));
+
+        $this->assertDatabaseHas('class_sessions', [
+            'course_id' => $course->id,
+            'title' => 'Lecture 1',
+        ]);
+    }
+
+    public function test_assessment_due_date_appears_on_calendar(): void
+    {
+        $student = $this->makeStudent();
+        $course = $this->makeCourse();
+        $course->students()->attach($student->id);
+
+        \App\Models\Assessment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $course->lecturer_id,
+            'title' => 'Midterm quiz',
+            'question_count' => 15,
+            'marks_per_question' => 2,
+            'due_at' => now()->startOfMonth()->addDays(10)->setTime(17, 0),
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('calendar.index'))
+            ->assertOk()
+            ->assertSee('Midterm quiz');
+    }
+
     private function makeLecturer(): User
     {
         return User::factory()->create(['role' => UserRole::Lecturer]);

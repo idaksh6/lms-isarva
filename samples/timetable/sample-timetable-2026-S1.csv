@@ -1,0 +1,7 @@
+title,starts_at,ends_at,mode,meeting_link,location,semester,notes
+Introduction lecture,2026-08-04 10:00:00,2026-08-04 11:30:00,online,https://meet.example.com/ds501-week1,,2026-S1,Week 1 — course overview
+Practical lab,2026-08-06 14:00:00,2026-08-06 16:00:00,offline,,Lab Block B Room 204,2026-S1,Bring laptop
+Guest seminar,2026-08-11 09:30:00,2026-08-11 10:30:00,online,https://meet.example.com/ds501-seminar,,2026-S1,
+Mid-module review,2026-08-18 10:00:00,2026-08-18 12:00:00,offline,,Main Hall Room 12,2026-S1,Open Q&A
+Workshop,2026-08-25 13:00:00,2026-08-25 15:00:00,online,https://meet.example.com/ds501-workshop,,2026-S1,Recorded session
+Wrong semester row,2026-09-01 10:00:00,2026-09-01 11:00:00,offline,,Room 999,2026-S2,Should be skipped if course semester is 2026-S1

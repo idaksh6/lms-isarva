@@ -23,6 +23,10 @@
             <label class="block text-sm font-semibold text-slate-700">Description</label>
             <textarea name="description" rows="4" class="lms-field-input mt-1.5">{{ old('description') }}</textarea>
         </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700">Semester</label>
+            <input type="text" name="semester" value="{{ old('semester') }}" class="lms-field-input mt-1.5" placeholder="e.g. 2026-S1">
+        </div>
         @if (auth()->user()->isAdmin())
             @if ($lecturers->isNotEmpty())
                 <div>

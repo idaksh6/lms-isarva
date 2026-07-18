@@ -60,6 +60,7 @@ class CourseController extends Controller
             'code' => ['required', 'string', 'max:20', 'unique:courses,code'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'semester' => ['nullable', 'string', 'max:32'],
             'lecturer_id' => [
                 $request->user()->isAdmin() ? 'required' : 'nullable',
                 'exists:users,id',
@@ -87,6 +88,7 @@ class CourseController extends Controller
             'code' => strtoupper($validated['code']),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'semester' => $validated['semester'] ?? null,
             'lecturer_id' => $lecturerId,
         ]);
 
@@ -106,6 +108,10 @@ class CourseController extends Controller
             'assignments' => fn ($q) => $user->isStudent()
                 ? $q->where('is_published', true)->latest()
                 : $q->latest(),
+            'assessments' => fn ($q) => $user->isStudent()
+                ? $q->where('is_published', true)->latest()
+                : $q->latest(),
+            'materials' => fn ($q) => $q->orderBy('sort_order')->orderBy('title'),
             'students',
         ]);
 
@@ -116,15 +122,22 @@ class CourseController extends Controller
             ->get();
 
         $submissionsByAssignment = collect();
+        $attemptsByAssessment = collect();
         if (request()->user()->isStudent()) {
             $submissionsByAssignment = request()->user()
                 ->submissions()
                 ->whereIn('assignment_id', $course->assignments->pluck('id'))
                 ->get()
                 ->keyBy('assignment_id');
+
+            $attemptsByAssessment = \App\Models\AssessmentAttempt::query()
+                ->where('user_id', request()->user()->id)
+                ->whereIn('assessment_id', $course->assessments->pluck('id'))
+                ->get()
+                ->keyBy('assessment_id');
         }
 
-        return view('courses.show', compact('course', 'submissionsByAssignment', 'upcomingSessions'));
+        return view('courses.show', compact('course', 'submissionsByAssignment', 'attemptsByAssessment', 'upcomingSessions'));
     }
 
     public function edit(Course $course): View
@@ -148,6 +161,7 @@ class CourseController extends Controller
             'code' => ['required', 'string', 'max:20', 'unique:courses,code,'.$course->id],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'semester' => ['nullable', 'string', 'max:32'],
             'lecturer_id' => ['nullable', 'exists:users,id'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -156,6 +170,7 @@ class CourseController extends Controller
             'code' => strtoupper($validated['code']),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'semester' => $validated['semester'] ?? null,
             'lecturer_id' => $request->user()->isAdmin()
                 ? ($validated['lecturer_id'] ?? $course->lecturer_id)
                 : $course->lecturer_id,

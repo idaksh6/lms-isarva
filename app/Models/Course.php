@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['code', 'title', 'description', 'lecturer_id', 'is_active'])]
+#[Fillable(['code', 'title', 'description', 'semester', 'lecturer_id', 'is_active'])]
 class Course extends Model
 {
     protected function casts(): array
@@ -47,5 +47,15 @@ class Course extends Model
     public function classSessions(): HasMany
     {
         return $this->hasMany(ClassSession::class);
+    }
+
+    public function materials(): HasMany
+    {
+        return $this->hasMany(CourseMaterial::class)->orderBy('sort_order')->orderBy('title');
+    }
+
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
     }
 }

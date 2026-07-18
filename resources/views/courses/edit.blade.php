@@ -29,6 +29,10 @@
             <label for="description" class="lms-field-label">Description</label>
             <textarea id="description" name="description" rows="4" class="lms-field-input mt-1.5">{{ old('description', $course->description) }}</textarea>
         </div>
+        <div class="lms-form-field">
+            <label for="semester" class="lms-field-label">Semester <span class="font-normal text-isarva-muted">(e.g. 2026-S1 — used for timetable import filter)</span></label>
+            <input id="semester" type="text" name="semester" value="{{ old('semester', $course->semester) }}" class="lms-field-input mt-1.5" placeholder="2026-S1">
+        </div>
         @if (auth()->user()->isAdmin() && $lecturers->isNotEmpty())
             <div class="lms-form-field">
                 <label for="lecturer_id" class="lms-field-label">Lecturer</label>

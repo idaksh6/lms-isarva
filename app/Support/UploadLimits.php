@@ -11,9 +11,34 @@ class UploadLimits
 
     public const ASSIGNMENT_ATTACHMENT_MAX_KB = 2048;
 
+    public const COURSE_MATERIAL_MAX_KB = 3072;
+
+    public const TIMETABLE_CSV_MAX_KB = 2048;
+
     public static function assignmentAttachmentMaxMegabytes(): int
     {
         return (int) floor(self::ASSIGNMENT_ATTACHMENT_MAX_KB / 1024);
+    }
+
+    public static function courseMaterialMaxKilobytes(): int
+    {
+        return min(self::COURSE_MATERIAL_MAX_KB, self::phpUploadMaxKilobytes());
+    }
+
+    public static function courseMaterialMaxMegabytes(): int
+    {
+        return (int) floor(self::courseMaterialMaxKilobytes() / 1024);
+    }
+
+    public static function timetableCsvMaxMegabytes(): int
+    {
+        return (int) floor(self::TIMETABLE_CSV_MAX_KB / 1024);
+    }
+
+    public static function postTooLargeMessage(): string
+    {
+        return 'The file is too large. Course materials must be '
+            .self::courseMaterialMaxMegabytes().' MB or smaller.';
     }
 
     public static function submissionMaxKilobytes(): int

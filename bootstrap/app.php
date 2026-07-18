@@ -20,4 +20,24 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => \App\Support\UploadLimits::postTooLargeMessage(),
+                ], 413);
+            }
+
+            $field = match (true) {
+                $request->is('courses/*/sessions/timetable') => 'timetable',
+                default => 'file',
+            };
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    $field => \App\Support\UploadLimits::postTooLargeMessage(),
+                ]);
+        });
     })->create();

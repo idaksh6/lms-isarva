@@ -78,5 +78,29 @@
             @endif
         </div>
     </section>
+
+    @can('update', $course)
+        <section class="lms-panel">
+            <div class="lms-panel-header">
+                <h2 class="lms-panel-title">Import semester timetable</h2>
+            </div>
+            <div class="lms-panel-body">
+                <p class="text-sm text-isarva-muted">Upload a CSV with columns: title, starts_at, ends_at, mode, meeting_link, location, semester. Rows matching this course's semester ({{ $course->semester ?: 'any' }}) become class sessions on the calendar.</p>
+                <form method="POST" action="{{ route('courses.sessions.timetable.import', $course) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
+                    @csrf
+                    <x-lms.single-file-upload
+                        name="timetable"
+                        label="CSV file"
+                        accept=".csv,.txt"
+                        :max-upload-mb="\App\Support\UploadLimits::timetableCsvMaxMegabytes()"
+                        :hint="'Semester timetable CSV · max '.\App\Support\UploadLimits::timetableCsvMaxMegabytes().' MB'"
+                    />
+                    <div class="lms-form-actions border-t-0 pt-0">
+                        <button type="submit" class="lms-btn-primary">Import timetable</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    @endcan
 </div>
 @endsection

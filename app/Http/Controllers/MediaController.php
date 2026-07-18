@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssignmentAttachment;
+use App\Models\CourseMaterial;
 use App\Models\Submission;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -41,6 +42,24 @@ class MediaController extends Controller
         abort_unless($submission->file_path && Storage::disk('public')->exists($submission->file_path), 404);
 
         return Storage::disk('public')->download($submission->file_path, $submission->file_name);
+    }
+
+    public function courseMaterial(CourseMaterial $material): StreamedResponse
+    {
+        $this->authorize('view', $material);
+
+        abort_unless($material->hasFile(), 404);
+
+        return $this->inlineFromDisk($material->file_path, $material->file_name ?? 'material', $material->mime);
+    }
+
+    public function downloadCourseMaterial(CourseMaterial $material): StreamedResponse
+    {
+        $this->authorize('view', $material);
+
+        abort_unless($material->hasFile(), 404);
+
+        return Storage::disk('public')->download($material->file_path, $material->file_name ?? 'material');
     }
 
     private function inlineFromDisk(string $path, string $name, ?string $mime): StreamedResponse

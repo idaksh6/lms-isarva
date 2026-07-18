@@ -1117,6 +1117,10 @@
         @apply border-brand-400 bg-brand-50/60;
     }
 
+    .lms-file-upload-zone--error {
+        @apply border-red-300 bg-red-50/50;
+    }
+
     .lms-file-upload-icon {
         @apply mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm ring-1 ring-slate-100;
     }
@@ -1159,6 +1163,18 @@
 
     .lms-panel {
         @apply lms-card flex min-w-0 flex-col overflow-hidden;
+    }
+
+    .lms-panel--list {
+        @apply p-0;
+    }
+
+    .lms-panel--list .lms-panel-header {
+        @apply border-b border-isarva-border px-4 pb-4 pt-4 sm:px-5 sm:pt-5;
+    }
+
+    .lms-panel--list .lms-panel-body {
+        @apply pt-0;
     }
 
     .lms-panel--fill {
@@ -1277,6 +1293,62 @@
 
     .lms-assignment-submissions-empty {
         @apply flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-14 text-center;
+    }
+
+    .lms-assessment-result-row {
+        @apply flex flex-col gap-4 rounded-xl border border-isarva-border bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5;
+    }
+
+    .lms-assessment-result-main {
+        @apply flex min-w-0 items-center gap-3;
+    }
+
+    .lms-assessment-result-name {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-assessment-result-meta {
+        @apply mt-0.5 text-xs text-isarva-muted;
+    }
+
+    .lms-assessment-result-status {
+        @apply flex shrink-0 flex-col items-start gap-1 sm:items-end;
+    }
+
+    .lms-assessment-result-score {
+        @apply text-lg font-bold text-isarva-heading;
+    }
+
+    .lms-assessment-result-date {
+        @apply text-xs text-isarva-muted;
+    }
+
+    .lms-assessment-index-row {
+        @apply flex w-full flex-col gap-4 border-t border-slate-100 px-4 py-5 first:border-t-0 sm:flex-row sm:items-center sm:justify-between sm:px-6;
+    }
+
+    .lms-assessment-index-title {
+        @apply text-sm font-semibold text-isarva-heading hover:text-brand-700;
+    }
+
+    .lms-assessment-index-meta {
+        @apply mt-1 text-xs text-isarva-muted;
+    }
+
+    .lms-assessment-index-track {
+        @apply mt-2.5 flex flex-wrap items-center gap-2 text-xs;
+    }
+
+    .lms-assessment-index-track-label {
+        @apply font-semibold uppercase tracking-wide text-slate-500;
+    }
+
+    .lms-assessment-index-track-value {
+        @apply rounded-full bg-brand-50 px-2.5 py-0.5 font-semibold text-brand-700;
+    }
+
+    .lms-assessment-index-actions {
+        @apply flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end;
     }
 
     .lms-student-list {
@@ -3243,6 +3315,93 @@
 
     .corp-schedule-list {
         @apply list-none divide-y divide-isarva-border p-0;
+    }
+
+    .lms-material-stack {
+        @apply w-full divide-y divide-isarva-border;
+    }
+
+    .lms-material-section {
+        @apply w-full;
+    }
+
+    .lms-material-section-head {
+        @apply flex w-full items-center justify-between gap-3 bg-slate-50 px-4 py-3.5 sm:px-6;
+    }
+
+    .lms-material-section-title {
+        @apply text-xs font-bold uppercase tracking-[0.14em] text-slate-500;
+    }
+
+    .lms-material-section-count {
+        @apply shrink-0 text-xs font-medium text-isarva-muted;
+    }
+
+    .lms-material-list {
+        @apply w-full list-none p-0;
+    }
+
+    .lms-material-row {
+        @apply box-border grid w-full grid-cols-1 items-start gap-x-5 gap-y-4 border-t border-slate-100 px-4 py-5 transition hover:bg-slate-50/70 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6;
+    }
+
+    .lms-material-row:first-child {
+        @apply border-t-0;
+    }
+
+    .lms-material-main {
+        @apply min-w-0 w-full;
+    }
+
+    @media (min-width: 640px) {
+        .lms-material-main {
+            grid-column: 2;
+        }
+
+        .lms-material-actions {
+            grid-column: 3;
+        }
+
+        .lms-material-icon {
+            grid-column: 1;
+            grid-row: 1;
+        }
+    }
+
+    .lms-material-icon {
+        @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm;
+    }
+
+    .lms-material-icon--file {
+        @apply border-brand-100 bg-brand-50 text-brand-600;
+    }
+
+    .lms-material-icon--link {
+        @apply border-emerald-100 bg-emerald-50 text-emerald-600;
+    }
+
+    .lms-material-icon--both {
+        @apply border-violet-100 bg-violet-50 text-violet-600;
+    }
+
+    .lms-material-title {
+        @apply text-sm font-semibold leading-snug text-isarva-heading;
+    }
+
+    .lms-material-desc {
+        @apply mt-1.5 text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .lms-material-meta {
+        @apply mt-2.5 flex flex-wrap items-center gap-2;
+    }
+
+    .lms-material-type-badge {
+        @apply inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600;
+    }
+
+    .lms-material-actions {
+        @apply flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-self-end;
     }
 
     .corp-schedule-row {

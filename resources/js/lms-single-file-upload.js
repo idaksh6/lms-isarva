@@ -2,7 +2,8 @@ export default function lmsSingleFileUpload(config = {}) {
     return {
         file: null,
         dragging: false,
-        maxSizeMb: config.maxSizeMb ?? 20,
+        error: null,
+        maxSizeMb: config.maxSizeMb ?? 3,
 
         formatSize(bytes) {
             if (bytes < 1024) {
@@ -15,13 +16,30 @@ export default function lmsSingleFileUpload(config = {}) {
             return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
         },
 
+        isTooLarge(file) {
+            return file.size > this.maxSizeMb * 1024 * 1024;
+        },
+
+        rejectFile(input) {
+            this.error = `This file is too large. Maximum size is ${this.maxSizeMb} MB.`;
+            this.file = null;
+            input.value = '';
+        },
+
         syncFromInput(input) {
             const selected = input.files[0];
             if (! selected) {
                 this.file = null;
+                this.error = null;
                 return;
             }
 
+            if (this.isTooLarge(selected)) {
+                this.rejectFile(input);
+                return;
+            }
+
+            this.error = null;
             this.file = {
                 name: selected.name,
                 size: this.formatSize(selected.size),
@@ -41,6 +59,11 @@ export default function lmsSingleFileUpload(config = {}) {
                 return;
             }
 
+            if (this.isTooLarge(dropped)) {
+                this.rejectFile(input);
+                return;
+            }
+
             const transfer = new DataTransfer();
             transfer.items.add(dropped);
             input.files = transfer.files;
@@ -49,6 +72,7 @@ export default function lmsSingleFileUpload(config = {}) {
 
         clear() {
             this.file = null;
+            this.error = null;
             this.$refs.input.value = '';
         },
     };

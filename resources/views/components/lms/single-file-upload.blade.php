@@ -2,12 +2,13 @@
     'name' => 'file',
     'label' => 'Upload your work',
     'hint' => null,
-    'maxUploadMb' => 20,
+    'maxUploadMb' => 3,
     'required' => true,
+    'accept' => '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.md,.ipynb,.zip,.rar,.7z,.png,.jpg,.jpeg,.gif,.json,.py,.r,.sql',
 ])
 
 @php
-    $hint ??= "PDF, notebooks, ZIP — max {$maxUploadMb} MB";
+    $hint ??= "Max {$maxUploadMb} MB";
 @endphp
 
 <div
@@ -21,7 +22,7 @@
 
     <div
         class="lms-file-upload-zone"
-        :class="{ 'lms-file-upload-zone--drag': dragging }"
+        :class="{ 'lms-file-upload-zone--drag': dragging, 'lms-file-upload-zone--error': error }"
         @click="$refs.input.click()"
         @dragover.prevent="dragging = true"
         @dragleave.prevent="dragging = false"
@@ -33,7 +34,7 @@
             name="{{ $name }}"
             class="sr-only"
             @if ($required) required @endif
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.md,.ipynb,.zip,.rar,.7z,.png,.jpg,.jpeg,.gif,.json,.py,.r,.sql"
+            accept="{{ $accept }}"
             @change="onSelect($event)"
         >
         <span class="lms-file-upload-icon" aria-hidden="true">
@@ -44,6 +45,8 @@
         <span class="lms-file-upload-title">Drop your file here or <span class="text-brand-600">browse</span></span>
         <span class="lms-file-upload-meta">{{ $hint }}</span>
     </div>
+
+    <p x-show="error" x-cloak x-text="error" class="mt-2 text-sm font-medium text-red-600"></p>
 
     <div x-show="file" x-cloak class="lms-file-upload-list">
         <div class="lms-file-upload-item">

@@ -32,6 +32,15 @@ class CalendarController extends Controller
             ->get()
             ->groupBy(fn ($a) => $a->due_at->format('Y-m-d'));
 
+        $assessments = LmsQuery::assessmentsFor($user)
+            ->where('is_published', true)
+            ->whereNotNull('due_at')
+            ->whereBetween('due_at', [$rangeStart, $rangeEnd])
+            ->with('course')
+            ->orderBy('due_at')
+            ->get()
+            ->groupBy(fn ($a) => $a->due_at->format('Y-m-d'));
+
         $sessions = LmsQuery::classSessionsFor($user)
             ->whereBetween('starts_at', [$rangeStart, $rangeEnd])
             ->with('course')
@@ -48,7 +57,7 @@ class CalendarController extends Controller
         }
 
         $dueEventsByDate = [];
-        foreach ($assignments->keys() as $day) {
+        foreach (collect($assignments->keys())->merge($assessments->keys())->unique() as $day) {
             $dueEventsByDate[$day] = ['due' => true];
         }
 
@@ -62,7 +71,7 @@ class CalendarController extends Controller
                 $key = $legacyDate->format('Y-m-d');
                 if ($sessions->has($key)) {
                     $selectedSessionDate = $legacyDate;
-                } elseif ($assignments->has($key)) {
+                } elseif ($assignments->has($key) || $assessments->has($key)) {
                     $selectedDueDate = $legacyDate;
                 } else {
                     $selectedSessionDate = $legacyDate;
@@ -77,12 +86,15 @@ class CalendarController extends Controller
         }
 
         $selectedDueAssignments = collect();
+        $selectedDueAssessments = collect();
         if ($selectedDueDate) {
             $key = $selectedDueDate->format('Y-m-d');
             $selectedDueAssignments = $assignments->get($key, collect());
+            $selectedDueAssessments = $assessments->get($key, collect());
         }
 
         $monthAssignments = $assignments->flatten()->sortBy('due_at');
+        $monthAssessments = $assessments->flatten()->sortBy('due_at');
         $monthSessions = $sessions->flatten()->sortBy('starts_at');
 
         $calendarQuery = array_filter([
@@ -97,15 +109,18 @@ class CalendarController extends Controller
             'start' => $start,
             'end' => $end,
             'assignmentsByDate' => $assignments,
+            'assessmentsByDate' => $assessments,
             'sessionsByDate' => $sessions,
             'sessionEventsByDate' => $sessionEventsByDate,
             'dueEventsByDate' => $dueEventsByDate,
             'monthAssignments' => $monthAssignments,
+            'monthAssessments' => $monthAssessments,
             'monthSessions' => $monthSessions,
             'selectedSessionDate' => $selectedSessionDate,
             'selectedDueDate' => $selectedDueDate,
             'selectedSessionSessions' => $selectedSessionSessions,
             'selectedDueAssignments' => $selectedDueAssignments,
+            'selectedDueAssessments' => $selectedDueAssessments,
             'calendarQuery' => $calendarQuery,
         ]);
     }

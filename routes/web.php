@@ -3,11 +3,14 @@
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AnswerController;
+use App\Http\Controllers\AssessmentAttemptController;
+use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentHubController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\GradebookController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\SubmissionHubController;
+use App\Http\Controllers\TimetableImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -59,6 +63,45 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('class-sessions.update');
     Route::delete('class-sessions/{classSession}', [ClassSessionController::class, 'destroy'])
         ->name('class-sessions.destroy');
+
+    Route::post('courses/{course}/sessions/timetable', [TimetableImportController::class, 'store'])
+        ->name('courses.sessions.timetable.import');
+
+    Route::get('courses/{course}/materials', [CourseMaterialController::class, 'index'])
+        ->name('courses.materials.index');
+    Route::get('courses/{course}/materials/create', [CourseMaterialController::class, 'create'])
+        ->name('courses.materials.create');
+    Route::post('courses/{course}/materials', [CourseMaterialController::class, 'store'])
+        ->name('courses.materials.store');
+    Route::get('course-materials/{material}/edit', [CourseMaterialController::class, 'edit'])
+        ->name('course-materials.edit');
+    Route::patch('course-materials/{material}', [CourseMaterialController::class, 'update'])
+        ->name('course-materials.update');
+    Route::delete('course-materials/{material}', [CourseMaterialController::class, 'destroy'])
+        ->name('course-materials.destroy');
+
+    Route::get('courses/{course}/assessments', [AssessmentController::class, 'index'])
+        ->name('courses.assessments.index');
+    Route::get('courses/{course}/assessments/create', [AssessmentController::class, 'create'])
+        ->name('courses.assessments.create');
+    Route::post('courses/{course}/assessments', [AssessmentController::class, 'store'])
+        ->name('courses.assessments.store');
+    Route::get('assessments/{assessment}', [AssessmentController::class, 'show'])
+        ->name('assessments.show');
+    Route::get('assessments/{assessment}/edit', [AssessmentController::class, 'edit'])
+        ->name('assessments.edit');
+    Route::patch('assessments/{assessment}', [AssessmentController::class, 'update'])
+        ->name('assessments.update');
+    Route::post('assessments/{assessment}/publish', [AssessmentController::class, 'publish'])
+        ->name('assessments.publish');
+    Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy'])
+        ->name('assessments.destroy');
+    Route::get('assessments/{assessment}/attempt', [AssessmentAttemptController::class, 'create'])
+        ->name('assessments.attempt');
+    Route::post('assessments/{assessment}/attempt', [AssessmentAttemptController::class, 'store'])
+        ->name('assessments.attempt.store');
+    Route::get('assessments/{assessment}/result', [AssessmentAttemptController::class, 'result'])
+        ->name('assessments.result');
 
     Route::get('assignments', [AssignmentHubController::class, 'index'])->name('assignments.index');
     Route::get('assignments/{assignment}', [AssignmentController::class, 'show'])
@@ -114,6 +157,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])
         ->name('notifications.read-all');
 
+    Route::get('media/course-materials/{material}', [MediaController::class, 'courseMaterial'])
+        ->name('media.course-material');
+    Route::get('media/course-materials/{material}/download', [MediaController::class, 'downloadCourseMaterial'])
+        ->name('media.course-material.download');
     Route::get('media/assignment-attachments/{attachment}', [MediaController::class, 'assignmentAttachment'])
         ->name('media.assignment-attachment');
     Route::get('media/assignment-attachments/{attachment}/download', [MediaController::class, 'downloadAssignmentAttachment'])

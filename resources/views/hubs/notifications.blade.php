@@ -26,6 +26,7 @@
                             @switch($data['type'] ?? '')
                                 @case('announcement_published') New announcement @break
                                 @case('assignment_published') New assignment @break
+                                @case('assessment_published') New assessment @break
                                 @case('submission_received') New submission @break
                                 @case('grade_posted') Grade posted @break
                                 @case('assignment_due') Due soon @break
