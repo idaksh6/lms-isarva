@@ -47,4 +47,6 @@ jobs:
               exit 1
             fi
             cd "$APP"
+            export DEPLOY_BRANCH="${{ github.ref_name }}"
+            echo "Deploying branch: $DEPLOY_BRANCH"
             bash scripts/staging-deploy.sh
