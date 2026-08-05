@@ -75,6 +75,7 @@ Step-by-step UAT test cases (Tests 1–15) are in [docs/manual-testing/TEST_CASE
 - **CI/CD pipeline guide (Markdown):** [docs/deploy/CI_CD_PIPELINE_INTEGRATION.md](docs/deploy/CI_CD_PIPELINE_INTEGRATION.md)
 - **Already uploaded zip?** [docs/deploy/ZIP_TO_AUTO_DEPLOY.md](docs/deploy/ZIP_TO_AUTO_DEPLOY.md)
 - **GitHub Actions reference:** [docs/deploy/GITHUB_AUTO_DEPLOY.md](docs/deploy/GITHUB_AUTO_DEPLOY.md)
+- **Staging / demo server (`lmsdev.isarva.in`):** [docs/deploy/STAGING_LMSDEV_SETUP.md](docs/deploy/STAGING_LMSDEV_SETUP.md)
 
 ## Project structure
 

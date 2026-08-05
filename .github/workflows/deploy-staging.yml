@@ -1,0 +1,50 @@
+# Manual staging deploy ONLY — does not run on push to main.
+# Secrets are separate from production (STAGING_*).
+name: Deploy to staging (lmsdev.isarva.in)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Build frontend assets
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Upload build assets to staging server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          source: "public/build"
+          target: ${{ secrets.STAGING_SSH_APP_DIR }}
+          strip_components: 1
+
+      - name: Deploy application over SSH (staging path only)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            APP="${{ secrets.STAGING_SSH_APP_DIR }}"
+            if echo "$APP" | grep -q 'lms.isarvait.com'; then
+              echo "ERROR: STAGING_SSH_APP_DIR must not be production path." >&2
+              exit 1
+            fi
+            cd "$APP"
+            bash scripts/staging-deploy.sh
