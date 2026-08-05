@@ -7,7 +7,7 @@
 
         <x-auth-session-status class="auth-login-status" :status="session('status')" />
 
-        <form method="POST" action="{{ route('login') }}" class="auth-login-form">
+        <form method="POST" action="/login/" class="auth-login-form">
             @csrf
 
             <div class="auth-field">
