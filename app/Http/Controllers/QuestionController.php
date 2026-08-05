@@ -90,10 +90,13 @@ class QuestionController extends Controller
         $question->load([
             'author',
             'course',
-            'answers' => fn ($q) => $q->with('author')->orderByDesc('is_accepted')->latest(),
+            'rootAnswers.author',
+            'rootAnswers.childrenRecursive.author',
         ]);
 
-        return view('hubs.questions.show', compact('question'));
+        $answerCount = $question->answers()->count();
+
+        return view('hubs.questions.show', compact('question', 'answerCount'));
     }
 
     public function destroy(Question $question): RedirectResponse

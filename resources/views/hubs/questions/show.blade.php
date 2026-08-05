@@ -4,7 +4,14 @@
 @section('page_title', 'Q&A')
 
 @section('content')
-<div class="lms-page-stack corp-qa-page corp-qa-show">
+<div
+    class="lms-page-stack corp-qa-page corp-qa-show"
+    x-data="lmsQaThread({
+        storeUrl: @js(route('questions.answers.store', $question)),
+        csrf: @js(csrf_token()),
+        totalCount: {{ (int) $answerCount }},
+    })"
+>
     <div class="lms-page-actions">
         <a href="{{ route('questions.index') }}" class="lms-btn-back">← Back to Q&amp;A</a>
     </div>
@@ -47,55 +54,43 @@
     <section class="corp-panel">
         <div class="corp-panel-head corp-panel-head--compact">
             <div>
-                <h2 class="corp-panel-title">{{ $question->answers->count() }} {{ Str::plural('answer', $question->answers->count()) }}</h2>
-                <p class="corp-panel-desc">The question author or an administrator can mark the best response.</p>
+                <h2 class="corp-panel-title">
+                    <span x-text="totalCount">{{ $answerCount }}</span>
+                    <span x-text="totalCount === 1 ? 'response' : 'responses'">{{ Str::plural('response', $answerCount) }}</span>
+                </h2>
+                <p class="corp-panel-desc">Replies nest under their parent. The question author or an administrator can accept a top-level answer.</p>
             </div>
         </div>
 
-        @forelse ($question->answers as $answer)
-            <article @class(['corp-qa-answer-item', 'is-accepted' => $answer->is_accepted])>
-                <div class="corp-qa-answer-top">
-                    <x-lms.qa-author :user="$answer->author" :posted-at="$answer->created_at" variant="answer" />
-                    <div class="corp-qa-answer-actions">
-                        @if ($answer->is_accepted)
-                            <span class="corp-qa-accepted-badge">Accepted</span>
-                        @endif
-                        @can('accept', $answer)
-                            @if (! $answer->is_accepted)
-                                <form method="POST" action="{{ route('questions.answers.accept', [$question, $answer]) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Accept</button>
-                                </form>
-                            @endif
-                        @endcan
-                        @can('delete', $answer)
-                            <form method="POST" action="{{ route('answers.destroy', $answer) }}" onsubmit="return confirm('Remove this answer?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="lms-btn-danger lms-btn-danger--xs">Remove</button>
-                            </form>
-                        @endcan
-                    </div>
+        <div class="corp-qa-discussion" data-discussion-root>
+            @forelse ($question->rootAnswers as $answer)
+                @include('hubs.questions.partials.thread-node', [
+                    'answer' => $answer,
+                    'question' => $question,
+                    'depth' => 0,
+                ])
+            @empty
+                <div class="corp-qa-empty-answers" data-empty-answers>
+                    <p class="corp-qa-empty-title">No responses yet</p>
+                    <p class="corp-qa-empty-desc">Be the first to help by posting a reply below.</p>
                 </div>
-                <div class="corp-qa-answer-body whitespace-pre-wrap">{{ $answer->body }}</div>
-            </article>
-        @empty
-            <div class="corp-qa-empty-answers">
-                <p class="corp-qa-empty-title">No answers yet</p>
-                <p class="corp-qa-empty-desc">Be the first to help by posting a reply below.</p>
-            </div>
-        @endforelse
+            @endforelse
+        </div>
     </section>
 
     <section class="corp-panel">
         <div class="corp-panel-head corp-panel-head--compact">
             <div>
                 <h2 class="corp-panel-title">Post your answer</h2>
-                <p class="corp-panel-desc">Your name, role, and posting time will be recorded.</p>
+                <p class="corp-panel-desc">Your name, role, and posting time will be recorded. Use Reply on a comment to nest a response.</p>
             </div>
         </div>
-        <form method="POST" action="{{ route('questions.answers.store', $question) }}" class="corp-qa-reply-form">
+        <form
+            method="POST"
+            action="{{ route('questions.answers.store', $question) }}"
+            class="corp-qa-reply-form"
+            @submit.prevent="submitRoot($event)"
+        >
             @csrf
             <div class="lms-form-field">
                 <label for="body" class="lms-field-label">Response</label>
@@ -103,9 +98,13 @@
                 @error('body')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
+                <p class="mt-1 text-sm text-red-600" x-show="rootError" x-text="rootError" x-cloak></p>
             </div>
             <div class="lms-form-actions">
-                <button type="submit" class="lms-btn-primary">Submit answer</button>
+                <button type="submit" class="lms-btn-primary" :disabled="submitting">
+                    <span x-show="!submitting">Submit answer</span>
+                    <span x-show="submitting" x-cloak>Posting…</span>
+                </button>
             </div>
         </form>
     </section>

@@ -39,9 +39,17 @@ class Question extends Model
         return $this->hasMany(Answer::class)->latest();
     }
 
+    public function rootAnswers(): HasMany
+    {
+        return $this->hasMany(Answer::class)
+            ->whereNull('parent_id')
+            ->orderByDesc('is_accepted')
+            ->oldest();
+    }
+
     public function acceptedAnswer(): HasOne
     {
-        return $this->hasOne(Answer::class)->where('is_accepted', true);
+        return $this->hasOne(Answer::class)->where('is_accepted', true)->whereNull('parent_id');
     }
 
     public function isGlobal(): bool
