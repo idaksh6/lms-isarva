@@ -8,7 +8,7 @@ class UserPolicy
 {
     public function delete(User $actor, User $target): bool
     {
-        if (! $actor->isAdmin()) {
+        if (! $actor->isAdmin() && ! $actor->isLecturer()) {
             return false;
         }
 
@@ -17,7 +17,7 @@ class UserPolicy
 
     public function deactivate(User $actor, User $target): bool
     {
-        if (! $actor->isAdmin()) {
+        if (! $actor->isAdmin() && ! $actor->isLecturer()) {
             return false;
         }
 

@@ -4,7 +4,7 @@ return [
     'items' => [
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Courses', 'route' => 'courses.index', 'icon' => 'book', 'roles' => ['admin', 'lecturer', 'student']],
-        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'roles' => ['admin']],
+        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'roles' => ['admin', 'lecturer']],
         ['label' => 'Assignments', 'route' => 'assignments.index', 'icon' => 'clipboard', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Submissions', 'route' => 'submissions.index', 'icon' => 'inbox', 'roles' => ['admin', 'lecturer', 'student']],
         ['label' => 'Gradebook', 'route' => 'gradebook.index', 'icon' => 'chart', 'roles' => ['admin', 'lecturer']],

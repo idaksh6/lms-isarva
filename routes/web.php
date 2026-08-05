@@ -170,7 +170,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('media/submissions/{submission}/download', [MediaController::class, 'downloadSubmission'])
         ->name('media.submission.download');
 
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:admin,lecturer')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('users/create', [AdminUserController::class, 'create'])->name('users.create');
         Route::get('users/bulk-import', [AdminUserController::class, 'bulkImportForm'])->name('users.bulk-import');

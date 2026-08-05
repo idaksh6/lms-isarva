@@ -3,7 +3,7 @@
     $quickLinks = [
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home', 'active' => 'from-brand-500 to-brand-600', 'show' => true],
         ['label' => 'Courses', 'route' => 'courses.index', 'icon' => 'book', 'active' => 'from-brand-500 to-brand-600', 'show' => true],
-        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'active' => 'from-brand-600 to-brand-700', 'show' => $user->isAdmin()],
+        ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users', 'active' => 'from-brand-600 to-brand-700', 'show' => $user->isAdmin() || $user->isLecturer()],
         ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user', 'active' => 'from-brand-500 to-brand-700', 'show' => true],
     ];
 @endphp
