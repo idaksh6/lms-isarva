@@ -7,6 +7,7 @@ export default function lmsQaBoard(config) {
         panelLoading: false,
         panelReady: false,
         activeThreadId: null,
+        fullscreen: false,
 
         init() {
             if (this.initialThreadId) {
@@ -23,6 +24,7 @@ export default function lmsQaBoard(config) {
                 return;
             }
 
+            this.fullscreen = false;
             this.threadOpen = true;
             this.panelLoading = true;
             this.panelReady = false;
@@ -46,7 +48,6 @@ export default function lmsQaBoard(config) {
                     return;
                 }
 
-                // Tear down previous Alpine/thread pollers before replacing HTML.
                 mount.querySelectorAll('[x-data]').forEach((el) => {
                     if (el._x_dataStack) {
                         el._x_dataStack.forEach((scope) => {
@@ -87,6 +88,7 @@ export default function lmsQaBoard(config) {
         },
 
         closeThread() {
+            this.fullscreen = false;
             const mount = this.$refs.panelMount;
             if (mount) {
                 mount.querySelectorAll('[x-data]').forEach((el) => {

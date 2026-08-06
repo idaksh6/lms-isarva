@@ -6,6 +6,7 @@
 
 <div
     class="gchat-panel"
+    :class="{ 'is-fullscreen': isFullscreen }"
     data-question-id="{{ $question->id }}"
     x-data="lmsQaThread({
         storeUrl: @js(route('questions.answers.store', $question)),
@@ -14,15 +15,32 @@
         totalCount: {{ (int) $answerCount }},
         latestId: {{ (int) $latestAnswerId }},
         pollMs: 4000,
+        embedded: {{ $embedded ? 'true' : 'false' }},
     })"
 >
     <header class="gchat-panel-head">
         <div class="min-w-0 flex-1">
             <div class="gchat-panel-head-row">
                 <p class="gchat-panel-kicker">Thread</p>
-                @if ($embedded)
-                    <button type="button" class="gchat-panel-close" @click="$dispatch('qa-close-thread')" aria-label="Close thread">×</button>
-                @endif
+                <div class="gchat-panel-head-actions">
+                    <button
+                        type="button"
+                        class="gchat-panel-icon-btn"
+                        @click="toggleFullscreen()"
+                        :title="isFullscreen ? 'Exit full screen' : 'Open full screen'"
+                        :aria-label="isFullscreen ? 'Exit full screen' : 'Open full screen'"
+                    >
+                        <svg x-show="!isFullscreen" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>
+                        </svg>
+                        <svg x-show="isFullscreen" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 4H5v4M15 4h4v4M9 20H5v-4M15 20h4v-4"/>
+                        </svg>
+                    </button>
+                    @if ($embedded)
+                        <button type="button" class="gchat-panel-close" @click="exitAndClose()" aria-label="Close thread">×</button>
+                    @endif
+                </div>
             </div>
             <h1 class="gchat-panel-title">{{ $question->title }}</h1>
             <div class="gchat-panel-meta">
@@ -55,30 +73,40 @@
         >
     </div>
 
-    <div class="gchat-panel-body" data-thread-scroll>
-        <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}" x-show="matchesSearch($el)">
-            <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
-            <div class="gchat-msg-main">
-                <div class="gchat-msg-meta">
-                    <span class="gchat-msg-name">{{ $question->author->name }}</span>
-                    <time class="gchat-msg-time" datetime="{{ $question->created_at->toIso8601String() }}">
-                        {{ $question->created_at->format('M j, g:i A') }}
-                    </time>
+    <div class="gchat-panel-body" data-thread-scroll x-ref="threadScroll">
+        <div class="gchat-sticky-parent">
+            <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}" x-show="matchesSearch($el)">
+                <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
+                <div class="gchat-msg-main">
+                    <div class="gchat-msg-meta">
+                        <span class="gchat-msg-name">{{ $question->author->name }}</span>
+                        <time class="gchat-msg-time" datetime="{{ $question->created_at->toIso8601String() }}">
+                            {{ $question->created_at->format('M j, g:i A') }}
+                        </time>
+                    </div>
+                    <div class="gchat-bubble gchat-bubble--parent">
+                        <div class="gchat-bubble-text whitespace-pre-wrap">{{ $question->body }}</div>
+                    </div>
                 </div>
-                <div class="gchat-bubble gchat-bubble--parent">
-                    <div class="gchat-bubble-text whitespace-pre-wrap">{{ $question->body }}</div>
-                </div>
-            </div>
-        </article>
+            </article>
+        </div>
 
-        <div class="gchat-replies-divider" x-show="totalCount > 0" @if ($answerCount === 0) x-cloak @endif>
+        <button
+            type="button"
+            class="gchat-replies-divider"
+            x-show="totalCount > 0"
+            @if ($answerCount === 0) x-cloak @endif
+            @click="toggleReplies()"
+            :aria-expanded="repliesOpen.toString()"
+        >
             <span class="gchat-replies-count">
                 <span x-text="totalCount">{{ $answerCount }}</span>
                 <span x-text="totalCount === 1 ? 'reply' : 'replies'">{{ Str::plural('reply', $answerCount) }}</span>
+                <span class="gchat-replies-toggle-hint" x-text="repliesOpen ? '· Hide' : '· Show'"></span>
             </span>
-        </div>
+        </button>
 
-        <div class="gchat-replies" data-discussion-root>
+        <div class="gchat-replies" data-discussion-root x-show="repliesOpen" x-ref="repliesRoot">
             @forelse ($question->answers as $answer)
                 @include('hubs.questions.partials.chat-message', [
                     'answer' => $answer,

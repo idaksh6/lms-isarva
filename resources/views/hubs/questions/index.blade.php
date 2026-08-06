@@ -12,6 +12,7 @@
         csrf: @js(csrf_token()),
     })"
     @qa-close-thread.window="closeThread()"
+    @qa-toggle-fullscreen.window="fullscreen = $event.detail.open"
 >
     <x-lms.module-hero module="questions" title="Questions & answers" subtitle="Ask the community, share knowledge, and get help from students, lecturers, and administrators.">
         <div class="lms-stat-chips">
@@ -58,7 +59,7 @@
         @endif
     </form>
 
-    <div class="gchat-board" :class="{ 'is-open': threadOpen }">
+    <div class="gchat-board" :class="{ 'is-open': threadOpen, 'is-fullscreen': fullscreen && threadOpen }">
         <section class="gchat-board-feed corp-panel">
             <div class="corp-panel-head">
                 <div>

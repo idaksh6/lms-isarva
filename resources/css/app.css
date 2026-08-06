@@ -4857,12 +4857,20 @@
         @apply pb-3;
     }
 
+    .gchat-sticky-parent {
+        @apply sticky top-0 z-10 -mx-1 border-b border-slate-100 bg-[#fafbfc]/95 px-1 pb-1 backdrop-blur-sm;
+    }
+
     .gchat-msg-avatar {
         @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-600 text-xs font-semibold text-white;
     }
 
     .gchat-msg-avatar--lg {
         @apply h-10 w-10 bg-brand-600 text-sm;
+    }
+
+    .gchat-msg.is-mine {
+        @apply flex-row-reverse;
     }
 
     .gchat-msg.is-mine .gchat-msg-avatar {
@@ -4873,8 +4881,16 @@
         @apply min-w-0 flex-1;
     }
 
+    .gchat-msg.is-mine .gchat-msg-main {
+        @apply flex flex-col items-end;
+    }
+
     .gchat-msg-meta {
         @apply mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5;
+    }
+
+    .gchat-msg.is-mine .gchat-msg-meta {
+        @apply flex-row-reverse;
     }
 
     .gchat-msg-name {
@@ -4887,6 +4903,10 @@
 
     .gchat-msg-delete {
         @apply ml-auto;
+    }
+
+    .gchat-msg.is-mine .gchat-msg-delete {
+        @apply ml-0 mr-auto;
     }
 
     .gchat-msg-delete-btn {
@@ -4902,15 +4922,15 @@
     }
 
     .gchat-msg.is-mine .gchat-bubble {
-        @apply bg-sky-100 text-slate-900;
+        @apply rounded-2xl rounded-tr-md bg-sky-100 text-slate-900;
     }
 
     .gchat-bubble-text {
-        @apply break-words;
+        @apply break-words text-left;
     }
 
     .gchat-quote {
-        @apply mb-2 flex gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-2.5 py-2;
+        @apply mb-2 flex gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-2.5 py-2 text-left;
     }
 
     .gchat-quote-mark {
@@ -4937,13 +4957,17 @@
         @apply mt-1.5 text-xs font-semibold text-brand-700 opacity-0 transition hover:text-brand-800;
     }
 
+    .gchat-msg.is-mine .gchat-reply-btn {
+        @apply self-end;
+    }
+
     .gchat-msg:hover .gchat-reply-btn,
     .gchat-msg:focus-within .gchat-reply-btn {
         @apply opacity-100;
     }
 
     .gchat-replies-divider {
-        @apply relative my-3 flex items-center;
+        @apply relative my-3 flex w-full cursor-pointer items-center border-0 bg-transparent p-0;
     }
 
     .gchat-replies-divider::before,
@@ -4953,7 +4977,11 @@
     }
 
     .gchat-replies-count {
-        @apply shrink-0 px-3 text-xs font-semibold text-slate-500;
+        @apply shrink-0 px-3 text-xs font-semibold text-slate-500 transition hover:text-brand-700;
+    }
+
+    .gchat-replies-toggle-hint {
+        @apply font-medium text-brand-600;
     }
 
     .gchat-replies {
@@ -5014,6 +5042,38 @@
 
     .gchat-board.is-open {
         @apply lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] xl:grid-cols-[minmax(0,1fr)_minmax(24rem,28rem)];
+    }
+
+    .gchat-board.is-fullscreen {
+        @apply !grid-cols-1;
+    }
+
+    .gchat-board.is-fullscreen .gchat-board-feed {
+        @apply !hidden;
+    }
+
+    .gchat-board.is-fullscreen.is-open .gchat-board-panel {
+        @apply fixed inset-0 z-50 bg-slate-200/50 p-3 sm:p-5;
+    }
+
+    .gchat-board.is-fullscreen.is-open .gchat-board-panel .gchat-panel,
+    .gchat-board.is-fullscreen.is-open .gchat-board-panel-inner > .gchat-panel,
+    .gchat-panel.is-fullscreen {
+        @apply !h-[calc(100dvh-1.5rem)] !max-h-[calc(100dvh-1.5rem)] sm:!h-[calc(100dvh-2.5rem)] sm:!max-h-[calc(100dvh-2.5rem)];
+    }
+
+    .corp-qa-show .gchat-panel.is-fullscreen {
+        @apply fixed inset-3 z-50 !h-auto !max-h-none sm:inset-5;
+        height: calc(100dvh - 1.5rem) !important;
+        max-height: calc(100dvh - 1.5rem) !important;
+    }
+
+    .gchat-panel-head-actions {
+        @apply flex items-center gap-1;
+    }
+
+    .gchat-panel-icon-btn {
+        @apply flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800;
     }
 
     .gchat-board-feed {

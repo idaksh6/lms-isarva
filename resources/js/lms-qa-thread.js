@@ -6,11 +6,14 @@ export default function lmsQaThread(config) {
         totalCount: config.totalCount ?? 0,
         latestId: config.latestId ?? 0,
         pollMs: config.pollMs ?? 4000,
+        embedded: Boolean(config.embedded),
         replyTo: null,
         submitting: false,
         error: null,
         threadSearch: '',
         pollTimer: null,
+        repliesOpen: true,
+        isFullscreen: false,
 
         get hasSearchMatches() {
             const q = (this.threadSearch || '').trim().toLowerCase();
@@ -32,11 +35,25 @@ export default function lmsQaThread(config) {
                 this.latestId = Math.max(this.latestId || 0, ...ids);
             }
 
+            this._onKeydown = (event) => {
+                if (event.key === 'Escape' && this.isFullscreen) {
+                    this.toggleFullscreen();
+                }
+            };
+            window.addEventListener('keydown', this._onKeydown);
+
             this.startPolling();
+            this.$nextTick(() => this.scrollToLatest({ smooth: false }));
         },
 
         destroy() {
             this.stopPolling();
+            if (this._onKeydown) {
+                window.removeEventListener('keydown', this._onKeydown);
+            }
+            if (this.isFullscreen) {
+                this.$dispatch('qa-toggle-fullscreen', { open: false });
+            }
         },
 
         matchesSearch(el) {
@@ -46,6 +63,39 @@ export default function lmsQaThread(config) {
             }
 
             return (el?.dataset?.searchText || '').includes(q);
+        },
+
+        toggleReplies() {
+            this.repliesOpen = ! this.repliesOpen;
+            if (this.repliesOpen) {
+                this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+            }
+        },
+
+        toggleFullscreen() {
+            this.isFullscreen = ! this.isFullscreen;
+            this.$dispatch('qa-toggle-fullscreen', { open: this.isFullscreen });
+            this.$nextTick(() => this.scrollToLatest({ smooth: false }));
+        },
+
+        exitAndClose() {
+            if (this.isFullscreen) {
+                this.isFullscreen = false;
+                this.$dispatch('qa-toggle-fullscreen', { open: false });
+            }
+            this.$dispatch('qa-close-thread');
+        },
+
+        scrollToLatest({ smooth = true } = {}) {
+            const scroller = this.$refs.threadScroll;
+            if (! scroller) {
+                return;
+            }
+
+            scroller.scrollTo({
+                top: scroller.scrollHeight,
+                behavior: smooth ? 'smooth' : 'auto',
+            });
         },
 
         startPolling() {
@@ -86,6 +136,7 @@ export default function lmsQaThread(config) {
 
                 const data = await response.json();
                 const items = data.answers || [];
+                let added = false;
 
                 items.forEach((item) => {
                     if (! item?.id || ! item?.html) {
@@ -94,12 +145,24 @@ export default function lmsQaThread(config) {
                     if (this.$el.querySelector(`[data-answer-id="${item.id}"]`)) {
                         return;
                     }
+                    this.repliesOpen = true;
                     this.appendMessage(item.html, { scroll: false });
                     this.latestId = Math.max(this.latestId, item.id);
+                    added = true;
                 });
 
                 if (typeof data.total_answers === 'number') {
                     this.totalCount = data.total_answers;
+                }
+
+                if (added) {
+                    const scroller = this.$refs.threadScroll;
+                    const nearBottom = scroller
+                        ? (scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight) < 120
+                        : true;
+                    if (nearBottom) {
+                        this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+                    }
                 }
             } catch (error) {
                 // Silent poll failures — network blips should not interrupt the thread.
@@ -109,6 +172,7 @@ export default function lmsQaThread(config) {
         setReplyTo(target) {
             this.replyTo = target;
             this.error = null;
+            this.repliesOpen = true;
             this.$nextTick(() => this.$refs.composer?.focus());
         },
 
@@ -138,6 +202,7 @@ export default function lmsQaThread(config) {
             }
 
             this.submitting = true;
+            this.repliesOpen = true;
 
             try {
                 const response = await fetch(this.storeUrl, {
@@ -200,9 +265,7 @@ export default function lmsQaThread(config) {
             }
 
             if (scroll) {
-                this.$nextTick(() => {
-                    node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                });
+                this.$nextTick(() => this.scrollToLatest({ smooth: true }));
             }
         },
 
