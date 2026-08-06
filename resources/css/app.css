@@ -4850,7 +4850,7 @@
     }
 
     .gchat-msg {
-        @apply group flex items-start gap-3 px-1 py-2.5;
+        @apply flex items-start gap-3 px-1 py-2.5;
     }
 
     .gchat-msg--parent {
