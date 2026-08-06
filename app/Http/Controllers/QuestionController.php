@@ -90,11 +90,10 @@ class QuestionController extends Controller
         $question->load([
             'author',
             'course',
-            'rootAnswers.author',
-            'rootAnswers.childrenRecursive.author',
+            'answers' => fn ($q) => $q->with(['author', 'quoted.author'])->oldest(),
         ]);
 
-        $answerCount = $question->answers()->count();
+        $answerCount = $question->answers->count();
 
         return view('hubs.questions.show', compact('question', 'answerCount'));
     }

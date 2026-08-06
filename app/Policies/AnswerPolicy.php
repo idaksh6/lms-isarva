@@ -24,14 +24,6 @@ class AnswerPolicy
 
     public function accept(User $user, Answer $answer): bool
     {
-        if (! $answer->isRoot()) {
-            return false;
-        }
-
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        return $user->id === $answer->question->user_id;
+        return false;
     }
 }

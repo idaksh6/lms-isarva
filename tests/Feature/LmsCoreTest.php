@@ -353,18 +353,10 @@ class LmsCoreTest extends TestCase
         $this->assertNotNull($answer);
         $this->assertSame($lecturer->id, $answer->user_id);
         $this->assertNull($answer->parent_id);
-
-        $this->actingAs($student)
-            ->patch(route('questions.answers.accept', [$question, $answer]))
-            ->assertRedirect();
-
-        $question->refresh();
-        $answer->refresh();
-        $this->assertTrue($question->is_resolved);
-        $this->assertTrue($answer->is_accepted);
+        $this->assertTrue($question->fresh()->is_resolved);
     }
 
-    public function test_user_can_post_nested_reply_via_ajax(): void
+    public function test_user_can_post_quoted_reply_via_ajax(): void
     {
         $student = $this->makeStudent();
         $lecturer = $this->makeLecturer();
@@ -373,14 +365,14 @@ class LmsCoreTest extends TestCase
         $question = Question::query()->create([
             'user_id' => $student->id,
             'course_id' => $course->id,
-            'title' => 'Nested reply thread',
+            'title' => 'Chat-style thread',
             'body' => 'Parent question body',
         ]);
 
         $root = Answer::query()->create([
             'question_id' => $question->id,
             'user_id' => $lecturer->id,
-            'body' => 'Top-level answer',
+            'body' => 'Top-level reply in the thread',
         ]);
 
         $response = $this->actingAs($student)
@@ -391,9 +383,11 @@ class LmsCoreTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('answer.parent_id', $root->id)
-            ->assertJsonStructure(['html', 'total_answers', 'answer' => ['id', 'parent_id', 'depth']]);
+            ->assertJsonStructure(['html', 'total_answers', 'answer' => ['id', 'parent_id']]);
 
-        $this->assertSame(1, $response->json('answer.depth'));
+        $this->assertStringContainsString('Thanks — that helped.', $response->json('html'));
+        $this->assertStringContainsString('Top-level reply in the thread', $response->json('html'));
+
         $this->assertDatabaseHas('answers', [
             'question_id' => $question->id,
             'parent_id' => $root->id,
@@ -404,41 +398,10 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)
             ->get(route('questions.show', $question))
             ->assertOk()
-            ->assertSee('Reply', false)
+            ->assertSee('Thread', false)
+            ->assertSee('Reply in thread', false)
+            ->assertDontSee('Accept', false)
             ->assertSee('Thanks — that helped.', false);
-    }
-
-    public function test_nested_reply_cannot_exceed_max_depth(): void
-    {
-        $student = $this->makeStudent();
-        $question = Question::query()->create([
-            'user_id' => $student->id,
-            'title' => 'Deep thread',
-            'body' => 'Body',
-        ]);
-
-        $parent = Answer::query()->create([
-            'question_id' => $question->id,
-            'user_id' => $student->id,
-            'body' => 'Root',
-        ]);
-
-        for ($depth = 1; $depth <= Answer::MAX_DEPTH; $depth++) {
-            $parent = Answer::query()->create([
-                'question_id' => $question->id,
-                'parent_id' => $parent->id,
-                'user_id' => $student->id,
-                'body' => "Level {$depth}",
-            ]);
-        }
-
-        $this->actingAs($student)
-            ->postJson(route('questions.answers.store', $question), [
-                'body' => 'Too deep',
-                'parent_id' => $parent->id,
-            ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('parent_id');
     }
 
     public function test_user_can_update_portal_theme_from_settings(): void

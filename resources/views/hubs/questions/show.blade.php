@@ -4,6 +4,9 @@
 @section('page_title', 'Q&A')
 
 @section('content')
+@php
+    $viewer = auth()->user();
+@endphp
 <div
     class="lms-page-stack corp-qa-page corp-qa-show"
     x-data="lmsQaThread({
@@ -16,97 +19,113 @@
         <a href="{{ route('questions.index') }}" class="lms-btn-back">← Back to Q&amp;A</a>
     </div>
 
-    <section class="corp-panel corp-qa-thread corp-qa-thread--question">
-        <div class="corp-panel-head">
+    <section class="gchat-panel">
+        <header class="gchat-panel-head">
             <div class="min-w-0 flex-1">
-                <div class="corp-qa-thread-meta">
-                    @if ($question->is_resolved)
-                        <span class="corp-qa-status corp-qa-status--answered">Answered</span>
-                    @else
-                        <span class="corp-qa-status corp-qa-status--open">Open</span>
-                    @endif
+                <p class="gchat-panel-kicker">Thread</p>
+                <h1 class="gchat-panel-title">{{ $question->title }}</h1>
+                <div class="gchat-panel-meta">
                     @if ($question->course)
                         <span class="corp-code-badge">{{ $question->course->code }}</span>
                     @else
                         <span class="corp-qa-scope">General</span>
                     @endif
+                    @if ($question->course)
+                        <span class="gchat-panel-sub">{{ $question->course->title }}</span>
+                    @endif
                 </div>
-                <h1 class="corp-qa-thread-title">{{ $question->title }}</h1>
-                @if ($question->course)
-                    <p class="corp-qa-thread-sub">{{ $question->course->title }}</p>
-                @endif
             </div>
             @can('delete', $question)
-                <form method="POST" action="{{ route('questions.destroy', $question) }}" onsubmit="return confirm('Remove this question and all answers?')">
+                <form method="POST" action="{{ route('questions.destroy', $question) }}" onsubmit="return confirm('Remove this question and all replies?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="lms-btn-danger lms-btn-danger--xs">Remove question</button>
+                    <button type="submit" class="lms-btn-danger lms-btn-danger--xs">Remove</button>
                 </form>
             @endcan
-        </div>
+        </header>
 
-        <div class="corp-qa-thread-body">
-            <x-lms.qa-author :user="$question->author" :posted-at="$question->created_at" variant="question" />
-            <div class="corp-qa-thread-content whitespace-pre-wrap">{{ $question->body }}</div>
-        </div>
-    </section>
-
-    <section class="corp-panel">
-        <div class="corp-panel-head corp-panel-head--compact">
-            <div>
-                <h2 class="corp-panel-title">
-                    <span x-text="totalCount">{{ $answerCount }}</span>
-                    <span x-text="totalCount === 1 ? 'response' : 'responses'">{{ Str::plural('response', $answerCount) }}</span>
-                </h2>
-                <p class="corp-panel-desc">Replies nest under their parent. The question author or an administrator can accept a top-level answer.</p>
-            </div>
-        </div>
-
-        <div class="corp-qa-discussion" data-discussion-root>
-            @forelse ($question->rootAnswers as $answer)
-                @include('hubs.questions.partials.thread-node', [
-                    'answer' => $answer,
-                    'question' => $question,
-                    'depth' => 0,
-                ])
-            @empty
-                <div class="corp-qa-empty-answers" data-empty-answers>
-                    <p class="corp-qa-empty-title">No responses yet</p>
-                    <p class="corp-qa-empty-desc">Be the first to help by posting a reply below.</p>
+        <div class="gchat-panel-body">
+            {{-- Parent / original question --}}
+            <article class="gchat-msg gchat-msg--parent">
+                <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
+                <div class="gchat-msg-main">
+                    <div class="gchat-msg-meta">
+                        <span class="gchat-msg-name">{{ $question->author->name }}</span>
+                        <time class="gchat-msg-time" datetime="{{ $question->created_at->toIso8601String() }}">
+                            {{ $question->created_at->format('M j, g:i A') }}
+                        </time>
+                    </div>
+                    <div class="gchat-bubble gchat-bubble--parent">
+                        <div class="gchat-bubble-text whitespace-pre-wrap">{{ $question->body }}</div>
+                    </div>
                 </div>
-            @endforelse
-        </div>
-    </section>
+            </article>
 
-    <section class="corp-panel">
-        <div class="corp-panel-head corp-panel-head--compact">
-            <div>
-                <h2 class="corp-panel-title">Post your answer</h2>
-                <p class="corp-panel-desc">Your name, role, and posting time will be recorded. Use Reply on a comment to nest a response.</p>
+            {{-- Replies divider --}}
+            <div class="gchat-replies-divider" x-show="totalCount > 0" @if ($answerCount === 0) x-cloak @endif>
+                <span class="gchat-replies-count">
+                    <span x-text="totalCount">{{ $answerCount }}</span>
+                    <span x-text="totalCount === 1 ? 'reply' : 'replies'">{{ Str::plural('reply', $answerCount) }}</span>
+                </span>
+            </div>
+
+            <div class="gchat-replies" data-discussion-root>
+                @forelse ($question->answers as $answer)
+                    @include('hubs.questions.partials.chat-message', [
+                        'answer' => $answer,
+                        'question' => $question,
+                        'isMine' => $viewer && $viewer->id === $answer->user_id,
+                    ])
+                @empty
+                    <div class="gchat-empty" data-empty-answers>
+                        <p class="gchat-empty-title">No replies yet</p>
+                        <p class="gchat-empty-desc">Start the conversation below — replies appear here instantly.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
-        <form
-            method="POST"
-            action="{{ route('questions.answers.store', $question) }}"
-            class="corp-qa-reply-form"
-            @submit.prevent="submitRoot($event)"
-        >
-            @csrf
-            <div class="lms-form-field">
-                <label for="body" class="lms-field-label">Response</label>
-                <textarea id="body" name="body" rows="5" class="lms-field-input mt-1.5" required maxlength="10000" placeholder="Write a clear, helpful response…">{{ old('body') }}</textarea>
-                @error('body')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-sm text-red-600" x-show="rootError" x-text="rootError" x-cloak></p>
+
+        {{-- Composer (Google Chat style) --}}
+        <footer class="gchat-composer">
+            <div class="gchat-quote-preview" x-show="replyTo" x-cloak>
+                <div class="gchat-quote">
+                    <span class="gchat-quote-mark" aria-hidden="true">“</span>
+                    <div class="gchat-quote-body">
+                        <div class="gchat-quote-author">
+                            <span class="gchat-quote-avatar" aria-hidden="true" x-text="replyTo?.initials"></span>
+                            <span x-text="replyTo?.name"></span>
+                        </div>
+                        <p class="gchat-quote-text" x-text="replyTo?.body"></p>
+                    </div>
+                </div>
+                <button type="button" class="gchat-quote-clear" @click="clearReplyTo()" aria-label="Clear quote">×</button>
             </div>
-            <div class="lms-form-actions">
-                <button type="submit" class="lms-btn-primary" :disabled="submitting">
-                    <span x-show="!submitting">Submit answer</span>
-                    <span x-show="submitting" x-cloak>Posting…</span>
-                </button>
-            </div>
-        </form>
+
+            <form class="gchat-composer-form" @submit.prevent="submitMessage($event)">
+                @csrf
+                <div class="gchat-composer-row">
+                    <div class="gchat-msg-avatar" aria-hidden="true">{{ strtoupper(substr($viewer->name ?? 'U', 0, 1)) }}</div>
+                    <label class="sr-only" for="gchat-body">Write a reply</label>
+                    <textarea
+                        id="gchat-body"
+                        name="body"
+                        rows="2"
+                        class="gchat-composer-input"
+                        required
+                        maxlength="10000"
+                        placeholder="Reply in thread…"
+                        x-ref="composer"
+                        @keydown.enter.meta.prevent="submitMessage($event)"
+                        @keydown.enter.ctrl.prevent="submitMessage($event)"
+                    >{{ old('body') }}</textarea>
+                    <button type="submit" class="gchat-send-btn" :disabled="submitting" title="Send">
+                        <span x-show="!submitting">Send</span>
+                        <span x-show="submitting" x-cloak>…</span>
+                    </button>
+                </div>
+                <p class="gchat-composer-error" x-show="error" x-text="error" x-cloak></p>
+            </form>
+        </footer>
     </section>
 </div>
 @endsection

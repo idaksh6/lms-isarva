@@ -20,85 +20,77 @@ class AnswerController extends Controller
             'parent_id' => ['nullable', 'integer', 'exists:answers,id'],
         ]);
 
-        $parent = null;
-        $depth = 0;
+        $quoted = null;
 
         if (! empty($validated['parent_id'])) {
-            $parent = Answer::query()->findOrFail($validated['parent_id']);
+            $quoted = Answer::query()->with('author')->findOrFail($validated['parent_id']);
 
-            if ($parent->question_id !== $question->id) {
+            if ($quoted->question_id !== $question->id) {
                 throw ValidationException::withMessages([
-                    'parent_id' => 'Replies must belong to the same question.',
-                ]);
-            }
-
-            $depth = $parent->depth() + 1;
-
-            if ($depth > Answer::MAX_DEPTH) {
-                throw ValidationException::withMessages([
-                    'parent_id' => 'This thread has reached the maximum nesting depth.',
+                    'parent_id' => 'Replies must belong to the same question thread.',
                 ]);
             }
         }
 
         $answer = Answer::query()->create([
             'question_id' => $question->id,
-            'parent_id' => $parent?->id,
+            'parent_id' => $quoted?->id,
             'user_id' => $request->user()->id,
             'body' => $validated['body'],
         ]);
 
-        $answer->load('author');
+        $answer->load(['author', 'quoted.author']);
+
+        if (! $question->is_resolved) {
+            $question->update(['is_resolved' => true]);
+        }
 
         if ($request->expectsJson()) {
-            $html = view('hubs.questions.partials.thread-node', [
-                'answer' => $answer->setRelation('children', collect()),
+            $html = view('hubs.questions.partials.chat-message', [
+                'answer' => $answer,
                 'question' => $question,
-                'depth' => $depth,
+                'isMine' => true,
             ])->render();
 
             return response()->json([
                 'answer' => [
                     'id' => $answer->id,
                     'parent_id' => $answer->parent_id,
-                    'depth' => $depth,
                 ],
                 'html' => $html,
                 'total_answers' => $question->answers()->count(),
-                'message' => $parent ? 'Your reply has been posted.' : 'Your answer has been posted.',
+                'message' => 'Reply posted.',
             ]);
         }
 
-        return back()->with('success', $parent ? 'Your reply has been posted.' : 'Your answer has been posted.');
+        return back()->with('success', 'Your reply has been posted.');
     }
 
     public function accept(Question $question, Answer $answer): RedirectResponse
     {
-        abort_unless($answer->question_id === $question->id, 404);
-        abort_unless($answer->isRoot(), 422, 'Only top-level answers can be accepted.');
-        $this->authorize('accept', $answer);
-
-        $question->answers()->whereNull('parent_id')->update(['is_accepted' => false]);
-
-        $answer->update(['is_accepted' => true]);
-        $question->update(['is_resolved' => true]);
-
-        return back()->with('success', 'Answer marked as accepted.');
+        abort(404);
     }
 
-    public function destroy(Answer $answer): RedirectResponse
+    public function destroy(Answer $answer): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $answer);
 
         $question = $answer->question;
-        $wasAccepted = $answer->is_accepted;
+        $answerId = $answer->id;
 
         $answer->delete();
 
-        if ($wasAccepted) {
+        if ($question->answers()->count() === 0) {
             $question->update(['is_resolved' => false]);
         }
 
-        return back()->with('success', 'Answer removed.');
+        if (request()->expectsJson()) {
+            return response()->json([
+                'deleted' => $answerId,
+                'total_answers' => $question->answers()->count(),
+            ]);
+        }
+
+        return back()->with('success', 'Reply removed.');
     }
 }

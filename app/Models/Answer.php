@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Answer extends Model
 {
-    public const MAX_DEPTH = 5;
-
     protected function casts(): array
     {
         return [
@@ -35,9 +33,15 @@ class Answer extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function parent(): BelongsTo
+    /** Quoted message this reply references (Google Chat–style quote, not nesting). */
+    public function quoted(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->quoted();
     }
 
     public function children(): HasMany
@@ -45,44 +49,14 @@ class Answer extends Model
         return $this->hasMany(self::class, 'parent_id')->oldest();
     }
 
-    public function childrenRecursive(): HasMany
+    public function snippet(int $limit = 120): string
     {
-        return $this->children()->with(['author', 'childrenRecursive']);
-    }
+        $text = preg_replace('/\s+/', ' ', trim($this->body)) ?? '';
 
-    public function isRoot(): bool
-    {
-        return $this->parent_id === null;
-    }
-
-    public function depth(): int
-    {
-        $depth = 0;
-        $parent = $this->relationLoaded('parent') ? $this->parent : $this->parent()->first();
-
-        while ($parent !== null && $depth < self::MAX_DEPTH + 1) {
-            $depth++;
-            $parent = $parent->relationLoaded('parent')
-                ? $parent->parent
-                : $parent->parent()->first();
+        if (mb_strlen($text) <= $limit) {
+            return $text;
         }
 
-        return $depth;
-    }
-
-    public function canReceiveReply(): bool
-    {
-        return $this->depth() < self::MAX_DEPTH;
-    }
-
-    public function descendantCount(): int
-    {
-        $count = $this->children->count();
-
-        foreach ($this->children as $child) {
-            $count += $child->descendantCount();
-        }
-
-        return $count;
+        return rtrim(mb_substr($text, 0, $limit - 1)).'…';
     }
 }

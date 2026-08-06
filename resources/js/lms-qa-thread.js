@@ -3,89 +3,37 @@ export default function lmsQaThread(config) {
         storeUrl: config.storeUrl,
         csrf: config.csrf,
         totalCount: config.totalCount ?? 0,
-        replyOpenId: null,
+        replyTo: null,
         submitting: false,
         error: null,
-        rootError: null,
-        collapsed: {},
 
-        isCollapsed(id, defaultCollapsed = false) {
-            if (Object.prototype.hasOwnProperty.call(this.collapsed, id)) {
-                return this.collapsed[id];
-            }
-
-            return defaultCollapsed;
-        },
-
-        expandThread(id) {
-            this.collapsed[id] = false;
-        },
-
-        collapseThread(id) {
-            this.collapsed[id] = true;
-        },
-
-        openReply(id) {
-            this.replyOpenId = id;
+        setReplyTo(target) {
+            this.replyTo = target;
             this.error = null;
-            this.rootError = null;
-
-            this.$nextTick(() => {
-                const field = this.$refs[`replyBody${id}`]
-                    || document.getElementById(`reply-body-${id}`);
-                field?.focus();
-            });
+            this.$nextTick(() => this.$refs.composer?.focus());
         },
 
-        cancelReply() {
-            this.replyOpenId = null;
-            this.error = null;
+        clearReplyTo() {
+            this.replyTo = null;
         },
 
-        async submitRoot(event) {
-            const form = event.target;
-            const body = form.body?.value?.trim() ?? '';
+        async submitMessage(event) {
+            const form = event.target?.closest?.('form') || this.$el.querySelector('.gchat-composer-form');
+            const field = form?.querySelector('[name="body"]') || this.$refs.composer;
+            const body = (field?.value || '').trim();
 
             if (! body) {
-                this.rootError = 'Please write a response before submitting.';
-                return;
-            }
-
-            this.rootError = null;
-            await this.postAnswer({ body }, {
-                onSuccess: (data) => {
-                    this.appendNode(null, data.html);
-                    form.reset();
-                },
-                onError: (message) => {
-                    this.rootError = message;
-                },
-            });
-        },
-
-        async submitReply(parentId, event) {
-            const form = event.target;
-            const body = form.body?.value?.trim() ?? '';
-
-            if (! body) {
-                this.error = 'Please write a reply before submitting.';
+                this.error = 'Write a reply before sending.';
                 return;
             }
 
             this.error = null;
-            await this.postAnswer({ body, parent_id: parentId }, {
-                onSuccess: (data) => {
-                    this.appendNode(parentId, data.html);
-                    form.reset();
-                    this.replyOpenId = null;
-                },
-                onError: (message) => {
-                    this.error = message;
-                },
-            });
-        },
 
-        async postAnswer(payload, { onSuccess, onError }) {
+            const payload = { body };
+            if (this.replyTo?.id) {
+                payload.parent_id = this.replyTo.id;
+            }
+
             if (this.submitting) {
                 return;
             }
@@ -107,84 +55,99 @@ export default function lmsQaThread(config) {
                 const data = await response.json().catch(() => ({}));
 
                 if (! response.ok) {
-                    const message = data.message
+                    this.error = data.message
                         || Object.values(data.errors || {}).flat()[0]
-                        || 'Unable to post right now. Please try again.';
-                    onError(message);
+                        || 'Unable to send right now. Please try again.';
                     return;
                 }
 
                 this.totalCount = data.total_answers ?? (this.totalCount + 1);
-                onSuccess(data);
+                this.appendMessage(data.html);
+                if (field) {
+                    field.value = '';
+                }
+                this.replyTo = null;
             } catch (error) {
                 console.error(error);
-                onError('Unable to post right now. Please try again.');
+                this.error = 'Unable to send right now. Please try again.';
             } finally {
                 this.submitting = false;
             }
         },
 
-        appendNode(parentId, html) {
+        appendMessage(html) {
             const empty = this.$el.querySelector('[data-empty-answers]');
-            if (empty) {
-                empty.remove();
+            empty?.remove();
+
+            const root = this.$el.querySelector('[data-discussion-root]');
+            if (! root || ! html) {
+                return;
             }
 
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html.trim();
             const node = wrapper.firstElementChild;
-
             if (! node) {
                 return;
             }
 
-            if (! parentId) {
-                this.$el.querySelector('[data-discussion-root]')?.appendChild(node);
-                if (window.Alpine) {
-                    window.Alpine.initTree(node);
-                }
-                return;
-            }
-
-            const parentNode = this.$el.querySelector(`[data-answer-id="${parentId}"]`);
-            const children = parentNode?.querySelector(':scope > .corp-qa-thread-children');
-
-            if (! children) {
-                return;
-            }
-
-            let branch = children.querySelector(':scope > .corp-qa-thread-branch');
-
-            if (! branch) {
-                branch = document.createElement('div');
-                branch.className = 'corp-qa-thread-branch';
-                branch.dataset.branchFor = String(parentId);
-
-                const list = document.createElement('div');
-                list.className = 'corp-qa-thread-branch-list';
-                branch.appendChild(list);
-                children.appendChild(branch);
-            }
-
-            let list = branch.querySelector(':scope > .corp-qa-thread-branch-list');
-
-            if (! list) {
-                list = document.createElement('div');
-                list.className = 'corp-qa-thread-branch-list';
-                branch.appendChild(list);
-            }
-
-            this.expandThread(parentId);
-            list.appendChild(node);
+            root.appendChild(node);
 
             if (window.Alpine) {
                 window.Alpine.initTree(node);
             }
 
-            const viewBtn = branch.querySelector(':scope > .corp-qa-view-replies:not(.corp-qa-view-replies--hide)');
-            if (viewBtn) {
-                const count = list.querySelectorAll(':scope > .corp-qa-thread-node').length;
-                viewBtn.textContent = `View ${count} ${count === 1 ? 'reply' : 'replies'}`;
+            this.$nextTick(() => {
+                node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        },
+
+        async removeMessage(id, event) {
+            if (! confirm('Remove this reply?')) {
+                return;
+            }
+
+            const form = event.target.closest('form');
+            if (! form) {
+                return;
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': this.csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: new URLSearchParams({
+                        _token: this.csrf,
+                        _method: 'DELETE',
+                    }),
+                });
+
+                if (! response.ok) {
+                    throw new Error('Delete failed');
+                }
+
+                const data = await response.json().catch(() => ({}));
+                this.$el.querySelector(`[data-answer-id="${id}"]`)?.remove();
+                this.totalCount = data.total_answers ?? Math.max(0, this.totalCount - 1);
+
+                if (this.totalCount === 0) {
+                    const root = this.$el.querySelector('[data-discussion-root]');
+                    if (root && ! root.querySelector('.gchat-msg')) {
+                        root.innerHTML = `
+                            <div class="gchat-empty" data-empty-answers>
+                                <p class="gchat-empty-title">No replies yet</p>
+                                <p class="gchat-empty-desc">Start the conversation below — replies appear here instantly.</p>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                this.error = 'Unable to remove that reply.';
             }
         },
     };
