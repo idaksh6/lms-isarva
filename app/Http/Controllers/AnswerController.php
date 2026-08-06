@@ -45,7 +45,7 @@ class AnswerController extends Controller
             $question->update(['is_resolved' => true]);
         }
 
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->ajax()) {
             $html = view('hubs.questions.partials.chat-message', [
                 'answer' => $answer,
                 'question' => $question,

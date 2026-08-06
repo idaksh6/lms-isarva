@@ -22,7 +22,8 @@ export default function lmsQaThread(config) {
             }
 
             return [...this.$el.querySelectorAll('[data-search-text]')].some((el) => {
-                return (el.dataset.searchText || '').includes(q);
+                return ! el.classList.contains('is-search-hidden')
+                    && (el.dataset.searchText || '').includes(q);
             });
         },
 
@@ -42,6 +43,9 @@ export default function lmsQaThread(config) {
             };
             window.addEventListener('keydown', this._onKeydown);
 
+            this.$watch('threadSearch', () => this.applySearchFilter());
+            this.applySearchFilter();
+
             this.startPolling();
             this.$nextTick(() => this.scrollToLatest({ smooth: false }));
         },
@@ -54,6 +58,15 @@ export default function lmsQaThread(config) {
             if (this.isFullscreen) {
                 this.$dispatch('qa-toggle-fullscreen', { open: false });
             }
+        },
+
+        applySearchFilter() {
+            const q = (this.threadSearch || '').trim().toLowerCase();
+
+            this.$el.querySelectorAll('[data-search-text]').forEach((el) => {
+                const match = ! q || (el.dataset.searchText || '').includes(q);
+                el.classList.toggle('is-search-hidden', ! match);
+            });
         },
 
         matchesSearch(el) {
@@ -229,6 +242,13 @@ export default function lmsQaThread(config) {
                 if (data.answer?.id) {
                     this.latestId = Math.max(this.latestId, data.answer.id);
                 }
+
+                if (! data.html) {
+                    this.error = 'Reply saved, but could not render it. Refreshing…';
+                    window.location.reload();
+                    return;
+                }
+
                 this.appendMessage(data.html, { scroll: true });
                 if (field) {
                     field.value = '';
@@ -246,10 +266,15 @@ export default function lmsQaThread(config) {
             const empty = this.$el.querySelector('[data-empty-answers]');
             empty?.remove();
 
+            this.repliesOpen = true;
+
             const root = this.$el.querySelector('[data-discussion-root]');
             if (! root || ! html) {
                 return;
             }
+
+            // Ensure collapsed Alpine x-show container is visible for the new message.
+            root.style.removeProperty('display');
 
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html.trim();
@@ -258,11 +283,22 @@ export default function lmsQaThread(config) {
                 return;
             }
 
+            // Avoid duplicate if poll raced with the local post response.
+            const answerId = node.getAttribute('data-answer-id');
+            if (answerId && root.querySelector(`[data-answer-id="${answerId}"]`)) {
+                if (scroll) {
+                    this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+                }
+                return;
+            }
+
             root.appendChild(node);
 
             if (window.Alpine) {
                 window.Alpine.initTree(node);
             }
+
+            this.applySearchFilter();
 
             if (scroll) {
                 this.$nextTick(() => this.scrollToLatest({ smooth: true }));

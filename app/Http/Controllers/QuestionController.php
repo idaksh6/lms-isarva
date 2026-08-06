@@ -157,7 +157,8 @@ class QuestionController extends Controller
             ->with(['author', 'quoted.author'])
             ->where('question_id', $question->id)
             ->when($afterId > 0, fn ($q) => $q->where('id', '>', $afterId))
-            ->oldest()
+            ->orderBy('created_at')
+            ->orderBy('id')
             ->get();
 
         $viewerId = $request->user()?->id;
@@ -192,7 +193,11 @@ class QuestionController extends Controller
         $question->load([
             'author',
             'course',
-            'answers' => fn ($q) => $q->with(['author', 'quoted.author'])->oldest(),
+            'answers' => fn ($q) => $q
+                ->with(['author', 'quoted.author'])
+                ->reorder()
+                ->orderBy('created_at')
+                ->orderBy('id'),
         ]);
     }
 }

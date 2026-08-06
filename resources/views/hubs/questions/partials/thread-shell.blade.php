@@ -74,7 +74,7 @@
     </div>
 
     <div class="gchat-panel-body" data-thread-scroll x-ref="threadScroll">
-        <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}" x-show="matchesSearch($el)">
+            <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}">
             <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
             <div class="gchat-msg-main">
                 <div class="gchat-msg-meta">

@@ -36,7 +36,7 @@ class Question extends Model
 
     public function answers(): HasMany
     {
-        return $this->hasMany(Answer::class)->latest();
+        return $this->hasMany(Answer::class);
     }
 
     public function rootAnswers(): HasMany
@@ -44,7 +44,8 @@ class Question extends Model
         return $this->hasMany(Answer::class)
             ->whereNull('parent_id')
             ->orderByDesc('is_accepted')
-            ->oldest();
+            ->orderBy('created_at')
+            ->orderBy('id');
     }
 
     public function acceptedAnswer(): HasOne
