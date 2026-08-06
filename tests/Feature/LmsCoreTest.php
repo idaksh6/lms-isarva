@@ -404,6 +404,63 @@ class LmsCoreTest extends TestCase
             ->assertSee('Thanks — that helped.', false);
     }
 
+    public function test_qa_global_search_matches_reply_body(): void
+    {
+        $student = $this->makeStudent();
+        $lecturer = $this->makeLecturer();
+
+        $question = Question::query()->create([
+            'user_id' => $student->id,
+            'title' => 'Unrelated title',
+            'body' => 'Unrelated body',
+        ]);
+
+        Answer::query()->create([
+            'question_id' => $question->id,
+            'user_id' => $lecturer->id,
+            'body' => 'UniqueZebraDataset link is here',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('questions.index', ['q' => 'UniqueZebraDataset']))
+            ->assertOk()
+            ->assertSee('Unrelated title', false);
+    }
+
+    public function test_qa_panel_and_feed_endpoints(): void
+    {
+        $student = $this->makeStudent();
+        $question = Question::query()->create([
+            'user_id' => $student->id,
+            'title' => 'Panel panel',
+            'body' => 'Body',
+        ]);
+
+        $first = Answer::query()->create([
+            'question_id' => $question->id,
+            'user_id' => $student->id,
+            'body' => 'First reply',
+        ]);
+
+        $this->actingAs($student)
+            ->getJson(route('questions.panel', $question))
+            ->assertOk()
+            ->assertJsonPath('id', $question->id)
+            ->assertJsonStructure(['html', 'total_answers', 'url']);
+
+        $second = Answer::query()->create([
+            'question_id' => $question->id,
+            'user_id' => $student->id,
+            'body' => 'Second reply',
+        ]);
+
+        $this->actingAs($student)
+            ->getJson(route('questions.feed', ['question' => $question, 'after' => $first->id]))
+            ->assertOk()
+            ->assertJsonPath('latest_id', $second->id)
+            ->assertJsonCount(1, 'answers');
+    }
+
     public function test_user_can_update_portal_theme_from_settings(): void
     {
         $student = $this->makeStudent();

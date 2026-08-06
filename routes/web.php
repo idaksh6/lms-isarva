@@ -137,6 +137,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
     Route::get('questions/create', [QuestionController::class, 'create'])->name('questions.create');
     Route::post('questions', [QuestionController::class, 'store'])->name('questions.store');
+    Route::get('questions/{question}/panel', [QuestionController::class, 'panel'])->name('questions.panel');
+    Route::get('questions/{question}/feed', [QuestionController::class, 'feed'])->name('questions.feed');
     Route::get('questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
     Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
     Route::post('questions/{question}/answers', [AnswerController::class, 'store'])->name('questions.answers.store');

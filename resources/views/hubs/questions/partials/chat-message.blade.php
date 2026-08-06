@@ -17,6 +17,8 @@
     data-author-name="{{ $author->name }}"
     data-author-initials="{{ $initials }}"
     data-body="{{ $answer->snippet(160) }}"
+    data-search-text="{{ strtolower($author->name.' '.$answer->body.($quoted ? ' '.($quoted->author->name ?? '').' '.$quoted->body : '')) }}"
+    x-show="matchesSearch($el)"
 >
     <div class="gchat-msg-avatar" aria-hidden="true">{{ $initials }}</div>
     <div class="gchat-msg-main">

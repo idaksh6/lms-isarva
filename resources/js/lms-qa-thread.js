@@ -1,11 +1,110 @@
 export default function lmsQaThread(config) {
     return {
         storeUrl: config.storeUrl,
+        feedUrl: config.feedUrl,
         csrf: config.csrf,
         totalCount: config.totalCount ?? 0,
+        latestId: config.latestId ?? 0,
+        pollMs: config.pollMs ?? 4000,
         replyTo: null,
         submitting: false,
         error: null,
+        threadSearch: '',
+        pollTimer: null,
+
+        get hasSearchMatches() {
+            const q = (this.threadSearch || '').trim().toLowerCase();
+            if (! q) {
+                return true;
+            }
+
+            return [...this.$el.querySelectorAll('[data-search-text]')].some((el) => {
+                return (el.dataset.searchText || '').includes(q);
+            });
+        },
+
+        init() {
+            const ids = [...this.$el.querySelectorAll('[data-answer-id]')]
+                .map((el) => Number(el.dataset.answerId))
+                .filter((id) => Number.isFinite(id) && id > 0);
+
+            if (ids.length) {
+                this.latestId = Math.max(this.latestId || 0, ...ids);
+            }
+
+            this.startPolling();
+        },
+
+        destroy() {
+            this.stopPolling();
+        },
+
+        matchesSearch(el) {
+            const q = (this.threadSearch || '').trim().toLowerCase();
+            if (! q) {
+                return true;
+            }
+
+            return (el?.dataset?.searchText || '').includes(q);
+        },
+
+        startPolling() {
+            this.stopPolling();
+            if (! this.feedUrl) {
+                return;
+            }
+
+            this.pollTimer = setInterval(() => this.pollFeed(), this.pollMs);
+        },
+
+        stopPolling() {
+            if (this.pollTimer) {
+                clearInterval(this.pollTimer);
+                this.pollTimer = null;
+            }
+        },
+
+        async pollFeed() {
+            if (this.submitting || document.hidden) {
+                return;
+            }
+
+            try {
+                const url = new URL(this.feedUrl, window.location.origin);
+                url.searchParams.set('after', String(this.latestId || 0));
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (! response.ok) {
+                    return;
+                }
+
+                const data = await response.json();
+                const items = data.answers || [];
+
+                items.forEach((item) => {
+                    if (! item?.id || ! item?.html) {
+                        return;
+                    }
+                    if (this.$el.querySelector(`[data-answer-id="${item.id}"]`)) {
+                        return;
+                    }
+                    this.appendMessage(item.html, { scroll: false });
+                    this.latestId = Math.max(this.latestId, item.id);
+                });
+
+                if (typeof data.total_answers === 'number') {
+                    this.totalCount = data.total_answers;
+                }
+            } catch (error) {
+                // Silent poll failures — network blips should not interrupt the thread.
+            }
+        },
 
         setReplyTo(target) {
             this.replyTo = target;
@@ -62,7 +161,10 @@ export default function lmsQaThread(config) {
                 }
 
                 this.totalCount = data.total_answers ?? (this.totalCount + 1);
-                this.appendMessage(data.html);
+                if (data.answer?.id) {
+                    this.latestId = Math.max(this.latestId, data.answer.id);
+                }
+                this.appendMessage(data.html, { scroll: true });
                 if (field) {
                     field.value = '';
                 }
@@ -75,7 +177,7 @@ export default function lmsQaThread(config) {
             }
         },
 
-        appendMessage(html) {
+        appendMessage(html, { scroll = true } = {}) {
             const empty = this.$el.querySelector('[data-empty-answers]');
             empty?.remove();
 
@@ -97,9 +199,11 @@ export default function lmsQaThread(config) {
                 window.Alpine.initTree(node);
             }
 
-            this.$nextTick(() => {
-                node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            });
+            if (scroll) {
+                this.$nextTick(() => {
+                    node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+            }
         },
 
         async removeMessage(id, event) {
