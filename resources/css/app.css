@@ -4989,6 +4989,10 @@
         @apply space-y-1;
     }
 
+    .gchat-replies.is-collapsed {
+        display: none !important;
+    }
+
     .gchat-empty {
         @apply px-2 py-8 text-center;
     }

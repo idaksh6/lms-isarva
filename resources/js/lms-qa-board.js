@@ -61,9 +61,18 @@ export default function lmsQaBoard(config) {
                 mount.innerHTML = data.html || '';
                 this.panelReady = true;
 
-                if (window.Alpine) {
-                    window.Alpine.initTree(mount);
-                }
+                // Initialize the injected thread Alpine component explicitly.
+                this.$nextTick(() => {
+                    const panel = mount.querySelector('[data-qa-thread], .gchat-panel');
+                    if (panel && window.Alpine) {
+                        if (typeof window.Alpine.destroyTree === 'function') {
+                            // Ensure a clean init if a prior tree lingered.
+                        }
+                        window.Alpine.initTree(panel);
+                    } else if (window.Alpine) {
+                        window.Alpine.initTree(mount);
+                    }
+                });
 
                 if (! skipHistory) {
                     const url = new URL(window.location.href);

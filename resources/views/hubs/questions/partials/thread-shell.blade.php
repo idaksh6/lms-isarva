@@ -8,6 +8,7 @@
     class="gchat-panel"
     :class="{ 'is-fullscreen': isFullscreen }"
     data-question-id="{{ $question->id }}"
+    data-qa-thread
     x-data="lmsQaThread({
         storeUrl: @js(route('questions.answers.store', $question)),
         feedUrl: @js(route('questions.feed', $question)),
@@ -74,7 +75,7 @@
     </div>
 
     <div class="gchat-panel-body" data-thread-scroll x-ref="threadScroll">
-            <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}">
+        <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}">
             <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
             <div class="gchat-msg-main">
                 <div class="gchat-msg-meta">
@@ -104,7 +105,7 @@
             </span>
         </button>
 
-        <div class="gchat-replies" data-discussion-root x-show="repliesOpen" x-ref="repliesRoot">
+        <div class="gchat-replies" data-discussion-root x-ref="repliesRoot">
             @forelse ($question->answers as $answer)
                 @include('hubs.questions.partials.chat-message', [
                     'answer' => $answer,
@@ -136,10 +137,15 @@
                     <p class="gchat-quote-text" x-text="replyTo?.body"></p>
                 </div>
             </div>
-            <button type="button" class="gchat-quote-clear" @click="clearReplyTo()" aria-label="Clear quote">×</button>
+            <button type="button" class="gchat-quote-clear" data-qa-clear-quote aria-label="Clear quote">×</button>
         </div>
 
-        <form class="gchat-composer-form" @submit.prevent="submitMessage($event)">
+        <form
+            class="gchat-composer-form"
+            action="{{ route('questions.answers.store', $question) }}"
+            method="POST"
+            onsubmit="return false;"
+        >
             @csrf
             <div class="gchat-composer-row">
                 <div class="gchat-msg-avatar" aria-hidden="true">{{ strtoupper(substr($viewer->name ?? 'U', 0, 1)) }}</div>
@@ -149,12 +155,9 @@
                     name="body"
                     rows="2"
                     class="gchat-composer-input"
-                    required
                     maxlength="10000"
                     placeholder="Reply in thread…"
                     x-ref="composer"
-                    @keydown.enter.meta.prevent="submitMessage($event)"
-                    @keydown.enter.ctrl.prevent="submitMessage($event)"
                 ></textarea>
                 <button type="submit" class="gchat-send-btn" :disabled="submitting" title="Send">
                     <span x-show="!submitting">Send</span>

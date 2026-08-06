@@ -59,12 +59,11 @@
         <button
             type="button"
             class="gchat-reply-btn"
-            @click="setReplyTo({
-                id: {{ $answer->id }},
-                name: @js($author->name),
-                initials: @js($initials),
-                body: @js($answer->snippet(160)),
-            })"
+            data-qa-reply
+            data-id="{{ $answer->id }}"
+            data-name="{{ $author->name }}"
+            data-initials="{{ $initials }}"
+            data-body="{{ $answer->snippet(160) }}"
         >
             Reply
         </button>

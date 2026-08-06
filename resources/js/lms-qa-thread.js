@@ -43,8 +43,53 @@ export default function lmsQaThread(config) {
             };
             window.addEventListener('keydown', this._onKeydown);
 
+            // Native listeners — reliable even when the panel was injected via AJAX.
+            this._onSubmit = (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.submitMessage(event);
+            };
+            this._onClick = (event) => {
+                const replyBtn = event.target.closest('[data-qa-reply]');
+                if (replyBtn && this.$el.contains(replyBtn)) {
+                    event.preventDefault();
+                    this.setReplyTo({
+                        id: Number(replyBtn.dataset.id),
+                        name: replyBtn.dataset.name || '',
+                        initials: replyBtn.dataset.initials || '',
+                        body: replyBtn.dataset.body || '',
+                    });
+                    return;
+                }
+
+                const clearBtn = event.target.closest('[data-qa-clear-quote]');
+                if (clearBtn && this.$el.contains(clearBtn)) {
+                    event.preventDefault();
+                    this.clearReplyTo();
+                }
+            };
+
+            const form = this.$el.querySelector('.gchat-composer-form');
+            form?.addEventListener('submit', this._onSubmit);
+            this.$el.addEventListener('click', this._onClick);
+
+            const composer = this.$el.querySelector('.gchat-composer-input');
+            this._onComposerKey = (event) => {
+                if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    this.submitMessage(event);
+                }
+            };
+            composer?.addEventListener('keydown', this._onComposerKey);
+
             this.$watch('threadSearch', () => this.applySearchFilter());
+            this.$watch('repliesOpen', (open) => {
+                const root = this.$el.querySelector('[data-discussion-root]');
+                root?.classList.toggle('is-collapsed', ! open);
+            });
             this.applySearchFilter();
+            this.$el.querySelector('[data-discussion-root]')
+                ?.classList.toggle('is-collapsed', ! this.repliesOpen);
 
             this.startPolling();
             this.$nextTick(() => this.scrollToLatest({ smooth: false }));
@@ -55,6 +100,11 @@ export default function lmsQaThread(config) {
             if (this._onKeydown) {
                 window.removeEventListener('keydown', this._onKeydown);
             }
+            const form = this.$el.querySelector('.gchat-composer-form');
+            form?.removeEventListener('submit', this._onSubmit);
+            this.$el.removeEventListener('click', this._onClick);
+            this.$el.querySelector('.gchat-composer-input')
+                ?.removeEventListener('keydown', this._onComposerKey);
             if (this.isFullscreen) {
                 this.$dispatch('qa-toggle-fullscreen', { open: false });
             }
@@ -67,15 +117,6 @@ export default function lmsQaThread(config) {
                 const match = ! q || (el.dataset.searchText || '').includes(q);
                 el.classList.toggle('is-search-hidden', ! match);
             });
-        },
-
-        matchesSearch(el) {
-            const q = (this.threadSearch || '').trim().toLowerCase();
-            if (! q) {
-                return true;
-            }
-
-            return (el?.dataset?.searchText || '').includes(q);
         },
 
         toggleReplies() {
@@ -100,14 +141,16 @@ export default function lmsQaThread(config) {
         },
 
         scrollToLatest({ smooth = true } = {}) {
-            const scroller = this.$refs.threadScroll;
+            const scroller = this.$refs.threadScroll || this.$el.querySelector('[data-thread-scroll]');
             if (! scroller) {
                 return;
             }
 
-            scroller.scrollTo({
-                top: scroller.scrollHeight,
-                behavior: smooth ? 'smooth' : 'auto',
+            requestAnimationFrame(() => {
+                scroller.scrollTo({
+                    top: scroller.scrollHeight,
+                    behavior: smooth ? 'smooth' : 'auto',
+                });
             });
         },
 
@@ -169,16 +212,16 @@ export default function lmsQaThread(config) {
                 }
 
                 if (added) {
-                    const scroller = this.$refs.threadScroll;
+                    const scroller = this.$refs.threadScroll || this.$el.querySelector('[data-thread-scroll]');
                     const nearBottom = scroller
                         ? (scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight) < 120
                         : true;
                     if (nearBottom) {
-                        this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+                        this.scrollToLatest({ smooth: true });
                     }
                 }
             } catch (error) {
-                // Silent poll failures — network blips should not interrupt the thread.
+                // Silent poll failures.
             }
         },
 
@@ -186,7 +229,10 @@ export default function lmsQaThread(config) {
             this.replyTo = target;
             this.error = null;
             this.repliesOpen = true;
-            this.$nextTick(() => this.$refs.composer?.focus());
+            this.$nextTick(() => {
+                const composer = this.$refs.composer || this.$el.querySelector('.gchat-composer-input');
+                composer?.focus();
+            });
         },
 
         clearReplyTo() {
@@ -194,8 +240,14 @@ export default function lmsQaThread(config) {
         },
 
         async submitMessage(event) {
-            const form = event.target?.closest?.('form') || this.$el.querySelector('.gchat-composer-form');
-            const field = form?.querySelector('[name="body"]') || this.$refs.composer;
+            if (event?.preventDefault) {
+                event.preventDefault();
+            }
+
+            const form = this.$el.querySelector('.gchat-composer-form');
+            const field = form?.querySelector('[name="body"]')
+                || this.$refs.composer
+                || this.$el.querySelector('.gchat-composer-input');
             const body = (field?.value || '').trim();
 
             if (! body) {
@@ -226,6 +278,7 @@ export default function lmsQaThread(config) {
                         'X-CSRF-TOKEN': this.csrf,
                         'X-Requested-With': 'XMLHttpRequest',
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify(payload),
                 });
 
@@ -240,16 +293,19 @@ export default function lmsQaThread(config) {
 
                 this.totalCount = data.total_answers ?? (this.totalCount + 1);
                 if (data.answer?.id) {
-                    this.latestId = Math.max(this.latestId, data.answer.id);
+                    this.latestId = Math.max(this.latestId, Number(data.answer.id));
                 }
 
-                if (! data.html) {
-                    this.error = 'Reply saved, but could not render it. Refreshing…';
-                    window.location.reload();
+                if (data.html) {
+                    this.appendMessage(data.html, { scroll: true });
+                } else if (data.answer?.id) {
+                    // Fallback: pull the new message from the feed endpoint.
+                    await this.pullSingle(data.answer.id);
+                } else {
+                    this.error = 'Reply saved, but could not show it yet. Try refreshing.';
                     return;
                 }
 
-                this.appendMessage(data.html, { scroll: true });
                 if (field) {
                     field.value = '';
                 }
@@ -259,6 +315,29 @@ export default function lmsQaThread(config) {
                 this.error = 'Unable to send right now. Please try again.';
             } finally {
                 this.submitting = false;
+            }
+        },
+
+        async pullSingle(answerId) {
+            try {
+                const url = new URL(this.feedUrl, window.location.origin);
+                url.searchParams.set('after', String(Math.max(0, Number(answerId) - 1)));
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                if (! response.ok) {
+                    return;
+                }
+                const data = await response.json();
+                const match = (data.answers || []).find((item) => Number(item.id) === Number(answerId));
+                if (match?.html) {
+                    this.appendMessage(match.html, { scroll: true });
+                }
+            } catch (error) {
+                console.error(error);
             }
         },
 
@@ -273,8 +352,8 @@ export default function lmsQaThread(config) {
                 return;
             }
 
-            // Ensure collapsed Alpine x-show container is visible for the new message.
-            root.style.removeProperty('display');
+            root.classList.remove('is-collapsed');
+            root.style.display = '';
 
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html.trim();
@@ -283,25 +362,19 @@ export default function lmsQaThread(config) {
                 return;
             }
 
-            // Avoid duplicate if poll raced with the local post response.
             const answerId = node.getAttribute('data-answer-id');
-            if (answerId && root.querySelector(`[data-answer-id="${answerId}"]`)) {
+            if (answerId && this.$el.querySelector(`[data-answer-id="${answerId}"]`)) {
                 if (scroll) {
-                    this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+                    this.scrollToLatest({ smooth: true });
                 }
                 return;
             }
 
             root.appendChild(node);
-
-            if (window.Alpine) {
-                window.Alpine.initTree(node);
-            }
-
             this.applySearchFilter();
 
             if (scroll) {
-                this.$nextTick(() => this.scrollToLatest({ smooth: true }));
+                this.scrollToLatest({ smooth: true });
             }
         },
 
@@ -323,6 +396,7 @@ export default function lmsQaThread(config) {
                         'X-CSRF-TOKEN': this.csrf,
                         'X-Requested-With': 'XMLHttpRequest',
                     },
+                    credentials: 'same-origin',
                     body: new URLSearchParams({
                         _token: this.csrf,
                         _method: 'DELETE',
