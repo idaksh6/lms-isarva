@@ -74,22 +74,20 @@
     </div>
 
     <div class="gchat-panel-body" data-thread-scroll x-ref="threadScroll">
-        <div class="gchat-sticky-parent">
-            <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}" x-show="matchesSearch($el)">
-                <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
-                <div class="gchat-msg-main">
-                    <div class="gchat-msg-meta">
-                        <span class="gchat-msg-name">{{ $question->author->name }}</span>
-                        <time class="gchat-msg-time" datetime="{{ $question->created_at->toIso8601String() }}">
-                            {{ $question->created_at->format('M j, g:i A') }}
-                        </time>
-                    </div>
-                    <div class="gchat-bubble gchat-bubble--parent">
-                        <div class="gchat-bubble-text whitespace-pre-wrap">{{ $question->body }}</div>
-                    </div>
+        <article class="gchat-msg gchat-msg--parent" data-search-text="{{ strtolower($question->author->name.' '.$question->body) }}" x-show="matchesSearch($el)">
+            <div class="gchat-msg-avatar gchat-msg-avatar--lg" aria-hidden="true">{{ strtoupper(substr($question->author->name, 0, 1)) }}</div>
+            <div class="gchat-msg-main">
+                <div class="gchat-msg-meta">
+                    <span class="gchat-msg-name">{{ $question->author->name }}</span>
+                    <time class="gchat-msg-time" datetime="{{ $question->created_at->toIso8601String() }}">
+                        {{ $question->created_at->format('M j, g:i A') }}
+                    </time>
                 </div>
-            </article>
-        </div>
+                <div class="gchat-bubble gchat-bubble--parent">
+                    <div class="gchat-bubble-text whitespace-pre-wrap">{{ $question->body }}</div>
+                </div>
+            </div>
+        </article>
 
         <button
             type="button"
