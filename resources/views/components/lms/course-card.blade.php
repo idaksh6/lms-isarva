@@ -24,7 +24,7 @@
                 @endif
             </div>
             @if (! $course->is_active)
-                <span class="lms-course-card-draft">Disabled</span>
+                <span class="lms-course-card-draft">Not published</span>
             @endif
         </div>
 
@@ -69,7 +69,7 @@
         @if ($canPublish)
             <form method="POST" action="{{ route('courses.publish', $course) }}" class="lms-course-card-publish">
                 @csrf
-                <button type="submit" class="lms-btn-primary lms-btn-primary--xs w-full">
+                <button type="submit" class="lms-course-card-publish-btn">
                     Enable &amp; publish to students
                 </button>
             </form>

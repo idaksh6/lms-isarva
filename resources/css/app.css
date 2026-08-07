@@ -2199,6 +2199,18 @@
         @apply w-full;
     }
 
+    .lms-course-card-publish-btn {
+        @apply flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-amber-600 bg-amber-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition;
+    }
+
+    .lms-course-card-publish-btn:hover {
+        @apply border-amber-700 bg-amber-600;
+    }
+
+    .lms-course-card-publish-btn:active {
+        @apply border-amber-800 bg-amber-700;
+    }
+
     .lms-course-card-cover {
         @apply relative mx-3 mt-3 h-32 shrink-0 overflow-hidden rounded-md border border-isarva-border bg-slate-100 sm:mx-3.5 sm:mt-3.5 sm:h-36;
     }
@@ -2272,7 +2284,7 @@
     }
 
     .lms-course-card-draft {
-        @apply absolute right-3 top-12 z-10 rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white;
+        @apply absolute left-3 top-3 z-10 inline-flex items-center rounded-md border-2 border-amber-300 bg-amber-400 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-amber-950 shadow-md;
     }
 
     .lms-course-card-body {
