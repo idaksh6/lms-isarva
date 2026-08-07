@@ -67,7 +67,12 @@
 
     <div class="lms-course-card-footer">
         @if ($canPublish)
-            <form method="POST" action="{{ route('courses.publish', $course) }}" class="lms-course-card-publish">
+            <form
+                method="POST"
+                action="{{ route('courses.publish', $course) }}"
+                class="lms-course-card-publish"
+                onsubmit="return confirm({{ \Illuminate\Support\Js::from('Publish "'.$course->title.'" to students?'."\n\n".'Once enabled, this course cannot be disabled again from Edit course.') }})"
+            >
                 @csrf
                 <button type="submit" class="lms-course-card-publish-btn">
                     Enable &amp; publish to students
