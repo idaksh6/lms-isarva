@@ -653,13 +653,65 @@ class LmsCoreTest extends TestCase
                 'code' => $course->code,
                 'title' => 'Updated course title',
                 'lecturer_id' => $lecturer->id,
-                'is_active' => '1',
+                'is_active' => '0',
             ])
             ->assertRedirect(route('courses.show', $course));
 
         $fresh = $course->fresh();
         $this->assertSame('Updated course title', $fresh->title);
+        $this->assertTrue($fresh->is_active);
         $this->assertDatabaseHas('courses', ['id' => $course->id]);
+    }
+
+    public function test_new_course_is_disabled_until_published_from_list(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.store'), [
+                'code' => 'DS777',
+                'title' => 'Disabled by default',
+                'description' => 'Draft module',
+            ])
+            ->assertRedirect();
+
+        $course = Course::query()->where('code', 'DS777')->firstOrFail();
+        $this->assertFalse($course->is_active);
+
+        $course->students()->attach($student->id);
+
+        $this->actingAs($student)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertDontSee('Disabled by default');
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertSee('Enable')
+            ->assertSee('publish to students');
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.edit', $course))
+            ->assertOk()
+            ->assertDontSee('Course is active');
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.publish', $course))
+            ->assertRedirect(route('courses.index'));
+
+        $this->assertTrue($course->fresh()->is_active);
+
+        $this->actingAs($student)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertSee('Disabled by default');
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertDontSee('Enable & publish to students');
     }
 
     public function test_admin_must_assign_lecturer_when_creating_course(): void
@@ -678,6 +730,7 @@ class LmsCoreTest extends TestCase
         $course = Course::query()->where('code', 'ADM101')->first();
         $this->assertNotNull($course);
         $this->assertSame($lecturer->id, $course->lecturer_id);
+        $this->assertFalse($course->is_active);
 
         $this->actingAs($lecturer)
             ->get(route('courses.index'))

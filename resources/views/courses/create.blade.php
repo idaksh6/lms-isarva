@@ -9,6 +9,7 @@
 
     <form method="POST" action="{{ route('courses.store') }}" class="lms-card w-full space-y-5">
         @csrf
+        <p class="text-sm text-isarva-muted">New courses start disabled. Publish them from the course list when students should see the module.</p>
         <div>
             <label class="block text-sm font-semibold text-slate-700">Course code</label>
             <input type="text" name="code" value="{{ old('code') }}" class="lms-field-input mt-1.5" placeholder="e.g. DS501" required>

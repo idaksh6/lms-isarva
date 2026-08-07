@@ -14,7 +14,7 @@
 
         <div class="lms-form-header">
             <h2 class="lms-form-title">Course details</h2>
-            <p class="lms-form-desc">Update code, title, description, and availability.</p>
+            <p class="lms-form-desc">Update code, title, description, and semester. Publishing is managed from the course list.</p>
         </div>
 
         <div class="lms-form-field">
@@ -44,10 +44,11 @@
                 <x-input-error :messages="$errors->get('lecturer_id')" class="mt-1.5" />
             </div>
         @endif
-        <label class="lms-form-check">
-            <input type="checkbox" name="is_active" value="1" id="is_active" @checked(old('is_active', $course->is_active))>
-            <span class="text-sm font-medium text-slate-700">Course is active</span>
-        </label>
+        @if (! $course->is_active)
+            <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                This course is disabled. Publish it from the <a href="{{ route('courses.index') }}" class="font-semibold underline">course list</a> when students should see it.
+            </p>
+        @endif
     </form>
 
     <div class="lms-form-actions">

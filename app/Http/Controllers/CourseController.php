@@ -90,11 +90,12 @@ class CourseController extends Controller
             'description' => $validated['description'] ?? null,
             'semester' => $validated['semester'] ?? null,
             'lecturer_id' => $lecturerId,
+            'is_active' => false,
         ]);
 
         return redirect()
             ->route('courses.show', $course)
-            ->with('success', 'Course created successfully.');
+            ->with('success', 'Course created as disabled. Publish it from the course list when students should see it.');
     }
 
     public function show(Course $course): View
@@ -163,7 +164,6 @@ class CourseController extends Controller
             'description' => ['nullable', 'string'],
             'semester' => ['nullable', 'string', 'max:32'],
             'lecturer_id' => ['nullable', 'exists:users,id'],
-            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         $course->update([
@@ -174,12 +174,28 @@ class CourseController extends Controller
             'lecturer_id' => $request->user()->isAdmin()
                 ? ($validated['lecturer_id'] ?? $course->lecturer_id)
                 : $course->lecturer_id,
-            'is_active' => $request->boolean('is_active', $course->is_active),
         ]);
 
         return redirect()
             ->route('courses.show', $course)
             ->with('success', 'Course updated.');
+    }
+
+    public function publish(Course $course): RedirectResponse
+    {
+        $this->authorize('update', $course);
+
+        if ($course->is_active) {
+            return redirect()
+                ->route('courses.index')
+                ->with('success', 'Course is already published to students.');
+        }
+
+        $course->update(['is_active' => true]);
+
+        return redirect()
+            ->route('courses.index')
+            ->with('success', 'Course enabled and published to students.');
     }
 
     public function destroy(Course $course): RedirectResponse

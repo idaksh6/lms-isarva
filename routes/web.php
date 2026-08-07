@@ -38,6 +38,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('courses', CourseController::class)->only([
         'index', 'create', 'store', 'show', 'edit', 'update', 'destroy',
     ]);
+    Route::post('courses/{course}/publish', [CourseController::class, 'publish'])
+        ->name('courses.publish');
 
     Route::get('courses/{course}/enrollments', [EnrollmentController::class, 'edit'])
         ->name('courses.enrollments.edit');
