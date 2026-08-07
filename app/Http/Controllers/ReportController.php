@@ -213,7 +213,7 @@ class ReportController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, array{assignment: Assignment, rows: \Illuminate\Support\Collection}>  $sections
+     * @param  \Illuminate\Support\Collection<int, array{assignment: Assignment, rows: \Illuminate\Support\Collection, kpis?: array}>  $sections
      */
     private function exportAssignmentsExcel(Course $course, $sections, string $baseName): StreamedResponse
     {
@@ -221,25 +221,77 @@ class ReportController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle(substr($course->code.' report', 0, 31));
 
-        $headers = IndividualAssignmentReport::csvHeaders();
-        foreach ($headers as $index => $header) {
-            $sheet->setCellValue([$index + 1, 1], $header);
-        }
+        $headers = IndividualAssignmentReport::studentExportHeaders();
+        $lastColIndex = count($headers);
+        $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastColIndex);
 
-        $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
-        $sheet->getStyle('A1:'.$lastColumn.'1')->getFont()->setBold(true);
+        $rowNumber = 1;
+        $sheet->setCellValue([1, $rowNumber], $course->code.' — '.$course->title);
+        $sheet->mergeCells('A'.$rowNumber.':'.$lastColumn.$rowNumber);
+        $sheet->getStyle('A'.$rowNumber)->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A'.$rowNumber)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('1D4ED8');
+        $sheet->getStyle('A'.$rowNumber)->getFont()->getColor()->setRGB('FFFFFF');
+        $rowNumber++;
 
-        $rowNumber = 2;
+        $sheet->setCellValue([1, $rowNumber], 'Individual assignment report · Generated '.now()->format('Y-m-d H:i'));
+        $sheet->mergeCells('A'.$rowNumber.':'.$lastColumn.$rowNumber);
+        $sheet->getStyle('A'.$rowNumber)->getFont()->setItalic(true)->setSize(10);
+        $rowNumber += 2;
+
         foreach ($sections as $section) {
-            foreach ($section['rows'] as $row) {
-                foreach (IndividualAssignmentReport::csvRow($section['assignment'], $row) as $col => $value) {
+            /** @var Assignment $assignment */
+            $assignment = $section['assignment'];
+            $sectionRows = $section['rows'];
+            $sectionKpis = $section['kpis'] ?? null;
+
+            $dueLabel = $assignment->due_at
+                ? 'Due '.$assignment->due_at->format('M j, Y g:i A')
+                : 'No due date';
+            $avgLabel = ($sectionKpis['avg_score'] ?? null) !== null
+                ? 'Avg '.$sectionKpis['avg_score'].'%'
+                : 'Avg —';
+            $headerText = $assignment->title.'  ·  '.$dueLabel.'  ·  '.$sectionRows->count().' students  ·  '.$avgLabel;
+
+            $sheet->setCellValue([1, $rowNumber], $headerText);
+            $sheet->mergeCells('A'.$rowNumber.':'.$lastColumn.$rowNumber);
+            $sheet->getStyle('A'.$rowNumber)->getFont()->setBold(true)->setSize(11);
+            $sheet->getStyle('A'.$rowNumber)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('F59E0B');
+            $sheet->getStyle('A'.$rowNumber)->getFont()->getColor()->setRGB('1C1917');
+            $rowNumber++;
+
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValue([$index + 1, $rowNumber], $header);
+            }
+            $sheet->getStyle('A'.$rowNumber.':'.$lastColumn.$rowNumber)->getFont()->setBold(true);
+            $sheet->getStyle('A'.$rowNumber.':'.$lastColumn.$rowNumber)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('E2E8F0');
+            $rowNumber++;
+
+            if ($sectionRows->isEmpty()) {
+                $sheet->setCellValue([1, $rowNumber], 'No students match the current filters for this assignment.');
+                $sheet->mergeCells('A'.$rowNumber.':'.$lastColumn.$rowNumber);
+                $sheet->getStyle('A'.$rowNumber)->getFont()->setItalic(true);
+                $rowNumber += 2;
+
+                continue;
+            }
+
+            foreach ($sectionRows as $row) {
+                foreach (IndividualAssignmentReport::studentExportRow($row) as $col => $value) {
                     $sheet->setCellValue([$col + 1, $rowNumber], $value);
                 }
                 $rowNumber++;
             }
+
+            $rowNumber++;
         }
 
-        foreach (range(1, count($headers)) as $col) {
+        foreach (range(1, $lastColIndex) as $col) {
             $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
         }
 

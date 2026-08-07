@@ -248,18 +248,36 @@ class IndividualAssignmentReport
     }
 
     /**
+     * @return list<string>
+     */
+    public static function studentExportHeaders(): array
+    {
+        return [
+            'Student Name',
+            'Student ID',
+            'Email',
+            'Status',
+            'Submitted At',
+            'Days Late',
+            'Score %',
+            'Letter',
+            'Feedback',
+            'Reviewed At',
+            'Reviewer',
+            'Source',
+            'File/Link',
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $row
      * @return list<string|int|float|null>
      */
-    public static function csvRow(Assignment $assignment, array $row): array
+    public static function studentExportRow(array $row): array
     {
         $student = $row['student'];
 
         return [
-            $assignment->course->code,
-            $assignment->course->title,
-            $assignment->title,
-            $assignment->due_at?->format('Y-m-d H:i') ?? '',
             $student->name,
             $student->student_id ?? '',
             $student->email,
@@ -277,28 +295,29 @@ class IndividualAssignmentReport
     }
 
     /**
+     * @param  array<string, mixed>  $row
+     * @return list<string|int|float|null>
+     */
+    public static function csvRow(Assignment $assignment, array $row): array
+    {
+        return array_merge([
+            $assignment->course->code,
+            $assignment->course->title,
+            $assignment->title,
+            $assignment->due_at?->format('Y-m-d H:i') ?? '',
+        ], self::studentExportRow($row));
+    }
+
+    /**
      * @return list<string>
      */
     public static function csvHeaders(): array
     {
-        return [
+        return array_merge([
             'Course Code',
             'Course Title',
             'Assignment',
             'Due At',
-            'Student Name',
-            'Student ID',
-            'Email',
-            'Status',
-            'Submitted At',
-            'Days Late',
-            'Score %',
-            'Letter',
-            'Feedback',
-            'Reviewed At',
-            'Reviewer',
-            'Source',
-            'File/Link',
-        ];
+        ], self::studentExportHeaders());
     }
 }
