@@ -23,6 +23,7 @@
         <a href="{{ route('reports.index') }}" class="lms-report-tab">Overview</a>
         <a href="{{ route('reports.assignments') }}" class="lms-report-tab">Individual assignment</a>
         <a href="{{ route('reports.activity') }}" class="lms-report-tab is-active">Course activity</a>
+        <a href="{{ route('reports.at-risk') }}" class="lms-report-tab">Course at-risk</a>
     </nav>
 
     <form method="GET" action="{{ route('reports.activity') }}" class="lms-report-filters">

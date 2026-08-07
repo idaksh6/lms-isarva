@@ -58,4 +58,9 @@ class Course extends Model
     {
         return $this->hasMany(Assessment::class);
     }
+
+    public function supportCases(): HasMany
+    {
+        return $this->hasMany(StudentSupportCase::class);
+    }
 }

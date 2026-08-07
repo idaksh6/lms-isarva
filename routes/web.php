@@ -7,6 +7,7 @@ use App\Http\Controllers\AssessmentAttemptController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentHubController;
+use App\Http\Controllers\AtRiskController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\CourseController;
@@ -134,6 +135,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/assignments/export', [ReportController::class, 'exportAssignments'])->name('reports.assignments.export');
     Route::get('reports/activity', [ReportController::class, 'activity'])->name('reports.activity');
     Route::get('reports/activity/export', [ReportController::class, 'exportActivity'])->name('reports.activity.export');
+    Route::get('reports/at-risk', [AtRiskController::class, 'index'])->name('reports.at-risk');
+    Route::get('reports/at-risk/export', [AtRiskController::class, 'export'])->name('reports.at-risk.export');
+    Route::post('reports/at-risk/cases', [AtRiskController::class, 'storeCase'])->name('reports.at-risk.cases.store');
+    Route::get('reports/at-risk/cases/{case}', [AtRiskController::class, 'showCase'])->name('reports.at-risk.cases.show');
+    Route::patch('reports/at-risk/cases/{case}', [AtRiskController::class, 'updateCase'])->name('reports.at-risk.cases.update');
+    Route::post('reports/at-risk/cases/{case}/refresh', [AtRiskController::class, 'refreshMetrics'])->name('reports.at-risk.cases.refresh');
+    Route::post('reports/at-risk/cases/{case}/actions', [AtRiskController::class, 'storeAction'])->name('reports.at-risk.cases.actions.store');
+    Route::delete('reports/at-risk/actions/{action}', [AtRiskController::class, 'destroyAction'])->name('reports.at-risk.actions.destroy');
 
     Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');

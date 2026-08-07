@@ -84,6 +84,7 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)->get(route('reports.index'))->assertForbidden();
         $this->actingAs($student)->get(route('reports.assignments'))->assertForbidden();
         $this->actingAs($student)->get(route('reports.activity'))->assertForbidden();
+        $this->actingAs($student)->get(route('reports.at-risk'))->assertForbidden();
         $this->actingAs($student)->get(route('gradebook.index'))->assertForbidden();
     }
 
