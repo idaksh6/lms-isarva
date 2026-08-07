@@ -150,6 +150,37 @@ class LmsCoreTest extends TestCase
             ->assertSee('82.5')
             ->assertDontSee('Hidden lab');
 
+        $secondAssignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Second lab',
+            'is_published' => true,
+            'due_at' => now()->addDays(3),
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.assignments', [
+                'course' => $course->id,
+            ]))
+            ->assertOk()
+            ->assertSee('All assignments')
+            ->assertSee('Pipeline lab')
+            ->assertSee('Second lab')
+            ->assertSee($submittedStudent->name)
+            ->assertSee('Missing Submitter');
+
+        $courseCsv = $this->actingAs($lecturer)
+            ->get(route('reports.assignments.export', [
+                'course' => $course->id,
+                'format' => 'csv',
+            ]))
+            ->assertOk()
+            ->streamedContent();
+
+        $this->assertStringContainsString('Pipeline lab', $courseCsv);
+        $this->assertStringContainsString('Second lab', $courseCsv);
+        $this->assertStringContainsString('Missing Submitter', $courseCsv);
+
         $this->actingAs($lecturer)
             ->get(route('reports.assignments', [
                 'course' => $course->id,

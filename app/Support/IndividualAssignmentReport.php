@@ -20,7 +20,7 @@ class IndividualAssignmentReport
      *     score_min?: float|int|string|null,
      *     score_max?: float|int|string|null,
      * }  $filters
-     * @return array{rows: Collection<int, array<string, mixed>>, kpis: array<string, mixed>}
+     * @return array{rows: Collection<int, array<string, mixed>>, kpis: array<string, mixed>, all_rows: Collection<int, array<string, mixed>>}
      */
     public static function build(Assignment $assignment, array $filters = []): array
     {
@@ -43,11 +43,57 @@ class IndividualAssignmentReport
             $submissions->get($student->id)
         ));
 
-        $kpis = self::kpis($allRows, $assignment);
-
+        $kpis = self::kpis($allRows);
         $rows = self::applyFilters($allRows, $filters);
 
-        return compact('rows', 'kpis');
+        return [
+            'rows' => $rows,
+            'kpis' => $kpis,
+            'all_rows' => $allRows,
+        ];
+    }
+
+    /**
+     * @param  array{
+     *     status?: string|null,
+     *     graded?: string|null,
+     *     q?: string|null,
+     *     submitted_from?: string|null,
+     *     submitted_to?: string|null,
+     *     score_min?: float|int|string|null,
+     *     score_max?: float|int|string|null,
+     * }  $filters
+     * @return array{
+     *     sections: Collection<int, array{assignment: Assignment, rows: Collection, kpis: array<string, mixed>}>,
+     *     kpis: array<string, mixed>
+     * }
+     */
+    public static function buildForCourse(\App\Models\Course $course, array $filters = []): array
+    {
+        $course->loadMissing('lecturer');
+
+        $assignments = $course->assignments()
+            ->where('is_published', true)
+            ->orderBy('due_at')
+            ->orderBy('title')
+            ->get();
+
+        $allRows = collect();
+        $sections = $assignments->map(function (Assignment $assignment) use ($filters, &$allRows) {
+            $report = self::build($assignment, $filters);
+            $allRows = $allRows->concat($report['all_rows']);
+
+            return [
+                'assignment' => $assignment,
+                'rows' => $report['rows'],
+                'kpis' => $report['kpis'],
+            ];
+        });
+
+        return [
+            'sections' => $sections,
+            'kpis' => self::kpis($allRows, uniqueEnrolled: true),
+        ];
     }
 
     /**
@@ -61,6 +107,7 @@ class IndividualAssignmentReport
         $letter = $submission?->letter_grade ?? GradeHelper::letterFromScore($score);
 
         return [
+            'assignment' => $assignment,
             'student' => $student,
             'submission' => $submission,
             'status_key' => $statusKey,
@@ -102,12 +149,14 @@ class IndividualAssignmentReport
      * @param  Collection<int, array<string, mixed>>  $rows
      * @return array<string, mixed>
      */
-    public static function kpis(Collection $rows, Assignment $assignment): array
+    public static function kpis(Collection $rows, bool $uniqueEnrolled = false): array
     {
-        $enrolled = $rows->count();
+        $enrolled = $uniqueEnrolled
+            ? $rows->pluck('student.id')->unique()->count()
+            : $rows->count();
         $submittedRows = $rows->where('is_submitted', true);
         $submitted = $submittedRows->count();
-        $notSubmitted = $enrolled - $submitted;
+        $notSubmitted = $rows->where('is_submitted', false)->count();
 
         $late = $rows->where('status_key', SubmissionStatus::Late->value)->count();
         $needsRevision = $rows->where('status_key', SubmissionStatus::NeedsRevision->value)->count();
@@ -116,13 +165,17 @@ class IndividualAssignmentReport
         $scores = $rows->whereNotNull('score')->pluck('score')->map(fn ($s) => (float) $s)->sort()->values();
         $graded = $scores->count();
 
-        $onTime = $submittedRows->filter(function (array $row) use ($assignment) {
-            if (! $row['submitted_at'] || ! $assignment->due_at) {
+        $onTime = $submittedRows->filter(function (array $row) {
+            /** @var Assignment|null $assignment */
+            $assignment = $row['assignment'] ?? null;
+            if (! $row['submitted_at'] || ! $assignment?->due_at) {
                 return true;
             }
 
             return $row['submitted_at']->lte($assignment->due_at);
         })->count();
+
+        $totalSlots = $rows->count();
 
         return [
             'enrolled' => $enrolled,
@@ -132,7 +185,7 @@ class IndividualAssignmentReport
             'needs_revision' => $needsRevision,
             'reviewed' => $reviewed,
             'graded' => $graded,
-            'submission_rate' => $enrolled > 0 ? round(($submitted / $enrolled) * 100, 1) : null,
+            'submission_rate' => $totalSlots > 0 ? round(($submitted / $totalSlots) * 100, 1) : null,
             'on_time_rate' => $submitted > 0 ? round(($onTime / $submitted) * 100, 1) : null,
             'graded_rate' => $submitted > 0 ? round(($graded / $submitted) * 100, 1) : null,
             'avg_score' => $graded > 0 ? round($scores->avg(), 1) : null,

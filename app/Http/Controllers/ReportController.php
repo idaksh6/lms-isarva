@@ -61,6 +61,7 @@ class ReportController extends Controller
         $selectedAssignment = null;
         $assignments = collect();
         $rows = collect();
+        $sections = collect();
         $kpis = null;
 
         if ($filters['course']) {
@@ -87,7 +88,17 @@ class ReportController extends Controller
                         $report = IndividualAssignmentReport::build($selectedAssignment, $filters);
                         $rows = $report['rows'];
                         $kpis = $report['kpis'];
+                        $sections = collect([[
+                            'assignment' => $selectedAssignment,
+                            'rows' => $rows,
+                            'kpis' => $kpis,
+                        ]]);
                     }
+                } else {
+                    $report = IndividualAssignmentReport::buildForCourse($selectedCourse, $filters);
+                    $sections = $report['sections'];
+                    $kpis = $report['kpis'];
+                    $rows = $sections->flatMap(fn (array $section) => $section['rows']);
                 }
             }
         }
@@ -99,6 +110,7 @@ class ReportController extends Controller
             'selectedAssignment',
             'filters',
             'rows',
+            'sections',
             'kpis',
         ));
     }
@@ -151,33 +163,49 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $assignment = Assignment::query()
-            ->where('course_id', $course->id)
-            ->where('id', $filters['assignment'])
-            ->firstOrFail();
+        if ($filters['assignment']) {
+            $assignment = Assignment::query()
+                ->where('course_id', $course->id)
+                ->where('id', $filters['assignment'])
+                ->firstOrFail();
 
-        $report = IndividualAssignmentReport::build($assignment, $filters);
+            $report = IndividualAssignmentReport::build($assignment, $filters);
+            $sections = collect([[
+                'assignment' => $assignment,
+                'rows' => $report['rows'],
+                'kpis' => $report['kpis'],
+            ]]);
+            $kpis = $report['kpis'];
+            $baseName = 'assignment-report-'.$course->code.'-'.$assignment->id.'-'.now()->format('Y-m-d');
+        } else {
+            $report = IndividualAssignmentReport::buildForCourse($course, $filters);
+            $sections = $report['sections'];
+            $kpis = $report['kpis'];
+            $baseName = 'assignment-report-'.$course->code.'-all-'.now()->format('Y-m-d');
+        }
+
         $format = strtolower($request->string('format')->trim()->toString() ?: 'csv');
-        $baseName = 'assignment-report-'.$course->code.'-'.$assignment->id.'-'.now()->format('Y-m-d');
 
         return match ($format) {
-            'xlsx', 'excel' => $this->exportAssignmentsExcel($assignment, $report, $baseName),
-            'pdf' => $this->exportAssignmentsPdf($assignment, $report, $baseName),
-            default => $this->exportAssignmentsCsv($assignment, $report, $baseName),
+            'xlsx', 'excel' => $this->exportAssignmentsExcel($course, $sections, $baseName),
+            'pdf' => $this->exportAssignmentsPdf($course, $sections, $kpis, $baseName),
+            default => $this->exportAssignmentsCsv($sections, $baseName),
         };
     }
 
     /**
-     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     * @param  \Illuminate\Support\Collection<int, array{assignment: Assignment, rows: \Illuminate\Support\Collection}>  $sections
      */
-    private function exportAssignmentsCsv(Assignment $assignment, array $report, string $baseName): StreamedResponse
+    private function exportAssignmentsCsv($sections, string $baseName): StreamedResponse
     {
-        return response()->streamDownload(function () use ($assignment, $report) {
+        return response()->streamDownload(function () use ($sections) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, IndividualAssignmentReport::csvHeaders());
 
-            foreach ($report['rows'] as $row) {
-                fputcsv($handle, IndividualAssignmentReport::csvRow($assignment, $row));
+            foreach ($sections as $section) {
+                foreach ($section['rows'] as $row) {
+                    fputcsv($handle, IndividualAssignmentReport::csvRow($section['assignment'], $row));
+                }
             }
 
             fclose($handle);
@@ -185,13 +213,13 @@ class ReportController extends Controller
     }
 
     /**
-     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     * @param  \Illuminate\Support\Collection<int, array{assignment: Assignment, rows: \Illuminate\Support\Collection}>  $sections
      */
-    private function exportAssignmentsExcel(Assignment $assignment, array $report, string $baseName): StreamedResponse
+    private function exportAssignmentsExcel(Course $course, $sections, string $baseName): StreamedResponse
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Assignment report');
+        $sheet->setTitle(substr($course->code.' report', 0, 31));
 
         $headers = IndividualAssignmentReport::csvHeaders();
         foreach ($headers as $index => $header) {
@@ -202,11 +230,13 @@ class ReportController extends Controller
         $sheet->getStyle('A1:'.$lastColumn.'1')->getFont()->setBold(true);
 
         $rowNumber = 2;
-        foreach ($report['rows'] as $row) {
-            foreach (IndividualAssignmentReport::csvRow($assignment, $row) as $col => $value) {
-                $sheet->setCellValue([$col + 1, $rowNumber], $value);
+        foreach ($sections as $section) {
+            foreach ($section['rows'] as $row) {
+                foreach (IndividualAssignmentReport::csvRow($section['assignment'], $row) as $col => $value) {
+                    $sheet->setCellValue([$col + 1, $rowNumber], $value);
+                }
+                $rowNumber++;
             }
-            $rowNumber++;
         }
 
         foreach (range(1, count($headers)) as $col) {
@@ -223,14 +253,15 @@ class ReportController extends Controller
     }
 
     /**
-     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     * @param  \Illuminate\Support\Collection<int, array{assignment: Assignment, rows: \Illuminate\Support\Collection, kpis?: array}>  $sections
+     * @param  array<string, mixed>|null  $kpis
      */
-    private function exportAssignmentsPdf(Assignment $assignment, array $report, string $baseName): Response
+    private function exportAssignmentsPdf(Course $course, $sections, ?array $kpis, string $baseName): Response
     {
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('hubs.reports-assignments-pdf', [
-            'assignment' => $assignment->loadMissing('course.lecturer'),
-            'rows' => $report['rows'],
-            'kpis' => $report['kpis'],
+            'course' => $course->loadMissing('lecturer'),
+            'sections' => $sections,
+            'kpis' => $kpis,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape');
 

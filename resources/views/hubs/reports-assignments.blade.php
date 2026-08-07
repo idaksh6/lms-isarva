@@ -12,9 +12,9 @@
     <x-lms.module-hero
         module="reports"
         title="Individual assignment report"
-        subtitle="Student-level performance for one assignment — status, scores, lateness, and feedback."
+        subtitle="Student-level performance by assignment — status, scores, lateness, and feedback. Leave Assignment empty to see the full course."
     >
-        @if ($selectedAssignment)
+        @if ($selectedCourse)
             <div class="lms-report-export-group">
                 <a
                     href="{{ route('reports.assignments.export', array_merge(request()->query(), ['format' => 'csv'])) }}"
@@ -52,15 +52,14 @@
             </div>
 
             <div class="lms-form-field">
-                <label for="report-assignment" class="lms-field-label">Assignment</label>
+                <label for="report-assignment" class="lms-field-label">Assignment <span class="font-normal text-isarva-muted">(optional)</span></label>
                 <select
                     id="report-assignment"
                     name="assignment"
                     class="lms-field-input mt-1.5"
                     @disabled(! $selectedCourse)
-                    onchange="this.form.submit()"
                 >
-                    <option value="">{{ $selectedCourse ? 'Choose an assignment…' : 'Select a course first' }}</option>
+                    <option value="">{{ $selectedCourse ? 'All assignments' : 'Select a course first' }}</option>
                     @foreach ($assignments as $assignment)
                         <option value="{{ $assignment->id }}" @selected(($filters['assignment'] ?? null) == $assignment->id)>
                             {{ $assignment->title }}
@@ -138,28 +137,36 @@
     @if (! $selectedCourse)
         <x-lms.empty-state
             title="Select a course"
-            message="Choose a course, then an assignment, to see every enrolled student’s performance."
+            message="Choose a course to see all published assignments, or narrow to one assignment."
             variant="chart"
         />
-    @elseif (! $selectedAssignment)
+    @elseif ($assignments->isEmpty())
         <x-lms.empty-state
-            title="Select an assignment"
-            message="Pick a published assignment to open the student performance report."
+            title="No published assignments"
+            message="Publish at least one assignment in this course to generate the report."
             variant="assignment"
         />
     @else
         <section class="corp-panel">
             <div class="corp-panel-head">
                 <div>
-                    <h2 class="corp-panel-title">{{ $selectedAssignment->title }}</h2>
+                    <h2 class="corp-panel-title">
+                        @if ($selectedAssignment)
+                            {{ $selectedAssignment->title }}
+                        @else
+                            All assignments — {{ $selectedCourse->code }}
+                        @endif
+                    </h2>
                     <p class="corp-panel-desc">
                         {{ $selectedCourse->code }} · {{ $selectedCourse->title }}
-                        @if ($selectedAssignment->due_at)
+                        @if ($selectedAssignment?->due_at)
                             · Due {{ $selectedAssignment->due_at->format('l, M j, Y g:i A') }}
+                        @elseif (! $selectedAssignment)
+                            · {{ $sections->count() }} published {{ \Illuminate\Support\Str::plural('assignment', $sections->count()) }}
                         @endif
                     </p>
                 </div>
-                <span class="corp-sidebar-badge">{{ $rows->count() }} shown</span>
+                <span class="corp-sidebar-badge">{{ $rows->count() }} rows</span>
             </div>
         </section>
 
@@ -178,115 +185,44 @@
             </div>
         @endif
 
-        <section class="corp-panel">
-            <div class="corp-panel-head">
-                <div>
-                    <h2 class="corp-panel-title">Student performance</h2>
-                    <p class="corp-panel-desc">One row per enrolled student, including those who have not submitted.</p>
+        @forelse ($sections as $section)
+            @php
+                $sectionAssignment = $section['assignment'];
+                $sectionRows = $section['rows'];
+                $sectionKpis = $section['kpis'] ?? null;
+            @endphp
+            <section class="corp-panel">
+                <div class="corp-panel-head">
+                    <div>
+                        <h2 class="corp-panel-title">{{ $sectionAssignment->title }}</h2>
+                        <p class="corp-panel-desc">
+                            @if ($sectionAssignment->due_at)
+                                Due {{ $sectionAssignment->due_at->format('M j, Y g:i A') }} ·
+                            @endif
+                            {{ $sectionRows->count() }} student {{ \Illuminate\Support\Str::plural('row', $sectionRows->count()) }}
+                            @if ($sectionKpis)
+                                · Avg {{ $sectionKpis['avg_score'] !== null ? $sectionKpis['avg_score'].'%' : '—' }}
+                            @endif
+                        </p>
+                    </div>
+                    <span class="corp-sidebar-badge">{{ $sectionRows->count() }}</span>
                 </div>
-            </div>
 
-            @if ($rows->isNotEmpty())
-                <div class="corp-table-wrap">
-                    <table class="corp-table corp-table--compact">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Status</th>
-                                <th>Submitted</th>
-                                <th>Days late</th>
-                                <th>Score</th>
-                                <th>Feedback</th>
-                                <th>Source</th>
-                                <th><span class="sr-only">Action</span></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($rows as $row)
-                                @php
-                                    /** @var \App\Models\User $student */
-                                    $student = $row['student'];
-                                    $submission = $row['submission'];
-                                    $daysLate = $row['days_late'];
-                                @endphp
-                                <tr class="corp-table-row group">
-                                    <td class="corp-table-cell">
-                                        <span class="corp-table-title">{{ $student->name }}</span>
-                                        <span class="corp-table-meta">
-                                            {{ $student->student_id ?: 'No ID' }}
-                                            · {{ $student->email }}
-                                            @unless ($student->is_active)
-                                                · Inactive
-                                            @endunless
-                                        </span>
-                                    </td>
-                                    <td class="corp-table-cell">
-                                        @if ($submission)
-                                            <x-status-badge :status="$submission->status" />
-                                        @else
-                                            <span class="lms-report-status-missing">Not submitted</span>
-                                        @endif
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--muted">
-                                        {{ $row['submitted_at']?->format('M j, Y g:i A') ?? '—' }}
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--muted">
-                                        @if ($daysLate === null)
-                                            —
-                                        @elseif ($daysLate > 0)
-                                            <span class="text-amber-700 font-semibold">+{{ $daysLate }}d</span>
-                                        @elseif ($daysLate < 0)
-                                            <span class="text-emerald-700">{{ $daysLate }}d</span>
-                                        @else
-                                            0
-                                        @endif
-                                    </td>
-                                    <td class="corp-table-cell">
-                                        @if ($row['is_graded'])
-                                            <x-lms.grade-badge :score="$row['score']" :letter="$row['letter']" size="sm" />
-                                        @else
-                                            <span class="text-xs text-isarva-muted">—</span>
-                                        @endif
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--muted">
-                                        <span class="lms-report-feedback" title="{{ $row['feedback'] }}">
-                                            {{ $row['feedback'] ? \Illuminate\Support\Str::limit($row['feedback'], 48) : '—' }}
-                                        </span>
-                                        @if ($row['reviewed_at'])
-                                            <span class="corp-table-meta">
-                                                Reviewed {{ $row['reviewed_at']->format('M j') }}
-                                                @if ($row['reviewer_name'])
-                                                    by {{ $row['reviewer_name'] }}
-                                                @endif
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--muted">
-                                        {{ $row['source_label'] ?? '—' }}
-                                        @if ($row['file_or_link'])
-                                            <span class="corp-table-meta">{{ \Illuminate\Support\Str::limit($row['file_or_link'], 28) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--action">
-                                        @if ($submission)
-                                            <a href="{{ route('submissions.show', $submission) }}" class="corp-table-action">View</a>
-                                        @else
-                                            <span class="text-xs text-isarva-muted">—</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <x-lms.empty-state
-                    title="No students match these filters"
-                    message="Try clearing status, graded, date, or score filters."
-                    variant="users"
-                />
-            @endif
-        </section>
+                @if ($sectionRows->isNotEmpty())
+                    @include('hubs.partials.assignment-report-table', ['rows' => $sectionRows])
+                @else
+                    <div class="corp-panel-body">
+                        <p class="text-sm text-isarva-muted">No students match the current filters for this assignment.</p>
+                    </div>
+                @endif
+            </section>
+        @empty
+            <x-lms.empty-state
+                title="No assignment data"
+                message="No published assignments are available for this course."
+                variant="assignment"
+            />
+        @endforelse
     @endif
 </div>
 @endsection
