@@ -2604,6 +2604,10 @@
         @apply mb-1 flex flex-wrap gap-2;
     }
 
+    .lms-report-export-group {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
     .lms-report-tab {
         @apply inline-flex items-center rounded-md border border-isarva-border bg-white px-3.5 py-2 text-sm font-semibold text-isarva-muted transition hover:border-brand-300 hover:text-brand-700;
     }

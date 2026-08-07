@@ -157,8 +157,21 @@ class ReportController extends Controller
             ->firstOrFail();
 
         $report = IndividualAssignmentReport::build($assignment, $filters);
-        $filename = 'assignment-report-'.$course->code.'-'.$assignment->id.'-'.now()->format('Y-m-d').'.csv';
+        $format = strtolower($request->string('format')->trim()->toString() ?: 'csv');
+        $baseName = 'assignment-report-'.$course->code.'-'.$assignment->id.'-'.now()->format('Y-m-d');
 
+        return match ($format) {
+            'xlsx', 'excel' => $this->exportAssignmentsExcel($assignment, $report, $baseName),
+            'pdf' => $this->exportAssignmentsPdf($assignment, $report, $baseName),
+            default => $this->exportAssignmentsCsv($assignment, $report, $baseName),
+        };
+    }
+
+    /**
+     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     */
+    private function exportAssignmentsCsv(Assignment $assignment, array $report, string $baseName): StreamedResponse
+    {
         return response()->streamDownload(function () use ($assignment, $report) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, IndividualAssignmentReport::csvHeaders());
@@ -168,7 +181,60 @@ class ReportController extends Controller
             }
 
             fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv']);
+        }, $baseName.'.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    /**
+     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     */
+    private function exportAssignmentsExcel(Assignment $assignment, array $report, string $baseName): StreamedResponse
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Assignment report');
+
+        $headers = IndividualAssignmentReport::csvHeaders();
+        foreach ($headers as $index => $header) {
+            $sheet->setCellValue([$index + 1, 1], $header);
+        }
+
+        $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
+        $sheet->getStyle('A1:'.$lastColumn.'1')->getFont()->setBold(true);
+
+        $rowNumber = 2;
+        foreach ($report['rows'] as $row) {
+            foreach (IndividualAssignmentReport::csvRow($assignment, $row) as $col => $value) {
+                $sheet->setCellValue([$col + 1, $rowNumber], $value);
+            }
+            $rowNumber++;
+        }
+
+        foreach (range(1, count($headers)) as $col) {
+            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+            $spreadsheet->disconnectWorksheets();
+        }, $baseName.'.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * @param  array{rows: \Illuminate\Support\Collection, kpis: array<string, mixed>}  $report
+     */
+    private function exportAssignmentsPdf(Assignment $assignment, array $report, string $baseName): Response
+    {
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('hubs.reports-assignments-pdf', [
+            'assignment' => $assignment->loadMissing('course.lecturer'),
+            'rows' => $report['rows'],
+            'kpis' => $report['kpis'],
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($baseName.'.pdf');
     }
 
     private function staffUser(Request $request): User

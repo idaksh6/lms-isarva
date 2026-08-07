@@ -15,10 +15,20 @@
         subtitle="Student-level performance for one assignment — status, scores, lateness, and feedback."
     >
         @if ($selectedAssignment)
-            <a
-                href="{{ route('reports.assignments.export', request()->query()) }}"
-                class="lms-btn-primary lms-btn-primary--xs"
-            >Export CSV</a>
+            <div class="lms-report-export-group">
+                <a
+                    href="{{ route('reports.assignments.export', array_merge(request()->query(), ['format' => 'csv'])) }}"
+                    class="lms-btn-secondary lms-btn-secondary--xs"
+                >CSV</a>
+                <a
+                    href="{{ route('reports.assignments.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}"
+                    class="lms-btn-secondary lms-btn-secondary--xs"
+                >Excel</a>
+                <a
+                    href="{{ route('reports.assignments.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"
+                    class="lms-btn-primary lms-btn-primary--xs"
+                >PDF</a>
+            </div>
         @endif
     </x-lms.module-hero>
 

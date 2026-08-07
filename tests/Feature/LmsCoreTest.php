@@ -170,6 +170,7 @@ class LmsCoreTest extends TestCase
             ->get(route('reports.assignments.export', [
                 'course' => $course->id,
                 'assignment' => $assignment->id,
+                'format' => 'csv',
             ]))
             ->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8')
@@ -181,6 +182,31 @@ class LmsCoreTest extends TestCase
         $this->assertStringContainsString('Not submitted', $csv);
         $this->assertStringContainsString('82.5', $csv);
         $this->assertStringContainsString($submittedStudent->name, $csv);
+
+        $excel = $this->actingAs($lecturer)
+            ->get(route('reports.assignments.export', [
+                'course' => $course->id,
+                'assignment' => $assignment->id,
+                'format' => 'xlsx',
+            ]))
+            ->assertOk();
+
+        $this->assertStringContainsString(
+            'spreadsheetml.sheet',
+            strtolower($excel->headers->get('content-type') ?? '')
+        );
+        $this->assertNotEmpty($excel->streamedContent());
+
+        $pdf = $this->actingAs($lecturer)
+            ->get(route('reports.assignments.export', [
+                'course' => $course->id,
+                'assignment' => $assignment->id,
+                'format' => 'pdf',
+            ]))
+            ->assertOk();
+
+        $this->assertStringContainsString('pdf', strtolower($pdf->headers->get('content-type') ?? ''));
+        $this->assertStringStartsWith('%PDF', $pdf->getContent());
     }
 
     public function test_lecturer_can_schedule_class_session_and_student_sees_it_on_calendar_day(): void
