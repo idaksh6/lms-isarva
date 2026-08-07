@@ -20,7 +20,7 @@
         <div class="lms-form-header">
             @if ($isGoogleForm)
                 <h2 class="lms-form-title">Google Form assessment</h2>
-                <p class="lms-form-desc">Update the title, instructions, due date, and form link. Students open the link in a new tab.</p>
+                <p class="lms-form-desc">Update the title, instructions, due date, form link, and total marks. Record student scores from the assessment details page.</p>
             @else
                 <h2 class="lms-form-title">Quiz questions</h2>
                 <p class="lms-form-desc">Add {{ $assessment->question_count }} questions with multiple choice options. Mark the correct answer for each.</p>
@@ -55,6 +55,20 @@
                     required
                 >
                 <x-input-error :messages="$errors->get('external_url')" class="mt-1.5" />
+            </div>
+            <div class="lms-form-field">
+                <label for="max_score" class="lms-field-label">Total marks</label>
+                <input
+                    id="max_score"
+                    type="number"
+                    name="max_score"
+                    value="{{ old('max_score', $assessment->max_score ?? 100) }}"
+                    min="1"
+                    max="1000"
+                    class="lms-field-input mt-1.5"
+                    required
+                >
+                <x-input-error :messages="$errors->get('max_score')" class="mt-1.5" />
             </div>
         @else
             <div class="space-y-6">

@@ -38,7 +38,7 @@
                         <a href="{{ route('assessments.show', $assessment) }}" class="lms-assessment-index-title">{{ $assessment->title }}</a>
                         <p class="lms-assessment-index-meta">
                             @if ($isGoogleForm)
-                                Google Form
+                                Google Form · {{ $assessment->maxScore() }} marks
                             @else
                                 {{ $assessment->question_count }} questions · {{ $assessment->maxScore() }} marks
                             @endif
@@ -49,9 +49,9 @@
                                 · <span class="font-medium text-amber-700">Draft</span>
                             @endif
                         </p>
-                        @if ($isStaff && $assessment->is_published && ! $isGoogleForm)
+                        @if ($isStaff && $assessment->is_published)
                             <p class="lms-assessment-index-track">
-                                <span class="lms-assessment-index-track-label">Submissions</span>
+                                <span class="lms-assessment-index-track-label">{{ $isGoogleForm ? 'Scores' : 'Submissions' }}</span>
                                 <span class="lms-assessment-index-track-value">{{ $assessment->submitted_count ?? 0 }} / {{ $enrolledCount }} students</span>
                             </p>
                         @endif
@@ -65,16 +65,19 @@
                                     rel="noopener noreferrer"
                                     class="lms-btn-primary lms-btn-primary--xs"
                                 >Open form</a>
+                                @if ($submitted)
+                                    <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">View score</a>
+                                @endif
                             @elseif ($submitted)
                                 <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">View result</a>
                             @elseif ($assessment->is_published)
                                 <a href="{{ route('assessments.attempt', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">Take assessment</a>
                             @endif
                         @else
-                            @if ($assessment->is_published && ! $isGoogleForm)
-                                <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">View results</a>
-                            @elseif ($assessment->is_published && $isGoogleForm)
-                                <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">View</a>
+                            @if ($assessment->is_published)
+                                <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">
+                                    {{ $isGoogleForm ? 'Enter scores' : 'View results' }}
+                                </a>
                             @endif
                             @can('update', $assessment)
                                 <a href="{{ route('assessments.edit', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">

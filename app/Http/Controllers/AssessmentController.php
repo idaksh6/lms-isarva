@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\AssessmentType;
 use App\Models\Assessment;
+use App\Models\AssessmentAttempt;
 use App\Models\Course;
+use App\Models\User;
 use App\Notifications\AssessmentPublishedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -88,6 +90,13 @@ class AssessmentController extends Controller
                 'min:1',
                 'max:10',
             ],
+            'max_score' => [
+                Rule::requiredIf($type === AssessmentType::GoogleForm->value),
+                'nullable',
+                'integer',
+                'min:1',
+                'max:1000',
+            ],
         ]);
 
         $assessmentType = $validated['type'] instanceof AssessmentType
@@ -105,6 +114,7 @@ class AssessmentController extends Controller
             'due_at' => $validated['due_at'] ?? null,
             'question_count' => $isGoogleForm ? 0 : (int) $validated['question_count'],
             'marks_per_question' => $isGoogleForm ? 0 : (int) $validated['marks_per_question'],
+            'max_score' => $isGoogleForm ? (int) $validated['max_score'] : null,
             'is_published' => false,
         ]);
 
@@ -131,12 +141,10 @@ class AssessmentController extends Controller
         $resultsSummary = null;
 
         if ($user->isStudent()) {
-            if ($assessment->isManual()) {
-                $attempt = $assessment->attempts()
-                    ->where('user_id', $user->id)
-                    ->first();
-            }
-        } elseif ($assessment->isManual() && $user->can('viewResults', $assessment)) {
+            $attempt = $assessment->attempts()
+                ->where('user_id', $user->id)
+                ->first();
+        } elseif ($user->can('viewResults', $assessment)) {
             $assessment->load(['course.students']);
 
             $attemptsByUser = $assessment->attempts()
@@ -166,6 +174,61 @@ class AssessmentController extends Controller
         return view('assessments.show', compact('assessment', 'attempt', 'studentResults', 'resultsSummary'));
     }
 
+    public function updateScore(Request $request, Assessment $assessment, User $user): RedirectResponse
+    {
+        $this->authorize('viewResults', $assessment);
+
+        if (! $assessment->isGoogleForm()) {
+            abort(404);
+        }
+
+        if (! $assessment->is_published) {
+            return back()->withErrors(['score' => 'Publish the assessment before recording scores.']);
+        }
+
+        if ($assessment->maxScore() < 1) {
+            return back()->withErrors(['score' => 'Set total marks on the assessment before recording scores.']);
+        }
+
+        if (! $assessment->course->students()->where('users.id', $user->id)->exists()) {
+            return back()->withErrors(['score' => 'Student is not enrolled on this course.']);
+        }
+
+        $validated = $request->validate([
+            'score' => ['required', 'numeric', 'min:0', 'max:'.$assessment->maxScore()],
+        ]);
+
+        AssessmentAttempt::query()->updateOrCreate(
+            [
+                'assessment_id' => $assessment->id,
+                'user_id' => $user->id,
+            ],
+            [
+                'score' => (int) round((float) $validated['score']),
+                'max_score' => $assessment->maxScore(),
+                'submitted_at' => now(),
+            ]
+        );
+
+        return back()->with('success', 'Score saved for '.$user->name.'.');
+    }
+
+    public function clearScore(Assessment $assessment, User $user): RedirectResponse
+    {
+        $this->authorize('viewResults', $assessment);
+
+        if (! $assessment->isGoogleForm()) {
+            abort(404);
+        }
+
+        $attempt = $assessment->attempts()->where('user_id', $user->id)->first();
+        if ($attempt) {
+            $attempt->delete();
+        }
+
+        return back()->with('success', 'Score cleared for '.$user->name.'.');
+    }
+
     public function edit(Assessment $assessment): View
     {
         $this->authorize('update', $assessment);
@@ -185,6 +248,7 @@ class AssessmentController extends Controller
                 'instructions' => ['nullable', 'string'],
                 'due_at' => ['nullable', 'date'],
                 'external_url' => ['required', 'url', 'max:2048', 'regex:/^https:\/\//i'],
+                'max_score' => ['required', 'integer', 'min:1', 'max:1000'],
             ]);
 
             $assessment->update([
@@ -192,6 +256,7 @@ class AssessmentController extends Controller
                 'instructions' => $validated['instructions'] ?? null,
                 'due_at' => $validated['due_at'] ?? null,
                 'external_url' => $validated['external_url'],
+                'max_score' => (int) $validated['max_score'],
             ]);
 
             return redirect()
@@ -247,7 +312,7 @@ class AssessmentController extends Controller
 
         if (! $assessment->isReadyToPublish()) {
             $message = $assessment->isGoogleForm()
-                ? 'Add a Google Form URL before publishing.'
+                ? 'Add a Google Form URL and total marks before publishing.'
                 : 'Add all '.$assessment->question_count.' questions with a correct answer before publishing.';
 
             return back()->withErrors(['publish' => $message]);

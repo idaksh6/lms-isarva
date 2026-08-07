@@ -1323,6 +1323,22 @@
         @apply text-xs text-isarva-muted;
     }
 
+    .lms-assessment-score-form {
+        @apply w-full sm:w-auto;
+    }
+
+    .lms-assessment-score-form-row {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .lms-assessment-score-input {
+        @apply w-20 shrink-0;
+    }
+
+    .lms-assessment-score-max {
+        @apply text-sm font-medium text-isarva-muted;
+    }
+
     .lms-assessment-index-row {
         @apply flex w-full flex-col gap-4 border-t border-slate-100 px-4 py-5 first:border-t-0 sm:flex-row sm:items-center sm:justify-between sm:px-6;
     }

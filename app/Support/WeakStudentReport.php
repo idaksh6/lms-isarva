@@ -148,7 +148,7 @@ class WeakStudentReport
             ->where('is_published', true)
             ->get();
 
-        $manualAssessments = $assessments->filter(fn (Assessment $a) => $a->isManual());
+        $scoredAssessments = $assessments;
 
         $submissions = Submission::query()
             ->whereIn('assignment_id', $assignments->pluck('id'))
@@ -156,7 +156,7 @@ class WeakStudentReport
             ->get();
 
         $attempts = AssessmentAttempt::query()
-            ->whereIn('assessment_id', $manualAssessments->pluck('id'))
+            ->whereIn('assessment_id', $scoredAssessments->pluck('id'))
             ->whereIn('user_id', $students->pluck('id'))
             ->whereNotNull('submitted_at')
             ->get();
@@ -178,7 +178,7 @@ class WeakStudentReport
             $overdueAssignments,
             $participationByUser,
             $hasPublishableWork,
-            $manualAssessments
+            $scoredAssessments
         ) {
             $studentSubs = $submissions->where('user_id', $student->id);
             $graded = $studentSubs->whereNotNull('score');
@@ -224,7 +224,7 @@ class WeakStudentReport
                 'stuck_revision' => $stuckRevision,
                 'quiz_avg' => $quizAvg,
                 'low_quiz' => $lowQuiz,
-                'manual_quiz_count' => $manualAssessments->count(),
+                'manual_quiz_count' => $scoredAssessments->count(),
                 'participation_rate' => $participationRate,
                 'has_publishable_work' => $hasPublishableWork,
             ];

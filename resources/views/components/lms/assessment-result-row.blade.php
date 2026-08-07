@@ -2,6 +2,8 @@
     'student',
     'attempt' => null,
     'maxScore',
+    'assessment' => null,
+    'editable' => false,
 ])
 
 @php
@@ -25,7 +27,47 @@
     </div>
 
     <div class="lms-assessment-result-status">
-        @if ($submitted)
+        @if ($editable && $assessment)
+            <form
+                method="POST"
+                action="{{ route('assessments.scores.update', [$assessment, $student]) }}"
+                class="lms-assessment-score-form"
+            >
+                @csrf
+                @method('PUT')
+                <label class="sr-only" for="score-{{ $student->id }}">Score for {{ $student->name }}</label>
+                <div class="lms-assessment-score-form-row">
+                    <input
+                        id="score-{{ $student->id }}"
+                        type="number"
+                        name="score"
+                        min="0"
+                        max="{{ $maxScore }}"
+                        step="1"
+                        value="{{ old('score', $attempt?->score) }}"
+                        class="lms-field-input lms-assessment-score-input"
+                        placeholder="0"
+                        required
+                    >
+                    <span class="lms-assessment-score-max">/ {{ $maxScore }}</span>
+                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs">
+                        {{ $submitted ? 'Update' : 'Save score' }}
+                    </button>
+                </div>
+            </form>
+            @if ($submitted)
+                <p class="lms-assessment-result-date">
+                    Recorded {{ $attempt->submitted_at->format('M j, Y · g:i A') }}
+                </p>
+                <form method="POST" action="{{ route('assessments.scores.destroy', [$assessment, $student]) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Clear</button>
+                </form>
+            @else
+                <span class="lms-badge bg-slate-100 text-slate-600">No score yet</span>
+            @endif
+        @elseif ($submitted)
             <span class="lms-badge bg-emerald-50 text-emerald-700">Submitted</span>
             <p class="lms-assessment-result-score">{{ $attempt->score }} / {{ $attempt->max_score ?: $maxScore }}</p>
             <p class="lms-assessment-result-date">{{ $attempt->submitted_at->format('M j, Y · g:i A') }}</p>

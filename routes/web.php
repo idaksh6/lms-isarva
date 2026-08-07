@@ -99,6 +99,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assessments.publish');
     Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy'])
         ->name('assessments.destroy');
+    Route::put('assessments/{assessment}/scores/{user}', [AssessmentController::class, 'updateScore'])
+        ->name('assessments.scores.update');
+    Route::delete('assessments/{assessment}/scores/{user}', [AssessmentController::class, 'clearScore'])
+        ->name('assessments.scores.destroy');
     Route::get('assessments/{assessment}/attempt', [AssessmentAttemptController::class, 'create'])
         ->name('assessments.attempt');
     Route::post('assessments/{assessment}/attempt', [AssessmentAttemptController::class, 'store'])

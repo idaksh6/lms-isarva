@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'external_url',
     'question_count',
     'marks_per_question',
+    'max_score',
     'due_at',
     'is_published',
 ])]
@@ -30,6 +31,7 @@ class Assessment extends Model
             'is_published' => 'boolean',
             'question_count' => 'integer',
             'marks_per_question' => 'integer',
+            'max_score' => 'integer',
         ];
     }
 
@@ -66,7 +68,7 @@ class Assessment extends Model
     public function maxScore(): int
     {
         if ($this->isGoogleForm()) {
-            return 0;
+            return (int) ($this->max_score ?? 0);
         }
 
         return $this->question_count * $this->marks_per_question;
@@ -75,7 +77,7 @@ class Assessment extends Model
     public function isReadyToPublish(): bool
     {
         if ($this->isGoogleForm()) {
-            return filled($this->external_url);
+            return filled($this->external_url) && $this->maxScore() > 0;
         }
 
         return $this->questions()->count() === $this->question_count

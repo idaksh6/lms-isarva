@@ -17,7 +17,11 @@
             <p class="text-sm text-isarva-muted">{{ $assessment->title }}</p>
             <p class="text-3xl font-bold text-isarva-heading">{{ $attempt->score }} / {{ $attempt->max_score }}</p>
             <p class="text-sm text-isarva-muted">Submitted {{ $attempt->submitted_at->format('M j, Y g:i A') }}</p>
-            <p class="text-sm text-isarva-muted">Individual question answers are not shown after submission.</p>
+            @if ($assessment->isGoogleForm())
+                <p class="text-sm text-isarva-muted">Score recorded by your lecturer from the Google Form responses.</p>
+            @else
+                <p class="text-sm text-isarva-muted">Individual question answers are not shown after submission.</p>
+            @endif
         </div>
     </section>
 </div>

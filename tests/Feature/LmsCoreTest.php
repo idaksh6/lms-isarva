@@ -1346,6 +1346,7 @@ class LmsCoreTest extends TestCase
                 'title' => 'External quiz',
                 'type' => 'google_form',
                 'external_url' => $formUrl,
+                'max_score' => 100,
                 'instructions' => 'Complete the Google Form.',
             ]);
 
@@ -1354,6 +1355,7 @@ class LmsCoreTest extends TestCase
         $response->assertRedirect(route('assessments.show', $assessment));
         $this->assertTrue($assessment->isGoogleForm());
         $this->assertSame($formUrl, $assessment->external_url);
+        $this->assertSame(100, $assessment->maxScore());
         $this->assertTrue($assessment->isReadyToPublish());
 
         $this->actingAs($lecturer)
@@ -1376,6 +1378,53 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)
             ->post(route('assessments.attempt.store', $assessment), ['answers' => []])
             ->assertRedirect(route('assessments.show', $assessment));
+
+        $this->actingAs($lecturer)
+            ->get(route('assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('Student scores')
+            ->assertSee($student->name)
+            ->assertSee('Save score');
+
+        $this->actingAs($lecturer)
+            ->get(route('courses.assessments.index', $course))
+            ->assertOk()
+            ->assertSee('Enter scores');
+
+        $this->actingAs($lecturer)
+            ->put(route('assessments.scores.update', [$assessment, $student]), [
+                'score' => 78,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('assessment_attempts', [
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'score' => 78,
+            'max_score' => 100,
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('78');
+
+        $this->actingAs($student)
+            ->get(route('assessments.result', $assessment))
+            ->assertOk()
+            ->assertSee('78 / 100');
+
+        $this->actingAs($lecturer)
+            ->put(route('assessments.scores.update', [$assessment, $student]), [
+                'score' => 90,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('assessment_attempts', [
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'score' => 90,
+        ]);
     }
 
     public function test_timetable_csv_import_creates_class_sessions(): void

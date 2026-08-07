@@ -27,7 +27,7 @@
                 Create the quiz shell first, then add all questions before publishing to students.
             </p>
             <p class="lms-form-desc" x-show="type === 'google_form'" x-cloak>
-                Add a Google Form link. Students will open it in a new tab — no quiz questions are managed in the LMS.
+                Add a Google Form link and total marks. Students open the form in a new tab; you record their scores in the LMS afterwards.
             </p>
         </div>
 
@@ -84,6 +84,22 @@
             >
             <p class="mt-1.5 text-xs text-isarva-muted">Students will open this link in a new tab after you publish.</p>
             <x-input-error :messages="$errors->get('external_url')" class="mt-1.5" />
+        </div>
+
+        <div class="lms-form-field" x-show="type === 'google_form'" x-cloak>
+            <label for="max_score" class="lms-field-label">Total marks</label>
+            <input
+                id="max_score"
+                type="number"
+                name="max_score"
+                value="{{ old('max_score', 100) }}"
+                min="1"
+                max="1000"
+                class="lms-field-input mt-1.5"
+                :required="type === 'google_form'"
+            >
+            <p class="mt-1.5 text-xs text-isarva-muted">Used when you record each student’s Google Form score in the LMS.</p>
+            <x-input-error :messages="$errors->get('max_score')" class="mt-1.5" />
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2" x-show="type === 'manual'">

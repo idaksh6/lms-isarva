@@ -88,7 +88,7 @@ class CourseActivityReport
             $completed = $rows->count();
             $avgScore = null;
 
-            if ($assessment->isManual() && $rows->isNotEmpty()) {
+            if ($rows->isNotEmpty()) {
                 $pct = $rows->map(function (AssessmentAttempt $attempt) {
                     if (! $attempt->max_score) {
                         return null;
@@ -195,7 +195,7 @@ class CourseActivityReport
 
         $notes = [
             'Attendance is not recorded in the LMS yet. Session counts show scheduled class activities only.',
-            'Google Form quizzes do not store scores in the LMS; completion is tracked only when students open them outside the LMS (manual quizzes show scores).',
+            'Google Form quiz scores can be recorded in the LMS: open the assessment and enter each student’s score from the form responses.',
         ];
 
         return [

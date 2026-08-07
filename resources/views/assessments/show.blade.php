@@ -26,6 +26,9 @@
                     rel="noopener noreferrer"
                     class="lms-btn-primary"
                 >Open Google Form</a>
+                @if ($submitted)
+                    <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary">View your score</a>
+                @endif
             @elseif (! $isGoogleForm)
                 @if ($submitted)
                     <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-primary">View your result</a>
@@ -47,7 +50,7 @@
             <p class="text-sm text-isarva-muted">
                 {{ $assessment->course->code }}
                 @if ($isGoogleForm)
-                    · Google Form
+                    · Google Form · {{ $assessment->maxScore() }} marks
                 @else
                     · {{ $assessment->question_count }} questions · {{ $assessment->maxScore() }} marks
                 @endif
@@ -72,11 +75,13 @@
                 @if ($isGoogleForm)
                     <p class="text-sm text-isarva-muted">
                         @if ($assessment->isReadyToPublish() && ! $assessment->is_published)
-                            Ready to publish. Students will open the Google Form in a new tab.
+                            Ready to publish. Students will open the Google Form in a new tab. After responses come in, record scores below.
                         @elseif (! $assessment->external_url)
                             Add a Google Form URL before publishing.
+                        @elseif ($assessment->maxScore() < 1)
+                            Set total marks before publishing and recording scores.
                         @else
-                            Scores are collected in Google Forms, not in the LMS.
+                            Open the Google Form responses, then enter each student’s score in the roster below.
                         @endif
                     </p>
                 @else
@@ -94,21 +99,33 @@
                     </form>
                 @endif
                 <x-input-error :messages="$errors->get('publish')" class="mt-1.5" />
+                <x-input-error :messages="$errors->get('score')" class="mt-1.5" />
             @elseif ($assessment->is_published && ! $isGoogleForm)
                 <p class="text-sm text-isarva-muted">One attempt allowed. Correct answers are not shown after submission.</p>
             @elseif ($assessment->is_published && $isGoogleForm)
-                <p class="text-sm text-isarva-muted">Complete the Google Form using the button above. It opens in a new tab.</p>
+                <p class="text-sm text-isarva-muted">
+                    Complete the Google Form using the button above. It opens in a new tab.
+                    @if ($submitted)
+                        Your lecturer has recorded a score for you.
+                    @endif
+                </p>
             @endif
         </div>
     </section>
 
-    @if ($isStaff && ! $isGoogleForm && $assessment->is_published && $resultsSummary)
+    @if ($isStaff && $assessment->is_published && $resultsSummary)
         <section class="lms-assignment-submissions-hub">
             <div class="lms-assignment-submissions-hub-header">
                 <div>
-                    <h2 class="lms-assignment-submissions-hub-title">Student results</h2>
+                    <h2 class="lms-assignment-submissions-hub-title">
+                        {{ $isGoogleForm ? 'Student scores' : 'Student results' }}
+                    </h2>
                     <p class="lms-assignment-submissions-hub-desc">
-                        Track who submitted and their score. Individual answers stay hidden from students after submit.
+                        @if ($isGoogleForm)
+                            Check Google Form responses, then save each student’s score in the LMS (out of {{ $assessment->maxScore() }}).
+                        @else
+                            Track who submitted and their score. Individual answers stay hidden from students after submit.
+                        @endif
                         @if ($resultsSummary['average'] !== null)
                             Class average: <strong class="font-semibold text-isarva-heading">{{ $resultsSummary['average'] }} / {{ $assessment->maxScore() }}</strong>
                         @endif
@@ -122,6 +139,8 @@
                         :student="$row['student']"
                         :attempt="$row['attempt']"
                         :max-score="$assessment->maxScore()"
+                        :assessment="$assessment"
+                        :editable="$isGoogleForm"
                     />
                 @empty
                     <div class="lms-assignment-submissions-empty">
@@ -136,7 +155,7 @@
             <div class="lms-panel-body">
                 <p class="text-sm text-isarva-muted">
                     @if ($isGoogleForm)
-                        Publish this assessment so enrolled students can open the Google Form.
+                        Publish this assessment so enrolled students can open the Google Form, then record scores here.
                     @else
                         Publish this assessment to start tracking student submissions and scores.
                     @endif
