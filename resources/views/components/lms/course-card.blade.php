@@ -71,7 +71,24 @@
                 method="POST"
                 action="{{ route('courses.publish', $course) }}"
                 class="lms-course-card-publish"
-                onsubmit="return confirm({{ \Illuminate\Support\Js::from('Publish "'.$course->title.'" to students?'."\n\n".'Once enabled, this course cannot be disabled again from Edit course.') }})"
+                x-data
+                x-on:submit.prevent="
+                    Swal.fire({
+                        title: {{ \Illuminate\Support\Js::from('Publish “'.$course->title.'” to students?') }},
+                        text: 'Once enabled, this course cannot be disabled again from Edit course.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        focusCancel: true,
+                        confirmButtonText: 'Yes, publish',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#f59e0b',
+                        cancelButtonColor: '#64748b',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $el.submit();
+                        }
+                    })
+                "
             >
                 @csrf
                 <button type="submit" class="lms-course-card-publish-btn">
