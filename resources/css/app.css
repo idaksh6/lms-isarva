@@ -2869,6 +2869,110 @@
         @apply mt-1 max-w-md text-sm text-isarva-muted;
     }
 
+    .lms-activity-summary {
+        @apply mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5;
+    }
+
+    .lms-activity-stat {
+        @apply rounded-xl border border-isarva-border bg-white px-4 py-3 shadow-sm;
+    }
+
+    .lms-activity-stat-value {
+        @apply block text-2xl font-bold tracking-tight text-isarva-heading;
+    }
+
+    .lms-activity-stat-label {
+        @apply mt-0.5 block text-xs font-semibold uppercase tracking-wide text-isarva-muted;
+    }
+
+    .lms-activity-stat-sub {
+        @apply mt-0.5 block text-xs text-slate-500;
+    }
+
+    .lms-activity-sections {
+        @apply space-y-4;
+    }
+
+    .lms-activity-section {
+        @apply overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
+    }
+
+    .lms-activity-section-head {
+        @apply flex items-start justify-between gap-3 border-b border-isarva-border px-4 py-4 sm:px-5;
+    }
+
+    .lms-activity-section-title {
+        @apply text-base font-semibold text-isarva-heading;
+    }
+
+    .lms-activity-section-desc {
+        @apply mt-1 text-sm text-isarva-muted;
+    }
+
+    .lms-activity-section-empty {
+        @apply px-4 py-8 text-center text-sm text-isarva-muted sm:px-5;
+    }
+
+    .lms-activity-status {
+        @apply inline-flex rounded-md px-2 py-0.5 text-xs font-semibold;
+    }
+
+    .lms-activity-status.is-past {
+        @apply bg-slate-100 text-slate-600;
+    }
+
+    .lms-activity-status.is-upcoming {
+        @apply bg-sky-50 text-sky-800;
+    }
+
+    .lms-activity-empty-board {
+        @apply overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
+    }
+
+    .lms-activity-empty-hero {
+        @apply flex flex-col items-center border-b border-slate-100 px-6 py-10 text-center;
+    }
+
+    .lms-activity-empty-icon {
+        @apply mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500;
+    }
+
+    .lms-activity-empty-icon svg {
+        @apply h-6 w-6;
+    }
+
+    .lms-activity-empty-title {
+        @apply text-lg font-semibold text-isarva-heading;
+    }
+
+    .lms-activity-empty-text {
+        @apply mt-2 max-w-lg text-sm text-isarva-muted;
+    }
+
+    .lms-activity-empty-grid {
+        @apply grid gap-0 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0;
+    }
+
+    .lms-activity-empty-tile {
+        @apply space-y-2 px-5 py-5;
+    }
+
+    .lms-activity-empty-tile-label {
+        @apply block text-xs font-semibold uppercase tracking-wide text-isarva-muted;
+    }
+
+    .lms-activity-empty-tile p {
+        @apply text-sm text-slate-600;
+    }
+
+    .lms-activity-empty-roster {
+        @apply border-t border-slate-100;
+    }
+
+    .lms-activity-empty-roster-title {
+        @apply px-4 pt-4 text-sm font-semibold text-isarva-heading sm:px-5;
+    }
+
     .lms-report-status-missing {
         @apply inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600;
     }

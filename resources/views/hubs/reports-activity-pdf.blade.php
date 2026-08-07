@@ -37,9 +37,7 @@
         <span class="kpi"><strong>{{ $kpis['avg_assignment_score'] !== null ? $kpis['avg_assignment_score'].'%' : '—' }}</strong> Avg score</span>
     </div>
 
-    @foreach ($report['notes'] as $note)
-        <p class="note">{{ $note }}</p>
-    @endforeach
+    <p class="note">Attendance is not recorded in the LMS. Google Form scores appear after lecturers record them on the assessment page.</p>
 
     <h2>Class sessions / activities</h2>
     <table>

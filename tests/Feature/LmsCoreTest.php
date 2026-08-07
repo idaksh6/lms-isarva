@@ -286,7 +286,7 @@ class LmsCoreTest extends TestCase
             ->assertSee('Activity lab')
             ->assertSee('Student participation')
             ->assertSee($student->name)
-            ->assertSee('Attendance is not recorded');
+            ->assertSee('About this report');
 
         $csv = $this->actingAs($lecturer)
             ->get(route('reports.activity.export', [

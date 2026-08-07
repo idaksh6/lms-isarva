@@ -193,10 +193,7 @@ class CourseActivityReport
             'participation_rate' => $enrolled > 0 ? round(($activeParticipants / $enrolled) * 100, 1) : null,
         ];
 
-        $notes = [
-            'Attendance is not recorded in the LMS yet. Session counts show scheduled class activities only.',
-            'Google Form quiz scores can be recorded in the LMS: open the assessment and enter each student’s score from the form responses.',
-        ];
+        $notes = [];
 
         return [
             'kpis' => $kpis,
