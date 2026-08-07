@@ -4,11 +4,16 @@
 @section('page_title', 'Reports')
 
 @section('content')
+@php
+    $kpis = $selectedCourse ? $report['kpis'] : null;
+    $flagged = $selectedCourse ? $report['flagged'] : collect();
+@endphp
+
 <div class="corp-dashboard">
     <x-lms.module-hero
         module="reports"
         title="Course at-risk"
-        subtitle="Auto-flagged weak students with reasons, performance snapshots, and intervention tracking."
+        subtitle="Find struggling students, open support cases, and track interventions."
     >
         @if ($selectedCourse)
             <div class="lms-report-export-group">
@@ -26,21 +31,19 @@
         <a href="{{ route('reports.at-risk') }}" class="lms-report-tab is-active">Course at-risk</a>
     </nav>
 
-    <form method="GET" action="{{ route('reports.at-risk') }}" class="lms-report-filters">
-        <div class="lms-report-filters-grid">
-            <div class="lms-form-field lms-report-filters-span">
-                <label for="at-risk-course" class="lms-field-label">Course</label>
-                <select id="at-risk-course" name="course" class="lms-field-input mt-1.5" onchange="this.form.submit()" required>
-                    <option value="">Choose a course…</option>
-                    @foreach ($courses as $course)
-                        <option value="{{ $course->id }}" @selected($selectedCourse?->id === $course->id)>
-                            {{ $course->code }} — {{ $course->title }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+    <form method="GET" action="{{ route('reports.at-risk') }}" class="lms-at-risk-toolbar">
+        <div class="lms-at-risk-toolbar-field">
+            <label for="at-risk-course" class="lms-field-label">Course</label>
+            <select id="at-risk-course" name="course" class="lms-field-input mt-1.5" onchange="this.form.submit()" required>
+                <option value="">Choose a course…</option>
+                @foreach ($courses as $course)
+                    <option value="{{ $course->id }}" @selected($selectedCourse?->id === $course->id)>
+                        {{ $course->code }} — {{ $course->title }}
+                    </option>
+                @endforeach
+            </select>
         </div>
-        <div class="lms-report-filters-actions">
+        <div class="lms-at-risk-toolbar-actions">
             <button type="submit" class="lms-btn-primary">Open report</button>
             @if ($selectedCourse)
                 <a href="{{ route('reports.at-risk') }}" class="lms-btn-secondary">Clear</a>
@@ -55,99 +58,153 @@
             variant="chart"
         />
     @else
-        @php $kpis = $report['kpis']; @endphp
-
-        <div class="corp-kpi-grid">
-            <x-dashboard.kpi-card label="Flagged students" :value="$kpis['flagged']" :sub="'of '.$kpis['enrolled'].' enrolled'" icon="users" />
-            <x-dashboard.kpi-card label="Open cases" :value="$kpis['open_cases']" sub="Active interventions" icon="clipboard" />
-            <x-dashboard.kpi-card label="Resolved cases" :value="$kpis['resolved_cases']" sub="Closed successfully" icon="chart" />
-            <x-dashboard.kpi-card label="Avg risk score" :value="$kpis['avg_risk_score'] !== null ? $kpis['avg_risk_score'] : '—'" sub="Rules fired per flagged student" icon="inbox" />
+        <div class="lms-at-risk-summary">
+            <div class="lms-at-risk-stat">
+                <span class="lms-at-risk-stat-value {{ $kpis['flagged'] > 0 ? 'is-alert' : 'is-ok' }}">{{ $kpis['flagged'] }}</span>
+                <span class="lms-at-risk-stat-label">Flagged</span>
+                <span class="lms-at-risk-stat-sub">of {{ $kpis['enrolled'] }} enrolled</span>
+            </div>
+            <div class="lms-at-risk-stat">
+                <span class="lms-at-risk-stat-value">{{ $kpis['open_cases'] }}</span>
+                <span class="lms-at-risk-stat-label">Open cases</span>
+                <span class="lms-at-risk-stat-sub">Active support</span>
+            </div>
+            <div class="lms-at-risk-stat">
+                <span class="lms-at-risk-stat-value">{{ $kpis['resolved_cases'] }}</span>
+                <span class="lms-at-risk-stat-label">Resolved</span>
+                <span class="lms-at-risk-stat-sub">Closed cases</span>
+            </div>
+            <div class="lms-at-risk-stat">
+                <span class="lms-at-risk-stat-value">{{ $kpis['avg_risk_score'] !== null ? $kpis['avg_risk_score'] : '—' }}</span>
+                <span class="lms-at-risk-stat-label">Avg risk</span>
+                <span class="lms-at-risk-stat-sub">Rules fired</span>
+            </div>
+            @if ($report['course_avg'] !== null)
+                <div class="lms-at-risk-stat">
+                    <span class="lms-at-risk-stat-value">{{ $report['course_avg'] }}%</span>
+                    <span class="lms-at-risk-stat-label">Course avg</span>
+                    <span class="lms-at-risk-stat-sub">Assignments</span>
+                </div>
+            @endif
         </div>
 
-        @foreach ($report['notes'] as $note)
-            <p class="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{{ $note }}</p>
-        @endforeach
+        <details class="lms-at-risk-legend">
+            <summary>How students are flagged</summary>
+            <div class="lms-at-risk-legend-body">
+                <p>A student is flagged if <strong>any critical rule</strong> fires, or if <strong>two or more</strong> other rules fire.</p>
+                <ul>
+                    <li><span class="lms-at-risk-chip is-critical">Critical</span> Assignment average under 60%, or 2+ missing overdue assignments</li>
+                    <li><span class="lms-at-risk-chip">Other</span> Chronic late, stuck in revision, low quiz score, low participation</li>
+                    <li>Snapshot compares current scores to the course average (score history is not stored yet). Attendance is not tracked.</li>
+                </ul>
+            </div>
+        </details>
 
-        <section class="corp-panel">
-            <div class="corp-panel-head">
+        <section class="lms-at-risk-list">
+            <div class="lms-at-risk-list-head">
                 <div>
-                    <h2 class="corp-panel-title">Weak students</h2>
-                    <p class="corp-panel-desc">
-                        Flagged when a critical rule fires, or when two or more rules fire.
-                        @if ($report['course_avg'] !== null)
-                            Course assignment average: {{ $report['course_avg'] }}%.
+                    <h2 class="lms-at-risk-list-title">Weak students</h2>
+                    <p class="lms-at-risk-list-desc">
+                        @if ($flagged->isNotEmpty())
+                            Review reasons and open a support case to log mentoring, extra classes, and strategies.
+                        @else
+                            Nobody matches the weak-student rules right now.
                         @endif
                     </p>
                 </div>
-                <span class="corp-sidebar-badge">{{ $report['flagged']->count() }}</span>
+                <span class="lms-at-risk-list-count">{{ $flagged->count() }}</span>
             </div>
 
-            @if ($report['flagged']->isNotEmpty())
-                <div class="corp-table-wrap">
-                    <table class="corp-table corp-table--compact">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Risk</th>
-                                <th>Reasons</th>
-                                <th>Snapshot</th>
-                                <th>Case</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($report['flagged'] as $row)
-                                @php $m = $row['metrics']; @endphp
-                                <tr class="corp-table-row">
-                                    <td class="corp-table-cell">
-                                        <span class="corp-table-title">{{ $row['student']->name }}</span>
-                                        <div class="corp-table-cell--muted text-xs">
-                                            {{ $row['student']->student_id ?: '—' }}
+            @if ($flagged->isNotEmpty())
+                <div class="lms-at-risk-cards">
+                    @foreach ($flagged as $row)
+                        @php
+                            $m = $row['metrics'];
+                            $riskLevel = $row['risk_score'] >= 3 ? 'high' : ($row['risk_score'] >= 2 ? 'medium' : 'low');
+                        @endphp
+                        <article class="lms-at-risk-card">
+                            <div class="lms-at-risk-card-top">
+                                <div class="lms-at-risk-card-identity">
+                                    <span class="lms-student-avatar lms-student-avatar--lg">{{ strtoupper(substr($row['student']->name, 0, 1)) }}</span>
+                                    <div class="min-w-0">
+                                        <h3 class="lms-at-risk-card-name">{{ $row['student']->name }}</h3>
+                                        <p class="lms-at-risk-card-meta">
+                                            {{ $row['student']->student_id ?: 'No student ID' }}
                                             · {{ $row['student']->email }}
-                                        </div>
-                                    </td>
-                                    <td class="corp-table-cell">
-                                        <span class="font-semibold">{{ $row['risk_score'] }}</span>
-                                    </td>
-                                    <td class="corp-table-cell">
-                                        <ul class="list-disc pl-4 text-sm space-y-0.5">
-                                            @foreach ($row['reasons'] as $reason)
-                                                <li>{{ $reason }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </td>
-                                    <td class="corp-table-cell corp-table-cell--muted text-sm">
-                                        Avg {{ $m['assignment_avg'] !== null ? $m['assignment_avg'].'%' : '—' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="lms-at-risk-card-risk is-{{ $riskLevel }}" title="Rules fired">
+                                    <span class="lms-at-risk-card-risk-score">{{ $row['risk_score'] }}</span>
+                                    <span class="lms-at-risk-card-risk-label">Risk</span>
+                                </div>
+                            </div>
+
+                            <div class="lms-at-risk-card-reasons">
+                                @foreach ($row['reasons'] as $reason)
+                                    <span class="lms-at-risk-reason">{{ $reason }}</span>
+                                @endforeach
+                            </div>
+
+                            <div class="lms-at-risk-metrics">
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Avg</span>
+                                    <span class="lms-at-risk-metric-value">
+                                        {{ $m['assignment_avg'] !== null ? $m['assignment_avg'].'%' : '—' }}
                                         @if ($m['avg_delta'] !== null)
-                                            ({{ $m['avg_delta'] > 0 ? '+' : '' }}{{ $m['avg_delta'] }} vs course)
+                                            <em class="{{ $m['avg_delta'] < 0 ? 'is-down' : 'is-up' }}">{{ $m['avg_delta'] > 0 ? '+' : '' }}{{ $m['avg_delta'] }}</em>
                                         @endif
-                                        <br>
-                                        Submitted {{ $m['submitted'] }}/{{ $m['published_assignments'] }}
-                                        · Missing {{ $m['missing_overdue'] }}
-                                        · Late {{ $m['late_count'] }}
-                                        <br>
-                                        Quiz {{ $m['quiz_avg'] !== null ? $m['quiz_avg'].'%' : '—' }}
-                                        · Part. {{ $m['participation_rate'] !== null ? $m['participation_rate'].'%' : '—' }}
-                                    </td>
-                                    <td class="corp-table-cell">
-                                        @if ($row['active_case'])
-                                            <a href="{{ route('reports.at-risk.cases.show', $row['active_case']) }}" class="lms-btn-secondary lms-btn-secondary--xs">View case</a>
-                                        @else
-                                            <form method="POST" action="{{ route('reports.at-risk.cases.store') }}">
-                                                @csrf
-                                                <input type="hidden" name="course_id" value="{{ $selectedCourse->id }}">
-                                                <input type="hidden" name="user_id" value="{{ $row['student']->id }}">
-                                                <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Open support</button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                    </span>
+                                </div>
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Submitted</span>
+                                    <span class="lms-at-risk-metric-value">{{ $m['submitted'] }}/{{ $m['published_assignments'] }}</span>
+                                </div>
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Missing</span>
+                                    <span class="lms-at-risk-metric-value">{{ $m['missing_overdue'] }}</span>
+                                </div>
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Late</span>
+                                    <span class="lms-at-risk-metric-value">{{ $m['late_count'] }}</span>
+                                </div>
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Quiz</span>
+                                    <span class="lms-at-risk-metric-value">{{ $m['quiz_avg'] !== null ? $m['quiz_avg'].'%' : '—' }}</span>
+                                </div>
+                                <div class="lms-at-risk-metric">
+                                    <span class="lms-at-risk-metric-label">Participation</span>
+                                    <span class="lms-at-risk-metric-value">{{ $m['participation_rate'] !== null ? $m['participation_rate'].'%' : '—' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="lms-at-risk-card-actions">
+                                @if ($row['active_case'])
+                                    <span class="lms-at-risk-case-pill">Case open</span>
+                                    <a href="{{ route('reports.at-risk.cases.show', $row['active_case']) }}" class="lms-btn-primary lms-btn-primary--xs">View case</a>
+                                @else
+                                    <form method="POST" action="{{ route('reports.at-risk.cases.store') }}">
+                                        @csrf
+                                        <input type="hidden" name="course_id" value="{{ $selectedCourse->id }}">
+                                        <input type="hidden" name="user_id" value="{{ $row['student']->id }}">
+                                        <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Open support</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
             @else
-                <div class="corp-panel-body">
-                    <p class="text-sm text-isarva-muted">No students currently match the weak-student rules for this course.</p>
+                <div class="lms-at-risk-empty">
+                    <div class="lms-at-risk-empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                    <h3 class="lms-at-risk-empty-title">No weak students flagged</h3>
+                    <p class="lms-at-risk-empty-text">
+                        Enrolled students are currently within the course thresholds. This list updates as grades, submissions, and participation change.
+                    </p>
                 </div>
             @endif
         </section>

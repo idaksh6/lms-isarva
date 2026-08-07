@@ -36,9 +36,7 @@
         <span class="kpi"><strong>{{ $kpis['enrolled'] }}</strong> Enrolled</span>
     </div>
 
-    @foreach ($report['notes'] as $note)
-        <p class="note">{{ $note }}</p>
-    @endforeach
+    <p class="note">Flagged when a critical rule fires, or when two or more other rules fire. Snapshot compares current performance to the course average.</p>
 
     <table>
         <thead>

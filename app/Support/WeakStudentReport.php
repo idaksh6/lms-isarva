@@ -92,11 +92,7 @@ class WeakStudentReport
             'flagged' => $flagged,
             'kpis' => $kpis,
             'course_avg' => $courseAvg,
-            'notes' => [
-                'Students are flagged when any critical rule fires, or when two or more non-critical rules fire.',
-                'Performance “trends” compare the student to the current course average — historical score history is not stored yet.',
-                'Attendance is not tracked in the LMS.',
-            ],
+            'notes' => [],
         ];
     }
 
