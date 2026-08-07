@@ -122,7 +122,7 @@
                     </h2>
                     <p class="lms-assignment-submissions-hub-desc">
                         @if ($isGoogleForm)
-                            Check Google Form responses, then save each student’s score in the LMS (out of {{ $assessment->maxScore() }}).
+                            Check Google Form responses, enter scores below (out of {{ $assessment->maxScore() }}), then click <strong>Save all scores</strong>. Leave a field blank to skip that student.
                         @else
                             Track who submitted and their score. Individual answers stay hidden from students after submit.
                         @endif
@@ -134,20 +134,64 @@
                 <span class="lms-assignment-submissions-hub-count">{{ $resultsSummary['submitted'] }}/{{ $resultsSummary['enrolled'] }}</span>
             </div>
             <div class="lms-assignment-submissions-hub-body">
-                @forelse ($studentResults as $row)
-                    <x-lms.assessment-result-row
-                        :student="$row['student']"
-                        :attempt="$row['attempt']"
-                        :max-score="$assessment->maxScore()"
-                        :assessment="$assessment"
-                        :editable="$isGoogleForm"
-                    />
-                @empty
-                    <div class="lms-assignment-submissions-empty">
-                        <p class="text-sm font-semibold text-slate-700">No enrolled students</p>
-                        <p class="mt-1 text-sm text-slate-500">Enroll students on this course to track assessment results.</p>
-                    </div>
-                @endforelse
+                @if ($isGoogleForm)
+                    <x-input-error :messages="$errors->get('scores')" class="mb-3" />
+                    <form method="POST" action="{{ route('assessments.scores.bulk', $assessment) }}" class="space-y-3">
+                        @csrf
+                        @method('PUT')
+                        <div class="lms-assessment-bulk-bar">
+                            <p class="text-sm text-isarva-muted">Enter scores for multiple students, then save once.</p>
+                            <button type="submit" class="lms-btn-primary">Save all scores</button>
+                        </div>
+                        @forelse ($studentResults as $row)
+                            <x-lms.assessment-result-row
+                                :student="$row['student']"
+                                :attempt="$row['attempt']"
+                                :max-score="$assessment->maxScore()"
+                                :assessment="$assessment"
+                                :editable="true"
+                                :bulk="true"
+                            />
+                        @empty
+                            <div class="lms-assignment-submissions-empty">
+                                <p class="text-sm font-semibold text-slate-700">No enrolled students</p>
+                                <p class="mt-1 text-sm text-slate-500">Enroll students on this course to track assessment results.</p>
+                            </div>
+                        @endforelse
+                        @if ($studentResults->isNotEmpty())
+                            <div class="lms-assessment-bulk-bar lms-assessment-bulk-bar--footer">
+                                <p class="text-sm text-isarva-muted">{{ $studentResults->count() }} enrolled students</p>
+                                <button type="submit" class="lms-btn-primary">Save all scores</button>
+                            </div>
+                        @endif
+                    </form>
+                    @foreach ($studentResults as $row)
+                        @if ($row['attempt']?->isSubmitted())
+                            <form
+                                id="clear-score-{{ $row['student']->id }}"
+                                method="POST"
+                                action="{{ route('assessments.scores.destroy', [$assessment, $row['student']]) }}"
+                                class="hidden"
+                            >
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        @endif
+                    @endforeach
+                @else
+                    @forelse ($studentResults as $row)
+                        <x-lms.assessment-result-row
+                            :student="$row['student']"
+                            :attempt="$row['attempt']"
+                            :max-score="$assessment->maxScore()"
+                        />
+                    @empty
+                        <div class="lms-assignment-submissions-empty">
+                            <p class="text-sm font-semibold text-slate-700">No enrolled students</p>
+                            <p class="mt-1 text-sm text-slate-500">Enroll students on this course to track assessment results.</p>
+                        </div>
+                    @endforelse
+                @endif
             </div>
         </section>
     @elseif ($isStaff && ! $assessment->is_published)

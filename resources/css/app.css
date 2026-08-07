@@ -1339,6 +1339,14 @@
         @apply text-sm font-medium text-isarva-muted;
     }
 
+    .lms-assessment-bulk-bar {
+        @apply flex flex-col gap-3 rounded-xl border border-isarva-border bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .lms-assessment-bulk-bar--footer {
+        @apply sticky bottom-3 z-10 shadow-sm;
+    }
+
     .lms-assessment-index-row {
         @apply flex w-full flex-col gap-4 border-t border-slate-100 px-4 py-5 first:border-t-0 sm:flex-row sm:items-center sm:justify-between sm:px-6;
     }

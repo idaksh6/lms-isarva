@@ -213,6 +213,65 @@ class AssessmentController extends Controller
         return back()->with('success', 'Score saved for '.$user->name.'.');
     }
 
+    public function bulkUpdateScores(Request $request, Assessment $assessment): RedirectResponse
+    {
+        $this->authorize('viewResults', $assessment);
+
+        if (! $assessment->isGoogleForm()) {
+            abort(404);
+        }
+
+        if (! $assessment->is_published) {
+            return back()->withErrors(['scores' => 'Publish the assessment before recording scores.']);
+        }
+
+        if ($assessment->maxScore() < 1) {
+            return back()->withErrors(['scores' => 'Set total marks on the assessment before recording scores.']);
+        }
+
+        $max = $assessment->maxScore();
+
+        $validated = $request->validate([
+            'scores' => ['required', 'array'],
+            'scores.*' => ['nullable', 'numeric', 'min:0', 'max:'.$max],
+        ]);
+
+        $enrolledIds = $assessment->course->students()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+        $saved = 0;
+
+        foreach ($validated['scores'] as $userId => $score) {
+            if ($score === null || $score === '') {
+                continue;
+            }
+
+            $userId = (int) $userId;
+            if (! in_array($userId, $enrolledIds, true)) {
+                continue;
+            }
+
+            AssessmentAttempt::query()->updateOrCreate(
+                [
+                    'assessment_id' => $assessment->id,
+                    'user_id' => $userId,
+                ],
+                [
+                    'score' => (int) round((float) $score),
+                    'max_score' => $max,
+                    'submitted_at' => now(),
+                ]
+            );
+            $saved++;
+        }
+
+        if ($saved === 0) {
+            return back()->withErrors(['scores' => 'Enter at least one score to save.']);
+        }
+
+        return back()->with('success', $saved === 1
+            ? '1 score saved.'
+            : $saved.' scores saved.');
+    }
+
     public function clearScore(Assessment $assessment, User $user): RedirectResponse
     {
         $this->authorize('viewResults', $assessment);

@@ -1384,7 +1384,7 @@ class LmsCoreTest extends TestCase
             ->assertOk()
             ->assertSee('Student scores')
             ->assertSee($student->name)
-            ->assertSee('Save score');
+            ->assertSee('Save all scores');
 
         $this->actingAs($lecturer)
             ->get(route('courses.assessments.index', $course))
@@ -1404,19 +1404,19 @@ class LmsCoreTest extends TestCase
             'max_score' => 100,
         ]);
 
-        $this->actingAs($lecturer)
-            ->get(route('assessments.show', $assessment))
-            ->assertOk()
-            ->assertSee('78');
-
-        $this->actingAs($student)
-            ->get(route('assessments.result', $assessment))
-            ->assertOk()
-            ->assertSee('78 / 100');
+        $otherStudent = User::factory()->create([
+            'role' => UserRole::Student,
+            'name' => 'Other Student',
+            'student_id' => 'DS2024888',
+        ]);
+        $course->students()->attach($otherStudent->id);
 
         $this->actingAs($lecturer)
-            ->put(route('assessments.scores.update', [$assessment, $student]), [
-                'score' => 90,
+            ->put(route('assessments.scores.bulk', $assessment), [
+                'scores' => [
+                    $student->id => 90,
+                    $otherStudent->id => 65,
+                ],
             ])
             ->assertRedirect();
 
@@ -1425,6 +1425,16 @@ class LmsCoreTest extends TestCase
             'user_id' => $student->id,
             'score' => 90,
         ]);
+        $this->assertDatabaseHas('assessment_attempts', [
+            'assessment_id' => $assessment->id,
+            'user_id' => $otherStudent->id,
+            'score' => 65,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('assessments.result', $assessment))
+            ->assertOk()
+            ->assertSee('90 / 100');
     }
 
     public function test_timetable_csv_import_creates_class_sessions(): void

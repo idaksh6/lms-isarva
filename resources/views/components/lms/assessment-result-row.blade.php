@@ -4,11 +4,16 @@
     'maxScore',
     'assessment' => null,
     'editable' => false,
+    'bulk' => false,
 ])
 
 @php
     $submitted = $attempt?->isSubmitted() ?? false;
     $inProgress = $attempt && ! $submitted;
+    $oldScores = old('scores', []);
+    $inputValue = array_key_exists((string) $student->id, $oldScores)
+        ? $oldScores[(string) $student->id]
+        : ($attempt?->score);
 @endphp
 
 <article class="lms-assessment-result-row">
@@ -27,7 +32,37 @@
     </div>
 
     <div class="lms-assessment-result-status">
-        @if ($editable && $assessment)
+        @if ($editable && $assessment && $bulk)
+            <div class="lms-assessment-score-form">
+                <label class="sr-only" for="score-{{ $student->id }}">Score for {{ $student->name }}</label>
+                <div class="lms-assessment-score-form-row">
+                    <input
+                        id="score-{{ $student->id }}"
+                        type="number"
+                        name="scores[{{ $student->id }}]"
+                        min="0"
+                        max="{{ $maxScore }}"
+                        step="1"
+                        value="{{ $inputValue }}"
+                        class="lms-field-input lms-assessment-score-input"
+                        placeholder="—"
+                    >
+                    <span class="lms-assessment-score-max">/ {{ $maxScore }}</span>
+                </div>
+            </div>
+            @if ($submitted)
+                <p class="lms-assessment-result-date">
+                    Recorded {{ $attempt->submitted_at->format('M j, Y · g:i A') }}
+                </p>
+                <button
+                    type="submit"
+                    form="clear-score-{{ $student->id }}"
+                    class="lms-btn-secondary lms-btn-secondary--xs"
+                >Clear</button>
+            @else
+                <span class="lms-badge bg-slate-100 text-slate-600">No score yet</span>
+            @endif
+        @elseif ($editable && $assessment)
             <form
                 method="POST"
                 action="{{ route('assessments.scores.update', [$assessment, $student]) }}"

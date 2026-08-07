@@ -101,6 +101,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assessments.destroy');
     Route::put('assessments/{assessment}/scores/{user}', [AssessmentController::class, 'updateScore'])
         ->name('assessments.scores.update');
+    Route::put('assessments/{assessment}/scores', [AssessmentController::class, 'bulkUpdateScores'])
+        ->name('assessments.scores.bulk');
     Route::delete('assessments/{assessment}/scores/{user}', [AssessmentController::class, 'clearScore'])
         ->name('assessments.scores.destroy');
     Route::get('assessments/{assessment}/attempt', [AssessmentAttemptController::class, 'create'])
