@@ -130,6 +130,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('reports/assignments', [ReportController::class, 'assignments'])->name('reports.assignments');
+    Route::get('reports/assignments/export', [ReportController::class, 'exportAssignments'])->name('reports.assignments.export');
 
     Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');

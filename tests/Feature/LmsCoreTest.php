@@ -82,7 +82,105 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)->get(route('announcements.index'))->assertOk();
         $this->actingAs($student)->get(route('questions.index'))->assertOk();
         $this->actingAs($student)->get(route('reports.index'))->assertForbidden();
+        $this->actingAs($student)->get(route('reports.assignments'))->assertForbidden();
         $this->actingAs($student)->get(route('gradebook.index'))->assertForbidden();
+    }
+
+    public function test_individual_assignment_report_shows_students_filters_and_exports_csv(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $otherLecturer = $this->makeLecturer();
+        $submittedStudent = $this->makeStudent();
+        $missingStudent = User::factory()->create([
+            'role' => UserRole::Student,
+            'name' => 'Missing Submitter',
+            'email' => 'missing@lms.test',
+            'student_id' => 'DS2024001',
+        ]);
+
+        $course = $this->makeCourse($lecturer);
+        $otherCourse = Course::query()->create([
+            'code' => 'OTH202',
+            'title' => 'Other Course',
+            'lecturer_id' => $otherLecturer->id,
+            'is_active' => true,
+        ]);
+        $course->students()->attach([$submittedStudent->id, $missingStudent->id]);
+        $otherCourse->students()->attach($submittedStudent->id);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Pipeline lab',
+            'is_published' => true,
+            'due_at' => now()->subDay(),
+        ]);
+
+        Assignment::query()->create([
+            'course_id' => $otherCourse->id,
+            'created_by' => $otherLecturer->id,
+            'title' => 'Hidden lab',
+            'is_published' => true,
+        ]);
+
+        Submission::query()->create([
+            'assignment_id' => $assignment->id,
+            'user_id' => $submittedStudent->id,
+            'file_path' => 'submissions/pipeline.pdf',
+            'file_name' => 'pipeline.pdf',
+            'status' => SubmissionStatus::Late,
+            'score' => 82.5,
+            'letter_grade' => 'B',
+            'feedback' => 'Solid work',
+            'submitted_at' => now(),
+            'reviewed_at' => now(),
+            'reviewed_by' => $lecturer->id,
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.assignments', [
+                'course' => $course->id,
+                'assignment' => $assignment->id,
+            ]))
+            ->assertOk()
+            ->assertSee('Pipeline lab')
+            ->assertSee($submittedStudent->name)
+            ->assertSee('Missing Submitter')
+            ->assertSee('Not submitted')
+            ->assertSee('82.5')
+            ->assertDontSee('Hidden lab');
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.assignments', [
+                'course' => $course->id,
+                'assignment' => $assignment->id,
+                'status' => 'not_submitted',
+            ]))
+            ->assertOk()
+            ->assertSee('Missing Submitter')
+            ->assertDontSee($submittedStudent->name);
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.assignments', [
+                'course' => $otherCourse->id,
+            ]))
+            ->assertForbidden();
+
+        $csv = $this->actingAs($lecturer)
+            ->get(route('reports.assignments.export', [
+                'course' => $course->id,
+                'assignment' => $assignment->id,
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->streamedContent();
+
+        $this->assertStringContainsString('Student Name', $csv);
+        $this->assertStringContainsString('Pipeline lab', $csv);
+        $this->assertStringContainsString('Missing Submitter', $csv);
+        $this->assertStringContainsString('Not submitted', $csv);
+        $this->assertStringContainsString('82.5', $csv);
+        $this->assertStringContainsString($submittedStudent->name, $csv);
     }
 
     public function test_lecturer_can_schedule_class_session_and_student_sees_it_on_calendar_day(): void
