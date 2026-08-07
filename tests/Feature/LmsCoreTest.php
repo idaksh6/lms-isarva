@@ -83,6 +83,7 @@ class LmsCoreTest extends TestCase
         $this->actingAs($student)->get(route('questions.index'))->assertOk();
         $this->actingAs($student)->get(route('reports.index'))->assertForbidden();
         $this->actingAs($student)->get(route('reports.assignments'))->assertForbidden();
+        $this->actingAs($student)->get(route('reports.activity'))->assertForbidden();
         $this->actingAs($student)->get(route('gradebook.index'))->assertForbidden();
     }
 
@@ -237,6 +238,82 @@ class LmsCoreTest extends TestCase
             ->assertOk();
 
         $this->assertStringContainsString('pdf', strtolower($pdf->headers->get('content-type') ?? ''));
+        $this->assertStringStartsWith('%PDF', $pdf->getContent());
+    }
+
+    public function test_course_activity_report_shows_sections_and_exports(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        ClassSession::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Week 1 lecture',
+            'starts_at' => now()->subDays(2)->setTime(10, 0),
+            'ends_at' => now()->subDays(2)->setTime(12, 0),
+            'mode' => SessionDeliveryMode::Online,
+            'meeting_link' => 'https://meet.example.com/week1',
+        ]);
+
+        $assignment = Assignment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Activity lab',
+            'is_published' => true,
+            'due_at' => now()->addWeek(),
+        ]);
+
+        Submission::query()->create([
+            'assignment_id' => $assignment->id,
+            'user_id' => $student->id,
+            'file_path' => 'submissions/activity.pdf',
+            'file_name' => 'activity.pdf',
+            'status' => SubmissionStatus::Submitted,
+            'score' => 90,
+            'letter_grade' => 'A',
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.activity', ['course' => $course->id]))
+            ->assertOk()
+            ->assertSee('Course activity report')
+            ->assertSee('Week 1 lecture')
+            ->assertSee('Activity lab')
+            ->assertSee('Student participation')
+            ->assertSee($student->name)
+            ->assertSee('Attendance is not recorded');
+
+        $csv = $this->actingAs($lecturer)
+            ->get(route('reports.activity.export', [
+                'course' => $course->id,
+                'format' => 'csv',
+            ]))
+            ->assertOk()
+            ->streamedContent();
+
+        $this->assertStringContainsString('Course Activity Report', $csv);
+        $this->assertStringContainsString('Week 1 lecture', $csv);
+        $this->assertStringContainsString('Activity lab', $csv);
+        $this->assertStringContainsString($student->name, $csv);
+
+        $this->actingAs($lecturer)
+            ->get(route('reports.activity.export', [
+                'course' => $course->id,
+                'format' => 'xlsx',
+            ]))
+            ->assertOk();
+
+        $pdf = $this->actingAs($lecturer)
+            ->get(route('reports.activity.export', [
+                'course' => $course->id,
+                'format' => 'pdf',
+            ]))
+            ->assertOk();
+
         $this->assertStringStartsWith('%PDF', $pdf->getContent());
     }
 
