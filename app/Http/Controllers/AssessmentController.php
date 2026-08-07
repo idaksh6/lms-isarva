@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AssessmentType;
 use App\Models\Assessment;
-use App\Models\AssessmentOption;
-use App\Models\AssessmentQuestion;
 use App\Models\Course;
 use App\Notifications\AssessmentPublishedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AssessmentController extends Controller
@@ -60,24 +60,59 @@ class AssessmentController extends Controller
         $this->authorize('create', Assessment::class);
         $this->authorize('update', $course);
 
+        $type = $request->input('type', AssessmentType::Manual->value);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
             'due_at' => ['nullable', 'date'],
-            'question_count' => ['required', 'integer', 'min:1', 'max:50'],
-            'marks_per_question' => ['required', 'integer', 'min:1', 'max:10'],
-            'is_published' => ['sometimes', 'boolean'],
+            'type' => ['required', Rule::enum(AssessmentType::class)],
+            'external_url' => [
+                Rule::requiredIf($type === AssessmentType::GoogleForm->value),
+                'nullable',
+                'url',
+                'max:2048',
+                'regex:/^https:\/\//i',
+            ],
+            'question_count' => [
+                Rule::requiredIf($type === AssessmentType::Manual->value),
+                'nullable',
+                'integer',
+                'min:1',
+                'max:50',
+            ],
+            'marks_per_question' => [
+                Rule::requiredIf($type === AssessmentType::Manual->value),
+                'nullable',
+                'integer',
+                'min:1',
+                'max:10',
+            ],
         ]);
+
+        $assessmentType = $validated['type'] instanceof AssessmentType
+            ? $validated['type']
+            : AssessmentType::from($validated['type']);
+
+        $isGoogleForm = $assessmentType === AssessmentType::GoogleForm;
 
         $assessment = $course->assessments()->create([
             'created_by' => $request->user()->id,
             'title' => $validated['title'],
             'instructions' => $validated['instructions'] ?? null,
+            'type' => $assessmentType,
+            'external_url' => $isGoogleForm ? ($validated['external_url'] ?? null) : null,
             'due_at' => $validated['due_at'] ?? null,
-            'question_count' => $validated['question_count'],
-            'marks_per_question' => $validated['marks_per_question'],
+            'question_count' => $isGoogleForm ? 0 : (int) $validated['question_count'],
+            'marks_per_question' => $isGoogleForm ? 0 : (int) $validated['marks_per_question'],
             'is_published' => false,
         ]);
+
+        if ($assessment->isGoogleForm()) {
+            return redirect()
+                ->route('assessments.show', $assessment)
+                ->with('success', 'Google Form assessment created. Publish when you are ready for students.');
+        }
 
         return redirect()
             ->route('assessments.edit', $assessment)
@@ -96,10 +131,12 @@ class AssessmentController extends Controller
         $resultsSummary = null;
 
         if ($user->isStudent()) {
-            $attempt = $assessment->attempts()
-                ->where('user_id', $user->id)
-                ->first();
-        } elseif ($user->can('viewResults', $assessment)) {
+            if ($assessment->isManual()) {
+                $attempt = $assessment->attempts()
+                    ->where('user_id', $user->id)
+                    ->first();
+            }
+        } elseif ($assessment->isManual() && $user->can('viewResults', $assessment)) {
             $assessment->load(['course.students']);
 
             $attemptsByUser = $assessment->attempts()
@@ -141,6 +178,26 @@ class AssessmentController extends Controller
     public function update(Request $request, Assessment $assessment): RedirectResponse
     {
         $this->authorize('update', $assessment);
+
+        if ($assessment->isGoogleForm()) {
+            $validated = $request->validate([
+                'title' => ['required', 'string', 'max:255'],
+                'instructions' => ['nullable', 'string'],
+                'due_at' => ['nullable', 'date'],
+                'external_url' => ['required', 'url', 'max:2048', 'regex:/^https:\/\//i'],
+            ]);
+
+            $assessment->update([
+                'title' => $validated['title'],
+                'instructions' => $validated['instructions'] ?? null,
+                'due_at' => $validated['due_at'] ?? null,
+                'external_url' => $validated['external_url'],
+            ]);
+
+            return redirect()
+                ->route('assessments.edit', $assessment)
+                ->with('success', 'Google Form assessment updated.');
+        }
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -189,7 +246,11 @@ class AssessmentController extends Controller
         $this->authorize('update', $assessment);
 
         if (! $assessment->isReadyToPublish()) {
-            return back()->withErrors(['publish' => 'Add all '.$assessment->question_count.' questions with a correct answer before publishing.']);
+            $message = $assessment->isGoogleForm()
+                ? 'Add a Google Form URL before publishing.'
+                : 'Add all '.$assessment->question_count.' questions with a correct answer before publishing.';
+
+            return back()->withErrors(['publish' => $message]);
         }
 
         $wasPublished = $assessment->is_published;

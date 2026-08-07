@@ -31,12 +31,17 @@
                 @php
                     $attempt = $attemptsByAssessment[$assessment->id] ?? null;
                     $submitted = $attempt && $attempt->isSubmitted();
+                    $isGoogleForm = $assessment->isGoogleForm();
                 @endphp
                 <div class="lms-assessment-index-row">
                     <div class="lms-assessment-index-main min-w-0">
                         <a href="{{ route('assessments.show', $assessment) }}" class="lms-assessment-index-title">{{ $assessment->title }}</a>
                         <p class="lms-assessment-index-meta">
-                            {{ $assessment->question_count }} questions · {{ $assessment->maxScore() }} marks
+                            @if ($isGoogleForm)
+                                Google Form
+                            @else
+                                {{ $assessment->question_count }} questions · {{ $assessment->maxScore() }} marks
+                            @endif
                             @if ($assessment->due_at)
                                 · Due {{ $assessment->due_at->format('M j, g:i A') }}
                             @endif
@@ -44,7 +49,7 @@
                                 · <span class="font-medium text-amber-700">Draft</span>
                             @endif
                         </p>
-                        @if ($isStaff && $assessment->is_published)
+                        @if ($isStaff && $assessment->is_published && ! $isGoogleForm)
                             <p class="lms-assessment-index-track">
                                 <span class="lms-assessment-index-track-label">Submissions</span>
                                 <span class="lms-assessment-index-track-value">{{ $assessment->submitted_count ?? 0 }} / {{ $enrolledCount }} students</span>
@@ -53,17 +58,28 @@
                     </div>
                     <div class="lms-assessment-index-actions">
                         @if (auth()->user()->isStudent())
-                            @if ($submitted)
+                            @if ($isGoogleForm && $assessment->is_published && $assessment->external_url)
+                                <a
+                                    href="{{ $assessment->external_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="lms-btn-primary lms-btn-primary--xs"
+                                >Open form</a>
+                            @elseif ($submitted)
                                 <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">View result</a>
                             @elseif ($assessment->is_published)
                                 <a href="{{ route('assessments.attempt', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">Take assessment</a>
                             @endif
                         @else
-                            @if ($assessment->is_published)
+                            @if ($assessment->is_published && ! $isGoogleForm)
                                 <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">View results</a>
+                            @elseif ($assessment->is_published && $isGoogleForm)
+                                <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">View</a>
                             @endif
                             @can('update', $assessment)
-                                <a href="{{ route('assessments.edit', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">Edit questions</a>
+                                <a href="{{ route('assessments.edit', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">
+                                    {{ $isGoogleForm ? 'Edit' : 'Edit questions' }}
+                                </a>
                             @endcan
                         @endif
                     </div>

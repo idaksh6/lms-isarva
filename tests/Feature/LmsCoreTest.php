@@ -972,6 +972,7 @@ class LmsCoreTest extends TestCase
         $this->actingAs($lecturer)
             ->post(route('courses.assessments.store', $course), [
                 'title' => 'Quiz 1',
+                'type' => 'manual',
                 'question_count' => 2,
                 'marks_per_question' => 2,
             ])
@@ -1041,6 +1042,54 @@ class LmsCoreTest extends TestCase
             ->assertOk()
             ->assertSee('View results')
             ->assertSee('1 / 1 students');
+    }
+
+    public function test_lecturer_can_create_and_publish_google_form_assessment(): void
+    {
+        Notification::fake();
+
+        $lecturer = $this->makeLecturer();
+        $student = $this->makeStudent();
+        $course = $this->makeCourse($lecturer);
+        $course->students()->attach($student->id);
+
+        $formUrl = 'https://docs.google.com/forms/d/e/example/viewform';
+
+        $response = $this->actingAs($lecturer)
+            ->post(route('courses.assessments.store', $course), [
+                'title' => 'External quiz',
+                'type' => 'google_form',
+                'external_url' => $formUrl,
+                'instructions' => 'Complete the Google Form.',
+            ]);
+
+        $assessment = \App\Models\Assessment::query()->where('course_id', $course->id)->firstOrFail();
+
+        $response->assertRedirect(route('assessments.show', $assessment));
+        $this->assertTrue($assessment->isGoogleForm());
+        $this->assertSame($formUrl, $assessment->external_url);
+        $this->assertTrue($assessment->isReadyToPublish());
+
+        $this->actingAs($lecturer)
+            ->post(route('assessments.publish', $assessment))
+            ->assertRedirect(route('assessments.show', $assessment));
+
+        Notification::assertSentTo($student, \App\Notifications\AssessmentPublishedNotification::class);
+
+        $this->actingAs($student)
+            ->get(route('assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('Open Google Form')
+            ->assertSee($formUrl, false)
+            ->assertSee('target="_blank"', false);
+
+        $this->actingAs($student)
+            ->get(route('assessments.attempt', $assessment))
+            ->assertRedirect(route('assessments.show', $assessment));
+
+        $this->actingAs($student)
+            ->post(route('assessments.attempt.store', $assessment), ['answers' => []])
+            ->assertRedirect(route('assessments.show', $assessment));
     }
 
     public function test_timetable_csv_import_creates_class_sessions(): void

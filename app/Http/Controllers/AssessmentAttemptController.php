@@ -13,6 +13,14 @@ class AssessmentAttemptController extends Controller
 {
     public function create(Assessment $assessment): View|RedirectResponse
     {
+        if ($assessment->isGoogleForm()) {
+            $this->authorize('view', $assessment);
+
+            return redirect()
+                ->route('assessments.show', $assessment)
+                ->withErrors(['attempt' => 'This assessment uses a Google Form. Open the form link from the assessment page.']);
+        }
+
         $this->authorize('attempt', $assessment);
 
         $assessment->load(['course', 'questions.options']);
@@ -32,6 +40,14 @@ class AssessmentAttemptController extends Controller
 
     public function store(Request $request, Assessment $assessment): RedirectResponse
     {
+        if ($assessment->isGoogleForm()) {
+            $this->authorize('view', $assessment);
+
+            return redirect()
+                ->route('assessments.show', $assessment)
+                ->withErrors(['attempt' => 'This assessment uses a Google Form and cannot be submitted in the LMS.']);
+        }
+
         $this->authorize('attempt', $assessment);
 
         $assessment->load('questions.options');

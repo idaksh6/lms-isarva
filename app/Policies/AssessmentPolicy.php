@@ -48,6 +48,10 @@ class AssessmentPolicy
 
     public function attempt(User $user, Assessment $assessment): bool
     {
+        if ($assessment->isGoogleForm()) {
+            return false;
+        }
+
         if (! $user->isStudent() || ! $this->view($user, $assessment)) {
             return false;
         }
