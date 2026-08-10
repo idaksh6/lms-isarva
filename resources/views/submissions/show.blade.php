@@ -110,8 +110,17 @@
                             <input id="score" type="number" name="score" min="0" max="100" step="0.5" value="{{ old('score', $submission->score) }}" class="lms-field-input mt-1.5">
                         </div>
                         <div class="lms-form-field">
-                            <label for="feedback" class="lms-field-label">Feedback for student</label>
-                            <textarea id="feedback" name="feedback" rows="4" class="lms-field-input mt-1.5" placeholder="What went well? What to improve?">{{ old('feedback', $submission->feedback) }}</textarea>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <label for="feedback" class="lms-field-label">Feedback for student</label>
+                                @if (($aiEnabled ?? false) && $canReview)
+                                    <form method="POST" action="{{ route('ai.submissions.feedback', $submission) }}">
+                                        @csrf
+                                        <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">AI draft feedback</button>
+                                    </form>
+                                @endif
+                            </div>
+                            <textarea id="feedback" name="feedback" rows="4" class="lms-field-input mt-1.5" placeholder="What went well? What to improve?">{{ old('feedback', ($aiGeneration?->isReady() ? ($aiGeneration->output['feedback'] ?? null) : null) ?? $submission->feedback) }}</textarea>
+                            <x-input-error :messages="$errors->get('ai')" class="mt-1.5" />
                         </div>
                         <div class="lms-review-actions">
                             <button type="submit" name="action" value="grade" class="lms-btn-primary">Post grade</button>

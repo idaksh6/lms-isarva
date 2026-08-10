@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AiCopilotController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\AssessmentAttemptController;
@@ -149,6 +150,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('reports/at-risk/cases/{case}/refresh', [AtRiskController::class, 'refreshMetrics'])->name('reports.at-risk.cases.refresh');
     Route::post('reports/at-risk/cases/{case}/actions', [AtRiskController::class, 'storeAction'])->name('reports.at-risk.cases.actions.store');
     Route::delete('reports/at-risk/actions/{action}', [AtRiskController::class, 'destroyAction'])->name('reports.at-risk.actions.destroy');
+
+    Route::get('ai/generations/{generation}', [AiCopilotController::class, 'show'])->name('ai.generations.show');
+    Route::post('ai/generations/{generation}/discard', [AiCopilotController::class, 'discard'])->name('ai.generations.discard');
+    Route::post('ai/cases/{case}/remediation-pack', [AiCopilotController::class, 'generateRemediationPack'])->name('ai.cases.remediation');
+    Route::post('ai/generations/{generation}/accept-agenda', [AiCopilotController::class, 'acceptRemediationAgenda'])->name('ai.generations.accept-agenda');
+    Route::post('ai/generations/{generation}/accept-quiz', [AiCopilotController::class, 'acceptRemediationQuiz'])->name('ai.generations.accept-quiz');
+    Route::post('ai/assessments/{assessment}/quiz-from-materials', [AiCopilotController::class, 'generateQuizFromMaterials'])->name('ai.assessments.quiz');
+    Route::post('ai/generations/{generation}/accept-assessment-quiz', [AiCopilotController::class, 'acceptQuizFromMaterials'])->name('ai.generations.accept-assessment-quiz');
+    Route::post('ai/submissions/{submission}/feedback-draft', [AiCopilotController::class, 'generateFeedbackDraft'])->name('ai.submissions.feedback');
+    Route::post('ai/materials/{material}/summary', [AiCopilotController::class, 'generateMaterialSummary'])->name('ai.materials.summary');
+    Route::post('ai/courses/{course}/doubt-assist', [AiCopilotController::class, 'generateStudentDoubt'])->name('ai.courses.doubt');
 
     Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');

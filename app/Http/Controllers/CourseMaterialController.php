@@ -15,7 +15,7 @@ use Illuminate\View\View;
 
 class CourseMaterialController extends Controller
 {
-    public function index(Course $course): View
+    public function index(Request $request, Course $course): View
     {
         $this->authorize('view', $course);
 
@@ -24,10 +24,21 @@ class CourseMaterialController extends Controller
             ->get()
             ->groupBy(fn ($m) => $m->category->value);
 
+        $aiGeneration = null;
+        if ($request->integer('ai')) {
+            $aiGeneration = \App\Models\AiGeneration::query()
+                ->where('id', $request->integer('ai'))
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
+
         return view('courses.materials.index', [
             'course' => $course->load('lecturer')->loadCount(['students', 'assignments', 'classSessions', 'materials']),
             'materialsByCategory' => $materials,
             'categories' => MaterialCategory::cases(),
+            'aiGeneration' => $aiGeneration,
+            'aiMaterialId' => $request->integer('material') ?: null,
+            'aiEnabled' => (bool) config('ai.enabled') && (bool) config('ai.features.material_summary'),
         ]);
     }
 

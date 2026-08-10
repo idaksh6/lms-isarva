@@ -37,6 +37,96 @@
         />
     </div>
 
+    @if ($aiEnabled ?? false)
+        <section class="corp-panel lms-ai-panel">
+            <div class="corp-panel-head">
+                <div>
+                    <h2 class="corp-panel-title">AI Teaching Copilot</h2>
+                    <p class="corp-panel-desc">Generate a reviewable remediation pack from this student’s risk reasons, metrics, and course materials.</p>
+                </div>
+                <form method="POST" action="{{ route('ai.cases.remediation', $case) }}">
+                    @csrf
+                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Generate remediation pack</button>
+                </form>
+            </div>
+            <div class="corp-panel-body space-y-4">
+                <x-input-error :messages="$errors->get('ai')" class="mt-0" />
+                @if ($aiGeneration)
+                    @if ($aiGeneration->isPending())
+                        <p class="text-sm text-isarva-muted">Generating… refresh in a moment.</p>
+                    @elseif ($aiGeneration->status->value === 'failed')
+                        <p class="text-sm text-rose-700">{{ $aiGeneration->error_message ?: 'Generation failed.' }}</p>
+                    @elseif ($aiGeneration->isReady() || $aiGeneration->status->value === 'accepted')
+                        @php $out = $aiGeneration->output ?? []; @endphp
+                        <div class="lms-ai-block">
+                            <h3 class="lms-ai-block-title">Why this student</h3>
+                            <p class="text-sm text-slate-700">{{ $out['why'] ?? '—' }}</p>
+                        </div>
+                        <div class="lms-ai-block">
+                            <h3 class="lms-ai-block-title">Mentoring agenda</h3>
+                            <ul class="lms-ai-list">
+                                @foreach ($out['agenda'] ?? [] as $item)
+                                    <li>
+                                        <strong>{{ $item['title'] ?? 'Action' }}</strong>
+                                        <span class="lms-ai-chip">{{ $item['type'] ?? 'strategy' }}</span>
+                                        <p>{{ $item['notes'] ?? '' }}</p>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            @if ($aiGeneration->isReady())
+                                <form method="POST" action="{{ route('ai.generations.accept-agenda', $aiGeneration) }}" class="mt-3">
+                                    @csrf
+                                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Accept agenda into case log</button>
+                                </form>
+                            @endif
+                        </div>
+                        <div class="lms-ai-block">
+                            <h3 class="lms-ai-block-title">Study brief</h3>
+                            <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ $out['study_brief'] ?? '—' }}</p>
+                        </div>
+                        <div class="lms-ai-block">
+                            <h3 class="lms-ai-block-title">Remediation quiz draft ({{ count($out['quiz'] ?? []) }} questions)</h3>
+                            <ol class="lms-ai-list lms-ai-list--numbered">
+                                @foreach ($out['quiz'] ?? [] as $q)
+                                    <li>
+                                        <strong>{{ $q['prompt'] ?? '' }}</strong>
+                                        <ul>
+                                            @foreach ($q['options'] ?? [] as $idx => $opt)
+                                                <li @class(['font-semibold text-emerald-700' => ((int) ($q['correct'] ?? 0)) === $idx + 1])>
+                                                    {{ $opt['label'] ?? '' }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                @endforeach
+                            </ol>
+                            @if ($aiGeneration->isReady() && ! empty($out['quiz']))
+                                <form method="POST" action="{{ route('ai.generations.accept-quiz', $aiGeneration) }}" class="mt-3">
+                                    @csrf
+                                    <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Create draft assessment</button>
+                                </form>
+                            @endif
+                        </div>
+                        @if (! empty($out['feedback_starter']))
+                            <div class="lms-ai-block">
+                                <h3 class="lms-ai-block-title">Feedback starter</h3>
+                                <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ $out['feedback_starter'] }}</p>
+                            </div>
+                        @endif
+                        @if ($aiGeneration->isReady())
+                            <form method="POST" action="{{ route('ai.generations.discard', $aiGeneration) }}">
+                                @csrf
+                                <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Discard draft</button>
+                            </form>
+                        @endif
+                    @endif
+                @else
+                    <p class="text-sm text-isarva-muted">AI drafts stay private until you accept them into the case log or create a draft quiz.</p>
+                @endif
+            </div>
+        </section>
+    @endif
+
     <div class="grid gap-4 lg:grid-cols-2">
         <section class="corp-panel">
             <div class="corp-panel-head">

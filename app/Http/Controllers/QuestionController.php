@@ -80,7 +80,7 @@ class QuestionController extends Controller
         ));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $this->authorize('create', Question::class);
 
@@ -89,7 +89,27 @@ class QuestionController extends Controller
             ->orderBy('code')
             ->get(['id', 'code', 'title']);
 
-        return view('hubs.questions.create', compact('courses'));
+        if ($request->user()->isStudent()) {
+            $courses = $request->user()->enrolledCourses()
+                ->where('courses.is_active', true)
+                ->orderBy('code')
+                ->get(['courses.id', 'courses.code', 'courses.title']);
+        }
+
+        $aiGeneration = null;
+        if ($request->integer('ai')) {
+            $aiGeneration = \App\Models\AiGeneration::query()
+                ->where('id', $request->integer('ai'))
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
+
+        return view('hubs.questions.create', [
+            'courses' => $courses,
+            'aiGeneration' => $aiGeneration,
+            'aiEnabled' => (bool) config('ai.enabled') && (bool) config('ai.features.student_doubt'),
+            'selectedCourseId' => $request->integer('course') ?: old('course_id'),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

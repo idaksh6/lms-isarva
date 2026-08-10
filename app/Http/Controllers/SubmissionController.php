@@ -156,13 +156,25 @@ class SubmissionController extends Controller
             ->with('success', $existing ? 'Your revised work was submitted.' : 'Your work was submitted successfully.');
     }
 
-    public function show(Submission $submission): View
+    public function show(Request $request, Submission $submission): View
     {
         $this->authorize('view', $submission);
 
         $submission->load(['assignment.course', 'student', 'reviewer']);
 
-        return view('submissions.show', compact('submission'));
+        $aiGeneration = null;
+        if ($request->integer('ai')) {
+            $aiGeneration = \App\Models\AiGeneration::query()
+                ->where('id', $request->integer('ai'))
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
+
+        return view('submissions.show', [
+            'submission' => $submission,
+            'aiGeneration' => $aiGeneration,
+            'aiEnabled' => (bool) config('ai.enabled') && (bool) config('ai.features.feedback_draft'),
+        ]);
     }
 
     public function review(Request $request, Submission $submission): RedirectResponse

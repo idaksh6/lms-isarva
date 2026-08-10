@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\SupportActionType;
 use App\Enums\SupportCaseStatus;
+use App\Models\AiGeneration;
 use App\Models\Course;
 use App\Models\StudentSupportAction;
 use App\Models\StudentSupportCase;
@@ -118,7 +119,7 @@ class AtRiskController extends Controller
             ->with('success', 'Support case opened.');
     }
 
-    public function showCase(StudentSupportCase $case): View
+    public function showCase(Request $request, StudentSupportCase $case): View
     {
         $this->authorize('view', $case);
 
@@ -127,12 +128,22 @@ class AtRiskController extends Controller
         $baseline = $case->baseline_metrics ?? [];
         $delta = $this->metricDelta($baseline, $latest);
 
+        $aiGeneration = null;
+        if ($request->integer('ai')) {
+            $aiGeneration = AiGeneration::query()
+                ->where('id', $request->integer('ai'))
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
+
         return view('hubs.reports-at-risk-case', [
             'case' => $case,
             'latest' => $latest,
             'delta' => $delta,
             'actionTypes' => SupportActionType::cases(),
             'statuses' => SupportCaseStatus::cases(),
+            'aiGeneration' => $aiGeneration,
+            'aiEnabled' => (bool) config('ai.enabled') && (bool) config('ai.features.remediation_pack'),
         ]);
     }
 

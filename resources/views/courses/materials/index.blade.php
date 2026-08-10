@@ -97,8 +97,24 @@
                                                 @endif
                                                 @can('update', $material)
                                                     <a href="{{ route('course-materials.edit', $material) }}" class="lms-btn-secondary lms-btn-secondary--xs">Edit</a>
+                                                    @if ($aiEnabled ?? false)
+                                                        <form method="POST" action="{{ route('ai.materials.summary', $material) }}" class="inline">
+                                                            @csrf
+                                                            <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">AI summarise</button>
+                                                        </form>
+                                                    @endif
                                                 @endcan
                                             </div>
+                                            @if (($aiGeneration ?? null)?->isReady() && ($aiMaterialId ?? null) === $material->id)
+                                                <div class="lms-ai-block mt-3 w-full sm:col-span-2">
+                                                    <h3 class="lms-ai-block-title">AI summary</h3>
+                                                    <ul class="lms-ai-list">
+                                                        @foreach ($aiGeneration->output['summary'] ?? [] as $line)
+                                                            <li>{{ $line }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
                                         </li>
                                     @endforeach
                                 </ul>

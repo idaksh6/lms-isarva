@@ -288,13 +288,25 @@ class AssessmentController extends Controller
         return back()->with('success', 'Score cleared for '.$user->name.'.');
     }
 
-    public function edit(Assessment $assessment): View
+    public function edit(Request $request, Assessment $assessment): View
     {
         $this->authorize('update', $assessment);
 
-        $assessment->load(['course', 'questions.options']);
+        $assessment->load(['course.materials', 'questions.options']);
 
-        return view('assessments.edit', compact('assessment'));
+        $aiGeneration = null;
+        if ($request->integer('ai')) {
+            $aiGeneration = \App\Models\AiGeneration::query()
+                ->where('id', $request->integer('ai'))
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
+
+        return view('assessments.edit', [
+            'assessment' => $assessment,
+            'aiGeneration' => $aiGeneration,
+            'aiEnabled' => (bool) config('ai.enabled') && (bool) config('ai.features.quiz_from_materials'),
+        ]);
     }
 
     public function update(Request $request, Assessment $assessment): RedirectResponse

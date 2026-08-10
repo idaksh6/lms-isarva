@@ -71,6 +71,51 @@
                 <x-input-error :messages="$errors->get('max_score')" class="mt-1.5" />
             </div>
         @else
+            @if ($aiEnabled ?? false)
+                <div class="lms-ai-panel lms-ai-panel--inset mb-6 space-y-3 rounded-xl border border-isarva-border bg-slate-50 p-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-sm font-semibold text-isarva-heading">AI: generate questions from materials</h3>
+                            <p class="mt-1 text-xs text-isarva-muted">Creates {{ $assessment->question_count }} MCQs. Review before saving.</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('ai.assessments.quiz', $assessment) }}" class="space-y-3">
+                        @csrf
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            @forelse ($assessment->course->materials as $material)
+                                <label class="flex items-start gap-2 text-sm text-slate-700">
+                                    <input type="checkbox" name="material_ids[]" value="{{ $material->id }}" class="mt-1">
+                                    <span>{{ $material->title }}</span>
+                                </label>
+                            @empty
+                                <p class="text-sm text-isarva-muted sm:col-span-2">Add course materials first to generate quiz questions.</p>
+                            @endforelse
+                        </div>
+                        <x-input-error :messages="$errors->get('material_ids')" />
+                        <x-input-error :messages="$errors->get('ai')" />
+                        @if ($assessment->course->materials->isNotEmpty())
+                            <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Generate quiz draft</button>
+                        @endif
+                    </form>
+
+                    @if (($aiGeneration ?? null)?->isReady())
+                        <div class="rounded-lg border border-emerald-200 bg-white p-3 text-sm">
+                            <p class="font-semibold text-isarva-heading">Draft ready ({{ count($aiGeneration->output['questions'] ?? []) }} questions)</p>
+                            <ol class="mt-2 list-decimal space-y-1 pl-5 text-slate-700">
+                                @foreach ($aiGeneration->output['questions'] ?? [] as $q)
+                                    <li>{{ $q['prompt'] ?? '' }}</li>
+                                @endforeach
+                            </ol>
+                            <form method="POST" action="{{ route('ai.generations.accept-assessment-quiz', $aiGeneration) }}" class="mt-3">
+                                @csrf
+                                <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Apply to question form</button>
+                            </form>
+                        </div>
+                    @elseif (($aiGeneration ?? null)?->status?->value === 'failed')
+                        <p class="text-sm text-rose-700">{{ $aiGeneration->error_message }}</p>
+                    @endif
+                </div>
+            @endif
             <div class="space-y-6">
                 @for ($i = 1; $i <= $assessment->question_count; $i++)
                     @php
