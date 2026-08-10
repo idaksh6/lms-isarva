@@ -38,61 +38,99 @@
     </div>
 
     @if ($aiEnabled ?? false)
-        <section class="corp-panel lms-ai-panel">
-            <div class="corp-panel-head">
-                <div>
-                    <h2 class="corp-panel-title">AI Teaching Copilot</h2>
-                    <p class="corp-panel-desc">Generate a reviewable remediation pack from this student’s risk reasons, metrics, and course materials.</p>
+        @php
+            $aiFailed = ($aiGeneration ?? null) && $aiGeneration->status->value === 'failed';
+            $aiPending = ($aiGeneration ?? null)?->isPending();
+            $aiReady = ($aiGeneration ?? null) && ($aiGeneration->isReady() || $aiGeneration->status->value === 'accepted');
+            $aiError = $aiFailed ? \App\Support\AiErrorPresenter::present($aiGeneration->error_message) : null;
+            $out = $aiReady ? ($aiGeneration->output ?? []) : [];
+        @endphp
+        <section class="lms-ai-shell" x-data="{ tab: 'why' }">
+            <div class="lms-ai-shell-head">
+                <div class="lms-ai-shell-brand">
+                    <span class="lms-ai-shell-badge">AI</span>
+                    <div>
+                        <h2 class="lms-ai-shell-title">Teaching Copilot</h2>
+                        <p class="lms-ai-shell-desc">Draft a remediation pack from risk reasons, metrics, and course materials. Nothing is saved until you accept it.</p>
+                    </div>
                 </div>
                 <form method="POST" action="{{ route('ai.cases.remediation', $case) }}">
                     @csrf
-                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Generate remediation pack</button>
+                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs" @disabled($aiPending)>
+                        {{ $aiPending ? 'Generating…' : (($aiReady || $aiFailed) ? 'Regenerate pack' : 'Generate remediation pack') }}
+                    </button>
                 </form>
             </div>
-            <div class="corp-panel-body space-y-4">
+
+            <div class="lms-ai-shell-body">
                 <x-input-error :messages="$errors->get('ai')" class="mt-0" />
-                @if ($aiGeneration)
-                    @if ($aiGeneration->isPending())
-                        <p class="text-sm text-isarva-muted">Generating… refresh in a moment.</p>
-                    @elseif ($aiGeneration->status->value === 'failed')
-                        <p class="text-sm text-rose-700">{{ $aiGeneration->error_message ?: 'Generation failed.' }}</p>
-                    @elseif ($aiGeneration->isReady() || $aiGeneration->status->value === 'accepted')
-                        @php $out = $aiGeneration->output ?? []; @endphp
-                        <div class="lms-ai-block">
-                            <h3 class="lms-ai-block-title">Why this student</h3>
-                            <p class="text-sm text-slate-700">{{ $out['why'] ?? '—' }}</p>
+
+                @if ($aiPending)
+                    <x-lms.ai-alert
+                        title="Generating remediation pack"
+                        message="This usually takes a few seconds. Refresh if the page still shows pending."
+                        tone="info"
+                    />
+                @elseif ($aiFailed && $aiError)
+                    <x-lms.ai-alert
+                        :title="$aiError['title']"
+                        :message="$aiError['message']"
+                        :tone="$aiError['tone']"
+                        :action-label="$aiError['action_label']"
+                        :action-url="$aiError['action_url']"
+                    />
+                @elseif ($aiReady)
+                    <div class="lms-ai-tabs" role="tablist" aria-label="Remediation pack sections">
+                        <button type="button" class="lms-ai-tab" role="tab" :class="tab === 'why' && 'is-active'" @click="tab = 'why'">Why</button>
+                        <button type="button" class="lms-ai-tab" role="tab" :class="tab === 'agenda' && 'is-active'" @click="tab = 'agenda'">Agenda</button>
+                        <button type="button" class="lms-ai-tab" role="tab" :class="tab === 'study' && 'is-active'" @click="tab = 'study'">Study brief</button>
+                        <button type="button" class="lms-ai-tab" role="tab" :class="tab === 'quiz' && 'is-active'" @click="tab = 'quiz'">Quiz ({{ count($out['quiz'] ?? []) }})</button>
+                        @if (! empty($out['feedback_starter']))
+                            <button type="button" class="lms-ai-tab" role="tab" :class="tab === 'feedback' && 'is-active'" @click="tab = 'feedback'">Feedback</button>
+                        @endif
+                    </div>
+
+                    <div class="lms-ai-tab-panels">
+                        <div class="lms-ai-tab-panel" x-show="tab === 'why'" x-cloak>
+                            <h3 class="lms-ai-panel-heading">Why this student</h3>
+                            <p class="lms-ai-panel-copy">{{ $out['why'] ?? '—' }}</p>
                         </div>
-                        <div class="lms-ai-block">
-                            <h3 class="lms-ai-block-title">Mentoring agenda</h3>
-                            <ul class="lms-ai-list">
+
+                        <div class="lms-ai-tab-panel" x-show="tab === 'agenda'" x-cloak>
+                            <h3 class="lms-ai-panel-heading">Mentoring agenda</h3>
+                            <ul class="lms-ai-agenda">
                                 @foreach ($out['agenda'] ?? [] as $item)
-                                    <li>
-                                        <strong>{{ $item['title'] ?? 'Action' }}</strong>
-                                        <span class="lms-ai-chip">{{ $item['type'] ?? 'strategy' }}</span>
+                                    <li class="lms-ai-agenda-item">
+                                        <div class="lms-ai-agenda-top">
+                                            <strong>{{ $item['title'] ?? 'Action' }}</strong>
+                                            <span class="lms-ai-chip">{{ str_replace('_', ' ', $item['type'] ?? 'strategy') }}</span>
+                                        </div>
                                         <p>{{ $item['notes'] ?? '' }}</p>
                                     </li>
                                 @endforeach
                             </ul>
                             @if ($aiGeneration->isReady())
-                                <form method="POST" action="{{ route('ai.generations.accept-agenda', $aiGeneration) }}" class="mt-3">
+                                <form method="POST" action="{{ route('ai.generations.accept-agenda', $aiGeneration) }}" class="lms-ai-actions">
                                     @csrf
                                     <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Accept agenda into case log</button>
                                 </form>
                             @endif
                         </div>
-                        <div class="lms-ai-block">
-                            <h3 class="lms-ai-block-title">Study brief</h3>
-                            <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ $out['study_brief'] ?? '—' }}</p>
+
+                        <div class="lms-ai-tab-panel" x-show="tab === 'study'" x-cloak>
+                            <h3 class="lms-ai-panel-heading">Study brief</h3>
+                            <p class="lms-ai-panel-copy whitespace-pre-wrap">{{ $out['study_brief'] ?? '—' }}</p>
                         </div>
-                        <div class="lms-ai-block">
-                            <h3 class="lms-ai-block-title">Remediation quiz draft ({{ count($out['quiz'] ?? []) }} questions)</h3>
-                            <ol class="lms-ai-list lms-ai-list--numbered">
+
+                        <div class="lms-ai-tab-panel" x-show="tab === 'quiz'" x-cloak>
+                            <h3 class="lms-ai-panel-heading">Remediation quiz draft</h3>
+                            <ol class="lms-ai-quiz">
                                 @foreach ($out['quiz'] ?? [] as $q)
                                     <li>
-                                        <strong>{{ $q['prompt'] ?? '' }}</strong>
-                                        <ul>
+                                        <p class="lms-ai-quiz-prompt">{{ $q['prompt'] ?? '' }}</p>
+                                        <ul class="lms-ai-quiz-options">
                                             @foreach ($q['options'] ?? [] as $idx => $opt)
-                                                <li @class(['font-semibold text-emerald-700' => ((int) ($q['correct'] ?? 0)) === $idx + 1])>
+                                                <li @class(['is-correct' => ((int) ($q['correct'] ?? 0)) === $idx + 1])>
                                                     {{ $opt['label'] ?? '' }}
                                                 </li>
                                             @endforeach
@@ -101,27 +139,36 @@
                                 @endforeach
                             </ol>
                             @if ($aiGeneration->isReady() && ! empty($out['quiz']))
-                                <form method="POST" action="{{ route('ai.generations.accept-quiz', $aiGeneration) }}" class="mt-3">
+                                <form method="POST" action="{{ route('ai.generations.accept-quiz', $aiGeneration) }}" class="lms-ai-actions">
                                     @csrf
                                     <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Create draft assessment</button>
                                 </form>
                             @endif
                         </div>
+
                         @if (! empty($out['feedback_starter']))
-                            <div class="lms-ai-block">
-                                <h3 class="lms-ai-block-title">Feedback starter</h3>
-                                <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ $out['feedback_starter'] }}</p>
+                            <div class="lms-ai-tab-panel" x-show="tab === 'feedback'" x-cloak>
+                                <h3 class="lms-ai-panel-heading">Feedback starter</h3>
+                                <p class="lms-ai-panel-copy whitespace-pre-wrap">{{ $out['feedback_starter'] }}</p>
                             </div>
                         @endif
-                        @if ($aiGeneration->isReady())
+                    </div>
+
+                    @if ($aiGeneration->isReady())
+                        <div class="lms-ai-shell-footer">
                             <form method="POST" action="{{ route('ai.generations.discard', $aiGeneration) }}">
                                 @csrf
                                 <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Discard draft</button>
                             </form>
-                        @endif
+                            <p class="lms-ai-footnote">Review before accepting. Drafts stay private to staff.</p>
+                        </div>
                     @endif
                 @else
-                    <p class="text-sm text-isarva-muted">AI drafts stay private until you accept them into the case log or create a draft quiz.</p>
+                    <x-lms.ai-alert
+                        title="No pack generated yet"
+                        message="Click Generate remediation pack to draft mentoring actions, a study brief, and a practice quiz for this student."
+                        tone="info"
+                    />
                 @endif
             </div>
         </section>

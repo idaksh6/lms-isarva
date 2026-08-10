@@ -2977,6 +2977,158 @@
         @apply space-y-4;
     }
 
+    .lms-ai-shell {
+        @apply mb-5 overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
+    }
+
+    .lms-ai-shell-head {
+        @apply flex flex-col gap-3 border-b border-isarva-border bg-slate-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5;
+    }
+
+    .lms-ai-shell-brand {
+        @apply flex min-w-0 items-start gap-3;
+    }
+
+    .lms-ai-shell-badge {
+        @apply mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-[0.65rem] font-bold tracking-wide text-white;
+    }
+
+    .lms-ai-shell-title {
+        @apply text-base font-semibold text-isarva-heading;
+    }
+
+    .lms-ai-shell-desc {
+        @apply mt-0.5 max-w-2xl text-sm text-isarva-muted;
+    }
+
+    .lms-ai-shell-body {
+        @apply space-y-4 px-4 py-4 sm:px-5;
+    }
+
+    .lms-ai-shell-footer {
+        @apply flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3;
+    }
+
+    .lms-ai-footnote {
+        @apply text-xs text-isarva-muted;
+    }
+
+    .lms-ai-alert {
+        @apply flex gap-3 rounded-xl border px-4 py-3;
+    }
+
+    .lms-ai-alert-icon {
+        @apply mt-0.5 flex h-5 w-5 shrink-0;
+    }
+
+    .lms-ai-alert-icon svg {
+        @apply h-5 w-5;
+    }
+
+    .lms-ai-alert-title {
+        @apply text-sm font-semibold;
+    }
+
+    .lms-ai-alert-message {
+        @apply mt-0.5 text-sm leading-relaxed;
+    }
+
+    .lms-ai-alert-action {
+        @apply mt-2 inline-flex text-sm font-semibold underline underline-offset-2;
+    }
+
+    .lms-ai-alert--error {
+        @apply border-rose-200 bg-rose-50 text-rose-950;
+    }
+
+    .lms-ai-alert--error .lms-ai-alert-icon,
+    .lms-ai-alert--error .lms-ai-alert-action {
+        @apply text-rose-700;
+    }
+
+    .lms-ai-alert--warning {
+        @apply border-amber-200 bg-amber-50 text-amber-950;
+    }
+
+    .lms-ai-alert--warning .lms-ai-alert-icon,
+    .lms-ai-alert--warning .lms-ai-alert-action {
+        @apply text-amber-800;
+    }
+
+    .lms-ai-alert--info {
+        @apply border-sky-200 bg-sky-50 text-sky-950;
+    }
+
+    .lms-ai-alert--info .lms-ai-alert-icon,
+    .lms-ai-alert--info .lms-ai-alert-action {
+        @apply text-sky-800;
+    }
+
+    .lms-ai-alert--success {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-950;
+    }
+
+    .lms-ai-alert--success .lms-ai-alert-icon,
+    .lms-ai-alert--success .lms-ai-alert-action {
+        @apply text-emerald-800;
+    }
+
+    .lms-ai-tabs {
+        @apply flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1;
+    }
+
+    .lms-ai-tab {
+        @apply rounded-md px-3 py-1.5 text-sm font-semibold text-isarva-muted transition hover:text-isarva-heading;
+    }
+
+    .lms-ai-tab.is-active {
+        @apply bg-white text-isarva-heading shadow-sm;
+    }
+
+    .lms-ai-panel-heading {
+        @apply mb-2 text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-ai-panel-copy {
+        @apply text-sm leading-relaxed text-slate-700;
+    }
+
+    .lms-ai-agenda {
+        @apply space-y-2;
+    }
+
+    .lms-ai-agenda-item {
+        @apply rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700;
+    }
+
+    .lms-ai-agenda-top {
+        @apply mb-1 flex flex-wrap items-center gap-2;
+    }
+
+    .lms-ai-actions {
+        @apply mt-4;
+    }
+
+    .lms-ai-quiz {
+        @apply list-decimal space-y-3 pl-5 text-sm text-slate-700;
+    }
+
+    .lms-ai-quiz-prompt {
+        @apply font-semibold text-isarva-heading;
+    }
+
+    .lms-ai-quiz-options {
+        @apply mt-1.5 list-none space-y-1 pl-0;
+    }
+
+    .lms-ai-quiz-options li {
+        @apply rounded-md border border-slate-200 bg-white px-2.5 py-1.5;
+    }
+
+    .lms-ai-quiz-options li.is-correct {
+        @apply border-emerald-300 bg-emerald-50 font-semibold text-emerald-900;
+    }
+
     .lms-ai-block {
         @apply rounded-lg border border-slate-200 bg-slate-50 p-3;
     }
@@ -2998,7 +3150,7 @@
     }
 
     .lms-ai-chip {
-        @apply ml-2 inline-flex rounded bg-slate-200 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700;
+        @apply inline-flex rounded bg-slate-200 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700;
     }
 
     .lms-report-status-missing {

@@ -100,7 +100,7 @@ class TeachingCopilotTest extends TestCase
         $this->actingAs($lecturer)
             ->get(route('reports.at-risk.cases.show', ['case' => $case, 'ai' => $generation->id]))
             ->assertOk()
-            ->assertSee('AI Teaching Copilot')
+            ->assertSee('Teaching Copilot')
             ->assertSee('Mentoring agenda');
 
         $this->actingAs($lecturer)
