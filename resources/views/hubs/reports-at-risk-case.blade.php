@@ -174,16 +174,28 @@
         </section>
     @endif
 
-    <div class="grid gap-4 lg:grid-cols-2">
-        <section class="corp-panel">
-            <div class="corp-panel-head">
+    @php
+        $baseline = $case->baseline_metrics ?? [];
+        $metricRows = [
+            ['Assignment avg', 'assignment_avg', '%', true],
+            ['Missing overdue', 'missing_overdue', '', false],
+            ['Late submissions', 'late_count', '', false],
+            ['Quiz avg', 'quiz_avg', '%', true],
+            ['Participation', 'participation_rate', '%', true],
+        ];
+        $higherIsBetter = fn (string $key) => in_array($key, ['assignment_avg', 'quiz_avg', 'participation_rate'], true);
+    @endphp
+
+    <div class="lms-case-workspace">
+        <section class="lms-case-card">
+            <header class="lms-case-card-head">
                 <div>
-                    <h2 class="corp-panel-title">Case status</h2>
-                    <p class="corp-panel-desc">Update progress and refresh the latest performance snapshot.</p>
+                    <h2 class="lms-case-card-title">Case status</h2>
+                    <p class="lms-case-card-desc">Update progress and refresh the performance snapshot.</p>
                 </div>
-            </div>
-            <div class="corp-panel-body space-y-4">
-                <form method="POST" action="{{ route('reports.at-risk.cases.update', $case) }}" class="space-y-3" x-data>
+            </header>
+            <div class="lms-case-card-body">
+                <form method="POST" action="{{ route('reports.at-risk.cases.update', $case) }}" class="lms-case-status-form" x-data>
                     @csrf
                     @method('PATCH')
                     <div class="lms-form-field">
@@ -194,201 +206,199 @@
                             @endforeach
                         </select>
                     </div>
-                    <button
-                        type="submit"
-                        class="lms-btn-primary"
-                        x-on:click.prevent="
-                            const status = document.getElementById('case-status').value;
-                            if (status === 'resolved' || status === 'dismissed') {
-                                Swal.fire({
-                                    title: status === 'resolved' ? 'Resolve this case?' : 'Dismiss this case?',
-                                    text: 'Latest metrics will be saved as the closing snapshot.',
-                                    icon: 'question',
-                                    showCancelButton: true,
-                                    focusCancel: true,
-                                    confirmButtonText: status === 'resolved' ? 'Yes, resolve' : 'Yes, dismiss',
-                                    cancelButtonText: 'Cancel',
-                                    confirmButtonColor: '#0f766e',
-                                    cancelButtonColor: '#64748b',
-                                }).then((result) => { if (result.isConfirmed) $el.closest('form').submit(); });
-                            } else {
-                                $el.closest('form').submit();
-                            }
-                        "
-                    >Save status</button>
+                    <div class="lms-case-status-actions">
+                        <button
+                            type="submit"
+                            class="lms-btn-primary lms-btn-primary--xs"
+                            x-on:click.prevent="
+                                const status = document.getElementById('case-status').value;
+                                if (status === 'resolved' || status === 'dismissed') {
+                                    Swal.fire({
+                                        title: status === 'resolved' ? 'Resolve this case?' : 'Dismiss this case?',
+                                        text: 'Latest metrics will be saved as the closing snapshot.',
+                                        icon: 'question',
+                                        showCancelButton: true,
+                                        focusCancel: true,
+                                        confirmButtonText: status === 'resolved' ? 'Yes, resolve' : 'Yes, dismiss',
+                                        cancelButtonText: 'Cancel',
+                                        confirmButtonColor: '#0f766e',
+                                        cancelButtonColor: '#64748b',
+                                    }).then((result) => { if (result.isConfirmed) $el.closest('form').submit(); });
+                                } else {
+                                    $el.closest('form').submit();
+                                }
+                            "
+                        >Save status</button>
+                        <button
+                            type="submit"
+                            form="refresh-metrics-form"
+                            class="lms-btn-secondary lms-btn-secondary--xs"
+                        >Refresh metrics</button>
+                    </div>
                 </form>
-
-                <form method="POST" action="{{ route('reports.at-risk.cases.refresh', $case) }}">
+                <form id="refresh-metrics-form" method="POST" action="{{ route('reports.at-risk.cases.refresh', $case) }}" class="hidden">
                     @csrf
-                    <button type="submit" class="lms-btn-secondary">Refresh latest metrics</button>
                 </form>
 
                 @if ($case->reasons)
-                    <div>
-                        <h3 class="text-sm font-semibold text-isarva-ink mb-1">Reasons at open</h3>
-                        <ul class="list-disc pl-5 text-sm text-isarva-muted space-y-0.5">
+                    <div class="lms-case-reasons">
+                        <h3 class="lms-case-reasons-label">Reasons at open</h3>
+                        <div class="lms-case-reason-chips">
                             @foreach ($case->reasons as $reason)
-                                <li>{{ is_array($reason) ? ($reason['label'] ?? '') : $reason }}</li>
+                                <span class="lms-case-reason-chip">{{ is_array($reason) ? ($reason['label'] ?? '') : $reason }}</span>
                             @endforeach
-                        </ul>
+                        </div>
                     </div>
                 @endif
             </div>
         </section>
 
-        <section class="corp-panel">
-            <div class="corp-panel-head">
+        <section class="lms-case-card">
+            <header class="lms-case-card-head">
                 <div>
-                    <h2 class="corp-panel-title">Baseline vs latest</h2>
-                    <p class="corp-panel-desc">Improvement delta since the case was opened.</p>
+                    <h2 class="lms-case-card-title">Baseline vs latest</h2>
+                    <p class="lms-case-card-desc">Improvement since the case opened.</p>
                 </div>
-            </div>
-            <div class="corp-panel-body">
-                @php
-                    $baseline = $case->baseline_metrics ?? [];
-                    $rows = [
-                        ['Assignment avg %', 'assignment_avg', '%'],
-                        ['Missing overdue', 'missing_overdue', ''],
-                        ['Late submissions', 'late_count', ''],
-                        ['Quiz avg %', 'quiz_avg', '%'],
-                        ['Participation %', 'participation_rate', '%'],
-                    ];
-                @endphp
-                <div class="corp-table-wrap">
-                    <table class="corp-table corp-table--compact">
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Baseline</th>
-                                <th>Latest</th>
-                                <th>Δ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($rows as [$label, $key, $suffix])
-                                <tr class="corp-table-row">
-                                    <td class="corp-table-cell">{{ $label }}</td>
-                                    <td class="corp-table-cell">{{ ($baseline[$key] ?? null) !== null ? $baseline[$key].$suffix : '—' }}</td>
-                                    <td class="corp-table-cell">{{ ($latest[$key] ?? null) !== null ? $latest[$key].$suffix : '—' }}</td>
-                                    <td class="corp-table-cell">
-                                        @if (($delta[$key] ?? null) !== null)
-                                            {{ $delta[$key] > 0 ? '+' : '' }}{{ $delta[$key] }}{{ $suffix }}
-                                        @else
-                                            —
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            </header>
+            <div class="lms-case-card-body lms-case-card-body--flush">
+                <div class="lms-case-metrics">
+                    @foreach ($metricRows as [$label, $key, $suffix, $isPct])
+                        @php
+                            $before = $baseline[$key] ?? null;
+                            $after = $latest[$key] ?? null;
+                            $change = $delta[$key] ?? null;
+                            $better = $higherIsBetter($key);
+                            $deltaClass = 'is-neutral';
+                            if ($change !== null && $change != 0) {
+                                $improved = $better ? $change > 0 : $change < 0;
+                                $deltaClass = $improved ? 'is-up' : 'is-down';
+                            }
+                        @endphp
+                        <div class="lms-case-metric">
+                            <span class="lms-case-metric-label">{{ $label }}</span>
+                            <div class="lms-case-metric-values">
+                                <span class="lms-case-metric-base">{{ $before !== null ? $before.$suffix : '—' }}</span>
+                                <span class="lms-case-metric-arrow" aria-hidden="true">→</span>
+                                <span class="lms-case-metric-latest">{{ $after !== null ? $after.$suffix : '—' }}</span>
+                            </div>
+                            <span class="lms-case-metric-delta {{ $deltaClass }}">
+                                @if ($change !== null)
+                                    {{ $change > 0 ? '+' : '' }}{{ $change }}{{ $suffix }}
+                                @else
+                                    —
+                                @endif
+                            </span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </section>
     </div>
 
-    <section class="corp-panel">
-        <div class="corp-panel-head">
+    <section class="lms-case-card lms-case-card--wide">
+        <header class="lms-case-card-head">
             <div>
-                <h2 class="corp-panel-title">Log intervention</h2>
-                <p class="corp-panel-desc">Record mentoring, extra classes, strategies, support, or improvement notes.</p>
+                <h2 class="lms-case-card-title">Log intervention</h2>
+                <p class="lms-case-card-desc">Record mentoring, extra classes, strategies, support, or improvement notes.</p>
             </div>
-        </div>
-        <div class="corp-panel-body">
-            <form method="POST" action="{{ route('reports.at-risk.cases.actions.store', $case) }}" class="grid gap-3 md:grid-cols-2">
+        </header>
+        <div class="lms-case-card-body">
+            <form method="POST" action="{{ route('reports.at-risk.cases.actions.store', $case) }}" class="lms-case-log-form">
                 @csrf
-                <div class="lms-form-field">
-                    <label for="action-type" class="lms-field-label">Type</label>
-                    <select id="action-type" name="type" class="lms-field-input mt-1.5" required>
-                        @foreach ($actionTypes as $type)
-                            <option value="{{ $type->value }}">{{ $type->label() }}</option>
-                        @endforeach
-                    </select>
+                <div class="lms-case-log-grid">
+                    <div class="lms-form-field">
+                        <label for="action-type" class="lms-field-label">Type</label>
+                        <select id="action-type" name="type" class="lms-field-input mt-1.5" required>
+                            @foreach ($actionTypes as $type)
+                                <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="lms-form-field">
+                        <label for="action-conducted" class="lms-field-label">Conducted at</label>
+                        <input id="action-conducted" type="datetime-local" name="conducted_at" class="lms-field-input mt-1.5" value="{{ now()->format('Y-m-d\TH:i') }}">
+                    </div>
+                    <div class="lms-form-field lms-case-log-span">
+                        <label for="action-title" class="lms-field-label">Title</label>
+                        <input id="action-title" type="text" name="title" class="lms-field-input mt-1.5" required maxlength="255" placeholder="e.g. Mentoring on assignment workflow">
+                    </div>
+                    <div class="lms-form-field lms-case-log-span">
+                        <label for="action-notes" class="lms-field-label">Notes</label>
+                        <textarea id="action-notes" name="notes" rows="3" class="lms-field-input mt-1.5" placeholder="What was done, agreed next steps, observed improvement…"></textarea>
+                    </div>
                 </div>
-                <div class="lms-form-field">
-                    <label for="action-conducted" class="lms-field-label">Conducted at</label>
-                    <input id="action-conducted" type="datetime-local" name="conducted_at" class="lms-field-input mt-1.5" value="{{ now()->format('Y-m-d\TH:i') }}">
-                </div>
-                <div class="lms-form-field md:col-span-2">
-                    <label for="action-title" class="lms-field-label">Title</label>
-                    <input id="action-title" type="text" name="title" class="lms-field-input mt-1.5" required maxlength="255" placeholder="e.g. Mentoring on assignment workflow">
-                </div>
-                <div class="lms-form-field md:col-span-2">
-                    <label for="action-notes" class="lms-field-label">Notes</label>
-                    <textarea id="action-notes" name="notes" rows="3" class="lms-field-input mt-1.5" placeholder="What was done, agreed next steps, observed improvement…"></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <button type="submit" class="lms-btn-primary">Add entry</button>
+                <div class="lms-case-log-footer">
+                    <button type="submit" class="lms-btn-primary lms-btn-primary--xs">Add entry</button>
                 </div>
             </form>
         </div>
     </section>
 
-    <section class="corp-panel">
-        <div class="corp-panel-head">
+    <section class="lms-case-card lms-case-card--wide">
+        <header class="lms-case-card-head">
             <div>
-                <h2 class="corp-panel-title">Intervention timeline</h2>
-                <p class="corp-panel-desc">Chronological log of support actions for this student.</p>
+                <h2 class="lms-case-card-title">Intervention timeline</h2>
+                <p class="lms-case-card-desc">Chronological log of support actions for this student.</p>
             </div>
-            <span class="corp-sidebar-badge">{{ $case->actions->count() }}</span>
-        </div>
+            <span class="lms-at-risk-list-count">{{ $case->actions->count() }}</span>
+        </header>
+
         @if ($case->actions->isNotEmpty())
-            <div class="corp-table-wrap">
-                <table class="corp-table corp-table--compact">
-                    <thead>
-                        <tr>
-                            <th>When</th>
-                            <th>Type</th>
-                            <th>Title / notes</th>
-                            <th>By</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($case->actions as $action)
-                            <tr class="corp-table-row">
-                                <td class="corp-table-cell corp-table-cell--muted">
-                                    {{ $action->conducted_at?->format('Y-m-d H:i') ?? $action->created_at->format('Y-m-d H:i') }}
-                                </td>
-                                <td class="corp-table-cell">{{ $action->type->label() }}</td>
-                                <td class="corp-table-cell">
-                                    <span class="corp-table-title">{{ $action->title }}</span>
-                                    @if ($action->notes)
-                                        <div class="text-sm text-isarva-muted mt-0.5">{{ $action->notes }}</div>
-                                    @endif
-                                </td>
-                                <td class="corp-table-cell corp-table-cell--muted">{{ $action->creator?->name ?? '—' }}</td>
-                                <td class="corp-table-cell">
-                                    <form
-                                        method="POST"
-                                        action="{{ route('reports.at-risk.actions.destroy', $action) }}"
-                                        x-data
-                                        x-on:submit.prevent="
-                                            Swal.fire({
-                                                title: 'Remove this entry?',
-                                                text: 'This cannot be undone.',
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                focusCancel: true,
-                                                confirmButtonText: 'Yes, remove',
-                                                cancelButtonText: 'Cancel',
-                                                confirmButtonColor: '#b91c1c',
-                                                cancelButtonColor: '#64748b',
-                                            }).then((result) => { if (result.isConfirmed) $el.submit(); })
-                                        "
-                                    >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="lms-btn-secondary lms-btn-secondary--xs">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="lms-case-timeline">
+                @foreach ($case->actions as $action)
+                    <article class="lms-case-timeline-item">
+                        <div class="lms-case-timeline-rail" aria-hidden="true">
+                            <span class="lms-case-timeline-dot"></span>
+                        </div>
+                        <div class="lms-case-timeline-content">
+                            <div class="lms-case-timeline-top">
+                                <span class="lms-case-timeline-type">{{ $action->type->label() }}</span>
+                                <time class="lms-case-timeline-when">
+                                    {{ $action->conducted_at?->format('M j, Y · g:i A') ?? $action->created_at->format('M j, Y · g:i A') }}
+                                </time>
+                            </div>
+                            <h3 class="lms-case-timeline-title">{{ $action->title }}</h3>
+                            @if ($action->notes)
+                                <p class="lms-case-timeline-notes">{{ $action->notes }}</p>
+                            @endif
+                            <div class="lms-case-timeline-meta">
+                                <span>By {{ $action->creator?->name ?? '—' }}</span>
+                                <form
+                                    method="POST"
+                                    action="{{ route('reports.at-risk.actions.destroy', $action) }}"
+                                    x-data
+                                    x-on:submit.prevent="
+                                        Swal.fire({
+                                            title: 'Remove this entry?',
+                                            text: 'This cannot be undone.',
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            focusCancel: true,
+                                            confirmButtonText: 'Yes, remove',
+                                            cancelButtonText: 'Cancel',
+                                            confirmButtonColor: '#b91c1c',
+                                            cancelButtonColor: '#64748b',
+                                        }).then((result) => { if (result.isConfirmed) $el.submit(); })
+                                    "
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="lms-case-timeline-delete">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
             </div>
         @else
-            <div class="corp-panel-body">
-                <p class="text-sm text-isarva-muted">No interventions logged yet.</p>
+            <div class="lms-case-empty">
+                <div class="lms-case-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <h3 class="lms-case-empty-title">No interventions yet</h3>
+                <p class="lms-case-empty-text">Log mentoring, extra classes, or strategies above. Accepted AI agenda items also appear here.</p>
             </div>
         @endif
     </section>
