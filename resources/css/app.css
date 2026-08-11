@@ -5589,7 +5589,7 @@
         @apply mt-3 text-sm leading-relaxed text-slate-700 sm:pl-12;
     }
 
-    /* Google Chat–style Q&A thread */
+    /* Q&A discussion thread */
     .gchat-panel {
         @apply flex flex-col overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
     }

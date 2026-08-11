@@ -33,7 +33,7 @@ class Answer extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** Quoted message this reply references (Google Chat–style quote, not nesting). */
+    /** Quoted message this reply references (inline quote, not deep nesting). */
     public function quoted(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');

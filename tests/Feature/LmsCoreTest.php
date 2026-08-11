@@ -598,7 +598,7 @@ class LmsCoreTest extends TestCase
         $question = Question::query()->create([
             'user_id' => $student->id,
             'course_id' => $course->id,
-            'title' => 'Chat-style thread',
+            'title' => 'Threaded discussion',
             'body' => 'Parent question body',
         ]);
 

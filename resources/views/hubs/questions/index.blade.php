@@ -68,7 +68,7 @@
                         @if ($search !== '')
                             Showing matches for “{{ $search }}”.
                         @else
-                            Open a question to view the thread on the right — like Google Chat.
+                            Open a question to view the full thread on the right.
                         @endif
                     </p>
                 </div>
