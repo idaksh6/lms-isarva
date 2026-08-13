@@ -34,6 +34,7 @@
                                     @case('submission_received') New submission @break
                                     @case('grade_posted') Grade posted @break
                                     @case('assignment_due') Due soon @break
+                                    @case('mentoring_assigned') Mentor assigned @break
                                     @default Update
                                 @endswitch
                             </span>

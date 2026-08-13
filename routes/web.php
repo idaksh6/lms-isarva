@@ -19,6 +19,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\GradebookController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MentoringController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
@@ -161,6 +162,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('reports/at-risk/cases/{case}/refresh', [AtRiskController::class, 'refreshMetrics'])->name('reports.at-risk.cases.refresh');
     Route::post('reports/at-risk/cases/{case}/actions', [AtRiskController::class, 'storeAction'])->name('reports.at-risk.cases.actions.store');
     Route::delete('reports/at-risk/actions/{action}', [AtRiskController::class, 'destroyAction'])->name('reports.at-risk.actions.destroy');
+
+    Route::get('mentoring', [MentoringController::class, 'index'])->name('mentoring.index');
+    Route::get('mentoring/create', [MentoringController::class, 'create'])->name('mentoring.create');
+    Route::post('mentoring', [MentoringController::class, 'store'])->name('mentoring.store');
+    Route::get('mentoring/report', [MentoringController::class, 'report'])->name('mentoring.report');
+    Route::get('mentoring/report/export', [MentoringController::class, 'export'])->name('mentoring.report.export');
+    Route::get('mentoring/{mentoring}', [MentoringController::class, 'show'])->name('mentoring.show');
+    Route::patch('mentoring/{mentoring}', [MentoringController::class, 'update'])->name('mentoring.update');
+    Route::post('mentoring/{mentoring}/areas', [MentoringController::class, 'storeArea'])->name('mentoring.areas.store');
+    Route::patch('mentoring/areas/{area}', [MentoringController::class, 'updateArea'])->name('mentoring.areas.update');
+    Route::delete('mentoring/areas/{area}', [MentoringController::class, 'destroyArea'])->name('mentoring.areas.destroy');
+    Route::post('mentoring/{mentoring}/sessions', [MentoringController::class, 'storeSession'])->name('mentoring.sessions.store');
+    Route::delete('mentoring/sessions/{session}', [MentoringController::class, 'destroySession'])->name('mentoring.sessions.destroy');
+    Route::post('mentoring/{mentoring}/plans', [MentoringController::class, 'storePlan'])->name('mentoring.plans.store');
+    Route::patch('mentoring/plans/{plan}', [MentoringController::class, 'updatePlan'])->name('mentoring.plans.update');
+    Route::delete('mentoring/plans/{plan}', [MentoringController::class, 'destroyPlan'])->name('mentoring.plans.destroy');
 
     Route::get('ai/generations/{generation}', [AiCopilotController::class, 'show'])->name('ai.generations.show');
     Route::post('ai/generations/{generation}/discard', [AiCopilotController::class, 'discard'])->name('ai.generations.discard');

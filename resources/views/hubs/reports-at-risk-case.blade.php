@@ -13,12 +13,7 @@
         <a href="{{ route('reports.at-risk', ['course' => $case->course_id]) }}" class="lms-btn-secondary lms-btn-secondary--xs">← Back to at-risk</a>
     </x-lms.module-hero>
 
-    <nav class="lms-report-tabs" aria-label="Report type">
-        <a href="{{ route('reports.index') }}" class="lms-report-tab">Overview</a>
-        <a href="{{ route('reports.assignments') }}" class="lms-report-tab">Individual assignment</a>
-        <a href="{{ route('reports.activity') }}" class="lms-report-tab">Course activity</a>
-        <a href="{{ route('reports.at-risk', ['course' => $case->course_id]) }}" class="lms-report-tab is-active">Course at-risk</a>
-    </nav>
+    <x-lms.report-tabs active="at-risk" />
 
     <div class="corp-kpi-grid">
         <x-dashboard.kpi-card label="Status" :value="$case->status->label()" :sub="'Opened '.($case->identified_at?->diffForHumans() ?? '—')" icon="clipboard" />

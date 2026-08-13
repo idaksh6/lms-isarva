@@ -28,12 +28,7 @@
         @endif
     </x-lms.module-hero>
 
-    <nav class="lms-report-tabs" aria-label="Report type">
-        <a href="{{ route('reports.index') }}" class="lms-report-tab">Overview</a>
-        <a href="{{ route('reports.assignments') }}" class="lms-report-tab">Individual assignment</a>
-        <a href="{{ route('reports.activity') }}" class="lms-report-tab is-active">Course activity</a>
-        <a href="{{ route('reports.at-risk') }}" class="lms-report-tab">Course at-risk</a>
-    </nav>
+    <x-lms.report-tabs active="activity" />
 
     <form method="GET" action="{{ route('reports.activity') }}" class="lms-at-risk-toolbar">
         <div class="lms-at-risk-toolbar-field">

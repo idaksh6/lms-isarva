@@ -20,12 +20,7 @@
         <a href="{{ route('reports.export') }}" class="lms-btn-primary lms-btn-primary--xs">Download CSV report</a>
     </x-lms.module-hero>
 
-    <nav class="lms-report-tabs" aria-label="Report type">
-        <a href="{{ route('reports.index') }}" class="lms-report-tab is-active">Overview</a>
-        <a href="{{ route('reports.assignments') }}" class="lms-report-tab">Individual assignment</a>
-        <a href="{{ route('reports.activity') }}" class="lms-report-tab">Course activity</a>
-        <a href="{{ route('reports.at-risk') }}" class="lms-report-tab">Course at-risk</a>
-    </nav>
+    <x-lms.report-tabs active="overview" />
 
     <div class="corp-kpi-grid">
         @foreach ($statusBreakdown as $key => $count)

@@ -76,6 +76,16 @@ class User extends Authenticatable
         return $this->hasMany(Answer::class);
     }
 
+    public function mentoringAsMentor(): HasMany
+    {
+        return $this->hasMany(MentoringRelationship::class, 'mentor_id');
+    }
+
+    public function mentoringAsMentee(): HasMany
+    {
+        return $this->hasMany(MentoringRelationship::class, 'mentee_id');
+    }
+
     public function isActive(): bool
     {
         return (bool) $this->is_active;
