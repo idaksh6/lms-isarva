@@ -1,36 +1,42 @@
-# Bulk import templates (Word / PDF / TXT)
+# Bulk import templates (Excel / Word / PDF / TXT)
 
 Use these templates to create quiz questions or assignments without typing them one-by-one in the LMS.
 
 ## Import types
 
-| Header line | Used for | Upload location |
-|-------------|----------|-----------------|
-| `LMS_IMPORT: QUIZ` | In-LMS MCQ assessment | Assessment → Edit quiz → Bulk import |
-| `LMS_IMPORT: QUESTION_BANK` | Same MCQ format (reusable bank file) | Same as quiz — apply into a quiz |
-| `LMS_IMPORT: ASSIGNMENTS` | One or more coursework assignments | Course → New assignment → Bulk import |
+| Format | Used for | Upload location |
+|--------|----------|-----------------|
+| Excel quiz / question bank | In-LMS MCQ assessment | Assessment → Edit quiz → Bulk import |
+| Excel assignments | Coursework assignments | Course → New assignment → Bulk import |
+| Word/TXT `LMS_IMPORT: QUIZ` / `QUESTION_BANK` | Same MCQs | Same as quiz |
+| Word/TXT `LMS_IMPORT: ASSIGNMENTS` | Same assignments | Same as assignment import |
 
 ## Supported files
 
-- Microsoft Word: `.docx` (preferred), `.doc` when Word can save as modern format
+- **Excel:** `.xlsx` (preferred), `.xls`
+- Microsoft Word: `.docx` (preferred), `.doc` when readable
 - PDF: text-based PDF (not a scanned image)
 - Plain text: `.txt` (handy for testing)
 
-Download starter Word templates from **Bulk import templates** in the app, or copy the `.txt` samples in this folder into Word/PDF.
+Download starter templates from **Bulk import** in the app.
 
-## Word macro
+## Excel quiz / question bank columns
 
-1. Open Word → `Alt+F11`
-2. Import `LmsBulkImportMacro.bas`
-3. Run:
-   - `InsertQuizHeader` / `InsertQuizQuestion`
-   - `InsertQuestionBankHeader`
-   - `InsertAssignmentsHeader` / `InsertAssignmentBlock`
-   - `ValidateLmsImport` before upload
+| prompt | option_a | option_b | option_c | option_d | answer |
+|--------|----------|----------|----------|----------|--------|
+| Question text | Choice A | Choice B | Choice C | Choice D | `B` |
 
-Save as `.docx` (or export PDF), then upload in the LMS.
+- Optional `option_e` / `option_f`
+- `answer` must be `A`–`F` (or `1`–`6`) matching a filled option
+- Up to 50 questions per import
 
-## Quiz / question bank shape
+## Excel assignments columns
+
+| title | instructions | delivery | drop_folder_url | due | publish |
+|-------|--------------|----------|-----------------|-----|---------|
+| Lab 1 | … | `file` / `link` / `both` | required for link/both | `2026-09-15 23:59` | `yes` / `no` |
+
+## Word / TXT quiz shape
 
 ```text
 LMS_IMPORT: QUIZ
@@ -43,24 +49,11 @@ D) …
 ANSWER: B
 ```
 
-- 2–6 options (`A)` … `F)`)
-- One `ANSWER:` letter per question
-- Up to 50 questions per import (assessment `question_count` is updated to match)
+## Word macro
 
-## Assignments shape
+1. Open Word → `Alt+F11`
+2. Import `LmsBulkImportMacro.bas`
+3. Run `InsertQuizQuestion` / `InsertAssignmentBlock`, then `ValidateLmsImport`
+4. Save as `.docx` (or export PDF) and upload
 
-```text
-LMS_IMPORT: ASSIGNMENTS
-
----
-TITLE: …
-INSTRUCTIONS: …
-DELIVERY: file
-DUE: 2026-09-15 23:59
-PUBLISH: no
----
-```
-
-- `DELIVERY`: `file` | `link` | `both`
-- `DROP_FOLDER_URL` required when delivery is `link` or `both`
-- `PUBLISH`: `yes` / `no`
+Excel does not need the macro — fill the spreadsheet columns directly.

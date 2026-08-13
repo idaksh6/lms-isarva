@@ -21,7 +21,7 @@ class DocumentTextExtractor
             'txt' => (string) file_get_contents($file->getRealPath()),
             'docx', 'doc' => $this->fromWord($file->getRealPath(), $extension),
             'pdf' => $this->fromPdf($file->getRealPath()),
-            default => throw new RuntimeException('Unsupported file type. Upload a .docx, .doc, .pdf, or .txt template.'),
+            default => throw new RuntimeException('Unsupported file type. Upload a .docx, .doc, .pdf, .xlsx, .xls, or .txt template.'),
         };
 
         $normalized = $this->normalize($text);

@@ -1,12 +1,20 @@
 @extends('layouts.lms')
 
-@section('title', 'Submit work')
-@section('page_title', 'Submit work')
+@section('title', 'Submit work — ' . $assignment->course->code)
+@section('page_title', $assignment->course->title)
 
 @section('content')
+@php
+    $course = $assignment->course->loadMissing('lecturer')->loadCount(['students', 'assignments', 'assessments']);
+@endphp
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-back">← Back to assignment</a>
+    <x-lms.course-hero :course="$course" active="assignment" />
+
+    <div class="lms-page-toolbar">
+        <p class="lms-page-toolbar-desc">Submit your work for {{ $assignment->title }}.</p>
+        <div class="lms-page-toolbar-actions">
+            <a href="{{ route('assignments.show', $assignment) }}" class="lms-btn-secondary lms-btn-secondary--xs">Back to assignment</a>
+        </div>
     </div>
 
     @if (! empty($resubmit))

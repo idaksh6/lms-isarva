@@ -5,16 +5,16 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('admin.users.index') }}" class="lms-btn-back">← Back to users</a>
-    </div>
+    <x-lms.module-hero module="users" title="Add user" subtitle="Create student, lecturer, or administrator access.">
+        <a href="{{ route('admin.users.index') }}" class="lms-btn-secondary lms-btn-secondary--xs">Back to users</a>
+    </x-lms.module-hero>
 
     <form method="POST" action="{{ route('admin.users.store') }}" class="lms-form-card">
         @csrf
 
         <div class="lms-form-header">
             <h2 class="lms-form-title">New user account</h2>
-            <p class="lms-form-desc">Create student, lecturer, or administrator access.</p>
+            <p class="lms-form-desc">Fill in the details below. Students can also include a student ID.</p>
         </div>
 
         <div class="lms-form-field">

@@ -2,8 +2,10 @@
 
 namespace App\Support\BulkImport;
 
-use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ImportTemplateBuilder
@@ -54,6 +56,15 @@ DUE: 2026-09-22 23:59
 PUBLISH: yes
 ---
 TXT;
+    }
+
+    public function download(string $kind, string $format): StreamedResponse
+    {
+        return match ($format) {
+            'txt' => $this->downloadTxt($kind),
+            'xlsx', 'xls', 'excel' => $this->downloadXlsx($kind),
+            default => $this->downloadDocx($kind),
+        };
     }
 
     public function downloadDocx(string $kind): StreamedResponse
@@ -107,6 +118,83 @@ TXT;
             echo $body;
         }, $filename, [
             'Content-Type' => 'text/plain; charset=UTF-8',
+        ]);
+    }
+
+    public function downloadXlsx(string $kind): StreamedResponse
+    {
+        [$filename, $headers, $rows] = match ($kind) {
+            'quiz', 'question-bank' => [
+                $kind === 'question-bank' ? 'lms-question-bank-template.xlsx' : 'lms-quiz-template.xlsx',
+                ['prompt', 'option_a', 'option_b', 'option_c', 'option_d', 'answer'],
+                [
+                    [
+                        'Which statement best describes a relational database primary key?',
+                        'It may be null on every row',
+                        'It uniquely identifies each row',
+                        'It must be a foreign key from another table',
+                        'It is only used for sorting reports',
+                        'B',
+                    ],
+                    [
+                        'What does SQL stand for?',
+                        'Structured Query Language',
+                        'Simple Quick Lookup',
+                        'System Queue Logic',
+                        'Secure Query Layer',
+                        'A',
+                    ],
+                ],
+            ],
+            'assignments' => [
+                'lms-assignments-template.xlsx',
+                ['title', 'instructions', 'delivery', 'drop_folder_url', 'due', 'publish'],
+                [
+                    [
+                        'Lab 1 — Data cleaning',
+                        'Clean the sample dataset and submit a short report with screenshots of your steps.',
+                        'file',
+                        '',
+                        '2026-09-15 23:59',
+                        'no',
+                    ],
+                    [
+                        'Essay — Ethics in AI',
+                        'Write 500–700 words on fairness in automated decision systems. Cite at least two sources.',
+                        'both',
+                        'https://drive.google.com/drive/folders/example',
+                        '2026-09-22 23:59',
+                        'yes',
+                    ],
+                ],
+            ],
+            default => abort(404),
+        };
+
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle($kind === 'assignments' ? 'Assignments' : 'Questions');
+        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray($rows, null, 'A2');
+        foreach (range(1, count($headers)) as $col) {
+            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
+        }
+        $sheet->getStyle('A1:'.$sheet->getHighestColumn().'1')->getFont()->setBold(true);
+
+        $temp = tempnam(sys_get_temp_dir(), 'lms-xlsx-');
+        if ($temp === false) {
+            abort(500, 'Could not create temporary Excel template.');
+        }
+        $xlsxPath = $temp.'.xlsx';
+        @unlink($temp);
+
+        (new XlsxWriter($spreadsheet))->save($xlsxPath);
+
+        return response()->streamDownload(function () use ($xlsxPath): void {
+            readfile($xlsxPath);
+            @unlink($xlsxPath);
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 }

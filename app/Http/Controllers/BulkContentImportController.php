@@ -9,17 +9,21 @@ use App\Notifications\AssignmentPublishedNotification;
 use App\Support\BulkImport\AssessmentQuestionImporter;
 use App\Support\BulkImport\AssignmentImportParser;
 use App\Support\BulkImport\DocumentTextExtractor;
+use App\Support\BulkImport\ExcelImportConverter;
 use App\Support\BulkImport\ImportTemplateBuilder;
 use App\Support\BulkImport\McqImportParser;
 use App\Support\UploadLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BulkContentImportController extends Controller
 {
+    private const IMPORT_MIMES = 'doc,docx,pdf,txt,xlsx,xls';
+
     public function templatesIndex(): View
     {
         $this->authorize('create', Assignment::class);
@@ -31,18 +35,17 @@ class BulkContentImportController extends Controller
     {
         $this->authorize('create', Assignment::class);
 
-        $kind = $request->route('kind');
-        $format = $request->query('format', 'docx');
+        $kind = (string) $request->route('kind');
+        $format = strtolower((string) $request->query('format', 'docx'));
 
-        return $format === 'txt'
-            ? $builder->downloadTxt($kind)
-            : $builder->downloadDocx($kind);
+        return $builder->download($kind, $format);
     }
 
     public function importAssessmentQuestions(
         Request $request,
         Assessment $assessment,
         DocumentTextExtractor $extractor,
+        ExcelImportConverter $excel,
         McqImportParser $parser,
         AssessmentQuestionImporter $importer,
     ): RedirectResponse {
@@ -56,7 +59,7 @@ class BulkContentImportController extends Controller
             'import_file' => [
                 'required',
                 'file',
-                'mimes:doc,docx,pdf,txt',
+                'mimes:'.self::IMPORT_MIMES,
                 'max:'.UploadLimits::BULK_IMPORT_MAX_KB,
             ],
         ], [
@@ -65,8 +68,8 @@ class BulkContentImportController extends Controller
         ]);
 
         try {
-            $extracted = $extractor->extract($request->file('import_file'));
-            $questions = $parser->parse($extracted['text']);
+            $text = $this->quizImportText($request->file('import_file'), $extractor, $excel);
+            $questions = $parser->parse($text);
             $count = $importer->replace($assessment, $questions);
         } catch (RuntimeException $e) {
             return back()->withErrors(['import_file' => $e->getMessage()]);
@@ -81,6 +84,7 @@ class BulkContentImportController extends Controller
         Request $request,
         Course $course,
         DocumentTextExtractor $extractor,
+        ExcelImportConverter $excel,
         AssignmentImportParser $parser,
     ): RedirectResponse {
         $this->authorize('create', Assignment::class);
@@ -90,7 +94,7 @@ class BulkContentImportController extends Controller
             'import_file' => [
                 'required',
                 'file',
-                'mimes:doc,docx,pdf,txt',
+                'mimes:'.self::IMPORT_MIMES,
                 'max:'.UploadLimits::BULK_IMPORT_MAX_KB,
             ],
         ], [
@@ -99,8 +103,8 @@ class BulkContentImportController extends Controller
         ]);
 
         try {
-            $extracted = $extractor->extract($request->file('import_file'));
-            $rows = $parser->parse($extracted['text']);
+            $text = $this->assignmentsImportText($request->file('import_file'), $extractor, $excel);
+            $rows = $parser->parse($text);
         } catch (RuntimeException $e) {
             return back()->withErrors(['import_file' => $e->getMessage()]);
         }
@@ -136,5 +140,27 @@ class BulkContentImportController extends Controller
             ->route('courses.show', $course)
             ->with('success', "Imported {$created} assignment".($created === 1 ? '' : 's')
                 .($published ? " ({$published} published)" : ' as drafts').'.');
+    }
+
+    private function quizImportText(UploadedFile $file, DocumentTextExtractor $extractor, ExcelImportConverter $excel): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: '');
+
+        if (in_array($extension, ['xlsx', 'xls'], true)) {
+            return $excel->toQuizText($file);
+        }
+
+        return $extractor->extract($file)['text'];
+    }
+
+    private function assignmentsImportText(UploadedFile $file, DocumentTextExtractor $extractor, ExcelImportConverter $excel): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: '');
+
+        if (in_array($extension, ['xlsx', 'xls'], true)) {
+            return $excel->toAssignmentsText($file);
+        }
+
+        return $extractor->extract($file)['text'];
     }
 }

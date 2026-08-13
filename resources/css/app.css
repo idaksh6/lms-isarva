@@ -40,7 +40,7 @@
 
 @layer components {
     .lms-card {
-        @apply rounded-lg border border-isarva-border bg-white p-5 shadow-isarva;
+        @apply rounded-xl border border-isarva-border bg-white p-5 shadow-isarva;
     }
 
     /* Site container — matches isarvait.com content width */
@@ -1021,7 +1021,7 @@
     }
 
     .lms-card {
-        @apply rounded-lg border border-isarva-border bg-white p-5 shadow-sm;
+        @apply rounded-xl border border-isarva-border bg-white p-5 shadow-sm;
     }
 
     .lms-input {
@@ -1066,7 +1066,43 @@
     }
 
     .lms-form-card {
-        @apply lms-card flex w-full flex-col gap-6 p-4 sm:p-5;
+        @apply lms-card flex w-full flex-col gap-6 p-5 sm:p-6;
+    }
+
+    .lms-bulk-import-panel {
+        @apply lms-card flex w-full flex-col gap-4 p-5 sm:p-6;
+    }
+
+    .lms-bulk-import-panel-head {
+        @apply flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+    }
+
+    .lms-bulk-import-panel-title {
+        @apply text-base font-bold text-isarva-heading;
+    }
+
+    .lms-bulk-import-panel-desc {
+        @apply mt-1 text-sm leading-relaxed text-isarva-muted;
+    }
+
+    .lms-bulk-import-panel-actions {
+        @apply flex flex-wrap gap-2;
+    }
+
+    .lms-bulk-import-panel-form {
+        @apply flex flex-col gap-3 sm:flex-row sm:items-end;
+    }
+
+    .lms-result-score {
+        @apply text-4xl font-bold tracking-tight text-isarva-heading;
+    }
+
+    .lms-notify-page-shell {
+        @apply lms-card overflow-hidden p-0;
+    }
+
+    .lms-notify-page-shell .lms-notify-page-list {
+        @apply divide-y divide-isarva-border rounded-none border-0 bg-transparent shadow-none;
     }
 
     .lms-form-actions .lms-btn-primary,
@@ -4979,7 +5015,7 @@
     }
 
     .corp-panel {
-        @apply min-w-0 max-w-full overflow-hidden rounded-lg border border-isarva-border bg-white shadow-sm;
+        @apply min-w-0 max-w-full overflow-hidden rounded-xl border border-isarva-border bg-white shadow-sm;
     }
 
     .corp-panel .lms-empty-state {

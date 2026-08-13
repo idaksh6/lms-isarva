@@ -121,6 +121,102 @@ class BulkContentImportTest extends TestCase
             ->assertSessionHasErrors('import_file');
     }
 
+    public function test_lecturer_can_download_quiz_excel_template(): void
+    {
+        $lecturer = $this->makeLecturer();
+
+        $response = $this->actingAs($lecturer)
+            ->get(route('imports.templates.download', ['kind' => 'quiz', 'format' => 'xlsx']));
+
+        $response->assertOk();
+        $this->assertStringContainsString('attachment', (string) $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('.xlsx', (string) $response->headers->get('content-disposition'));
+        $this->assertNotSame('', $response->streamedContent());
+    }
+
+    public function test_lecturer_can_import_quiz_questions_from_excel_template(): void
+    {
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+        $assessment = Assessment::query()->create([
+            'course_id' => $course->id,
+            'created_by' => $lecturer->id,
+            'title' => 'Excel quiz',
+            'type' => AssessmentType::Manual,
+            'question_count' => 5,
+            'marks_per_question' => 1,
+            'is_published' => false,
+        ]);
+
+        $path = $this->makeQuizXlsx();
+        $file = new UploadedFile($path, 'quiz.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+
+        $this->actingAs($lecturer)
+            ->post(route('assessments.questions.import', $assessment), [
+                'import_file' => $file,
+            ])
+            ->assertRedirect(route('assessments.edit', $assessment))
+            ->assertSessionHas('success');
+
+        $assessment->refresh();
+        $this->assertSame(2, $assessment->question_count);
+        $this->assertSame(2, $assessment->questions()->count());
+        @unlink($path);
+    }
+
+    public function test_lecturer_can_import_assignments_from_excel_template(): void
+    {
+        Notification::fake();
+
+        $lecturer = $this->makeLecturer();
+        $course = $this->makeCourse($lecturer);
+
+        $path = $this->makeAssignmentsXlsx();
+        $file = new UploadedFile($path, 'assignments.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+
+        $this->actingAs($lecturer)
+            ->post(route('courses.assignments.import', $course), [
+                'import_file' => $file,
+            ])
+            ->assertRedirect(route('courses.show', $course))
+            ->assertSessionHas('success');
+
+        $this->assertSame(2, Assignment::query()->where('course_id', $course->id)->count());
+        @unlink($path);
+    }
+
+    private function makeQuizXlsx(): string
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray(['prompt', 'option_a', 'option_b', 'option_c', 'option_d', 'answer'], null, 'A1');
+        $sheet->fromArray([
+            ['Capital of France?', 'Berlin', 'Paris', 'Rome', 'Madrid', 'B'],
+            ['2 + 2?', '3', '4', '5', '6', 'B'],
+        ], null, 'A2');
+
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'lms-quiz-'.uniqid('', true).'.xlsx';
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return $path;
+    }
+
+    private function makeAssignmentsXlsx(): string
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray(['title', 'instructions', 'delivery', 'drop_folder_url', 'due', 'publish'], null, 'A1');
+        $sheet->fromArray([
+            ['Lab A', 'Do the lab', 'file', '', '2026-10-01 23:59', 'no'],
+            ['Essay B', 'Write essay', 'file', '', '2026-10-08 23:59', 'no'],
+        ], null, 'A2');
+
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'lms-asn-'.uniqid('', true).'.xlsx';
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return $path;
+    }
+
     private function makeLecturer(): User
     {
         return User::factory()->create(['role' => UserRole::Lecturer]);

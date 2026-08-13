@@ -7,36 +7,42 @@
 @endphp
 
 @section('title', $assessment->title)
-@section('page_title', $assessment->title)
+@section('page_title', $assessment->course->title)
 
 @section('content')
+@php
+    $course = $assessment->course->loadCount(['students', 'assignments', 'assessments']);
+@endphp
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('courses.assessments.index', $assessment->course) }}" class="lms-btn-back">← Back to assessments</a>
-        @can('update', $assessment)
-            <a href="{{ route('assessments.edit', $assessment) }}" class="lms-btn-secondary">
-                {{ $isGoogleForm ? 'Edit' : 'Edit questions' }}
-            </a>
-        @endcan
-        @if (auth()->user()->isStudent() && $assessment->is_published)
-            @if ($isGoogleForm && $assessment->external_url)
-                <a
-                    href="{{ $assessment->external_url }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="lms-btn-primary"
-                >Open Google Form</a>
-                @if ($submitted)
-                    <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary">View your score</a>
-                @endif
-            @elseif (! $isGoogleForm)
-                @if ($submitted)
-                    <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-primary">View your result</a>
-                @else
-                    <a href="{{ route('assessments.attempt', $assessment) }}" class="lms-btn-primary">Start assessment</a>
+    <x-lms.course-hero :course="$course" active="assessments" />
+
+    <div class="lms-page-toolbar lms-page-toolbar--actions-only">
+        <div class="lms-page-toolbar-actions">
+            @can('update', $assessment)
+                <a href="{{ route('assessments.edit', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">
+                    {{ $isGoogleForm ? 'Edit' : 'Edit questions' }}
+                </a>
+            @endcan
+            @if (auth()->user()->isStudent() && $assessment->is_published)
+                @if ($isGoogleForm && $assessment->external_url)
+                    <a
+                        href="{{ $assessment->external_url }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="lms-btn-primary lms-btn-primary--xs"
+                    >Open Google Form</a>
+                    @if ($submitted)
+                        <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">View your score</a>
+                    @endif
+                @elseif (! $isGoogleForm)
+                    @if ($submitted)
+                        <a href="{{ route('assessments.result', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">View your result</a>
+                    @else
+                        <a href="{{ route('assessments.attempt', $assessment) }}" class="lms-btn-primary lms-btn-primary--xs">Start assessment</a>
+                    @endif
                 @endif
             @endif
-        @endif
+        </div>
     </div>
 
     <section class="lms-panel">

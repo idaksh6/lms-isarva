@@ -23,7 +23,7 @@ class AssessmentAttemptController extends Controller
 
         $this->authorize('attempt', $assessment);
 
-        $assessment->load(['course', 'questions.options']);
+        $assessment->load(['course.lecturer', 'questions.options']);
 
         $attempt = $assessment->attempts()->firstOrCreate([
             'user_id' => request()->user()->id,
@@ -110,6 +110,8 @@ class AssessmentAttemptController extends Controller
             ->where('user_id', request()->user()->id)
             ->whereNotNull('submitted_at')
             ->firstOrFail();
+
+        $assessment->load(['course.lecturer']);
 
         return view('assessments.result', compact('assessment', 'attempt'));
     }

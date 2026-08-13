@@ -14,6 +14,7 @@
 
             <div class="lms-form-header">
                 <h2 class="lms-form-title">Edit material</h2>
+                <p class="lms-form-desc">Update the title, category, link, or replace the uploaded file.</p>
             </div>
 
             <div class="lms-form-field">

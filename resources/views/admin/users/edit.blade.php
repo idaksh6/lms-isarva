@@ -5,9 +5,9 @@
 
 @section('content')
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('admin.users.index') }}" class="lms-btn-back">← Back to users</a>
-    </div>
+    <x-lms.module-hero module="users" title="Edit user" subtitle="Update account details for {{ $user->name }}.">
+        <a href="{{ route('admin.users.index') }}" class="lms-btn-secondary lms-btn-secondary--xs">Back to users</a>
+    </x-lms.module-hero>
 
     <form method="POST" action="{{ route('admin.users.update', $user) }}" class="lms-form-card">
         @csrf

@@ -1,12 +1,20 @@
 @extends('layouts.lms')
 
 @section('title', 'Take assessment — ' . $assessment->title)
-@section('page_title', $assessment->title)
+@section('page_title', $assessment->course->title)
 
 @section('content')
+@php
+    $course = $assessment->course->loadMissing('lecturer')->loadCount(['students', 'assignments', 'assessments']);
+@endphp
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-back">← Back</a>
+    <x-lms.course-hero :course="$course" active="assessments" />
+
+    <div class="lms-page-toolbar">
+        <p class="lms-page-toolbar-desc">Answer every question, then submit. You cannot change answers afterward.</p>
+        <div class="lms-page-toolbar-actions">
+            <a href="{{ route('assessments.show', $assessment) }}" class="lms-btn-secondary lms-btn-secondary--xs">Cancel</a>
+        </div>
     </div>
 
     <form method="POST" action="{{ route('assessments.attempt.store', $assessment) }}" class="lms-form-card">
@@ -14,7 +22,7 @@
 
         <div class="lms-form-header">
             <h2 class="lms-form-title">{{ $assessment->title }}</h2>
-            <p class="lms-form-desc">Answer all questions, then submit. You cannot change answers after submitting.</p>
+            <p class="lms-form-desc">{{ $assessment->question_count }} questions · {{ $assessment->maxScore() }} marks</p>
         </div>
 
         <div class="space-y-6">

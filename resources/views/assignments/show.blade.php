@@ -5,21 +5,28 @@
 @endphp
 
 @section('title', $assignment->title)
-@section('page_title', $assignment->title)
+@section('page_title', $assignment->course->title)
 
 @section('content')
+@php
+    $course = $assignment->course->loadMissing('lecturer')->loadCount(['students', 'assignments', 'assessments']);
+@endphp
 <div class="lms-page-stack">
-    <div class="lms-page-actions">
-        <a href="{{ route('courses.show', $assignment->course) }}" class="lms-btn-back">← Back to course</a>
-        @can('update', $assignment)
-            <a href="{{ route('assignments.edit', $assignment) }}" class="lms-btn-secondary">Edit assignment</a>
-        @endcan
-        @if (auth()->user()->isStudent() && $assignment->is_published && ! $userSubmission)
-            <a href="{{ route('assignments.submit', $assignment) }}" class="lms-btn-primary">Submit your work</a>
-        @endif
+    <x-lms.course-hero :course="$course" active="assignment" />
+
+    <div class="lms-page-toolbar">
+        <p class="lms-page-toolbar-desc">{{ $assignment->title }}</p>
+        <div class="lms-page-toolbar-actions">
+            @can('update', $assignment)
+                <a href="{{ route('assignments.edit', $assignment) }}" class="lms-btn-secondary lms-btn-secondary--xs">Edit assignment</a>
+            @endcan
+            @if (auth()->user()->isStudent() && $assignment->is_published && ! $userSubmission)
+                <a href="{{ route('assignments.submit', $assignment) }}" class="lms-btn-primary lms-btn-primary--xs">Submit your work</a>
+            @endif
+        </div>
     </div>
 
-    <x-lms.assignment-hero :assignment="$assignment" :course="$assignment->course" />
+    <x-lms.assignment-hero :assignment="$assignment" :course="$course" />
 
     @if ($isStaff)
         <div class="lms-assignment-staff-layout">
