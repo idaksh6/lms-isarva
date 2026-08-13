@@ -1,0 +1,16 @@
+LMS_IMPORT: ASSIGNMENTS
+
+---
+TITLE: Lab 1 — Data cleaning
+INSTRUCTIONS: Clean the sample dataset and submit a short report with screenshots of your steps.
+DELIVERY: file
+DUE: 2026-09-15 23:59
+PUBLISH: no
+---
+TITLE: Essay — Ethics in AI
+INSTRUCTIONS: Write 500–700 words on fairness in automated decision systems. Cite at least two sources.
+DELIVERY: both
+DROP_FOLDER_URL: https://drive.google.com/drive/folders/example
+DUE: 2026-09-22 23:59
+PUBLISH: yes
+---

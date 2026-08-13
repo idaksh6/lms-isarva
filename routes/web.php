@@ -9,6 +9,7 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentHubController;
 use App\Http\Controllers\AtRiskController;
+use App\Http\Controllers\BulkContentImportController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\CourseController;
@@ -54,6 +55,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('courses.assignments.create');
     Route::post('courses/{course}/assignments', [AssignmentController::class, 'store'])
         ->name('courses.assignments.store');
+    Route::post('courses/{course}/assignments/import', [BulkContentImportController::class, 'importCourseAssignments'])
+        ->name('courses.assignments.import');
+
+    Route::get('imports/templates', [BulkContentImportController::class, 'templatesIndex'])
+        ->name('imports.templates');
+    Route::get('imports/templates/{kind}', [BulkContentImportController::class, 'downloadTemplate'])
+        ->whereIn('kind', ['quiz', 'question-bank', 'assignments'])
+        ->name('imports.templates.download');
 
     Route::get('courses/{course}/sessions', [ClassSessionController::class, 'index'])
         ->name('courses.sessions.index');
@@ -96,6 +105,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assessments.edit');
     Route::patch('assessments/{assessment}', [AssessmentController::class, 'update'])
         ->name('assessments.update');
+    Route::post('assessments/{assessment}/questions/import', [BulkContentImportController::class, 'importAssessmentQuestions'])
+        ->name('assessments.questions.import');
     Route::post('assessments/{assessment}/publish', [AssessmentController::class, 'publish'])
         ->name('assessments.publish');
     Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy'])

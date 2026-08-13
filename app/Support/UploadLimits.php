@@ -15,6 +15,14 @@ class UploadLimits
 
     public const TIMETABLE_CSV_MAX_KB = 2048;
 
+    /** Cap for Word/PDF/TXT bulk question & assignment imports (KB). */
+    public const BULK_IMPORT_MAX_KB = 5120;
+
+    public static function bulkImportMaxMegabytes(): int
+    {
+        return (int) floor(self::BULK_IMPORT_MAX_KB / 1024);
+    }
+
     public static function assignmentAttachmentMaxMegabytes(): int
     {
         return (int) floor(self::ASSIGNMENT_ATTACHMENT_MAX_KB / 1024);

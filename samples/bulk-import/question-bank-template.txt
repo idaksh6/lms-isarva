@@ -1,0 +1,15 @@
+LMS_IMPORT: QUESTION_BANK
+
+Q1. In supervised learning, what does the training set contain?
+A) Only unlabeled examples
+B) Input examples paired with known targets
+C) Only model hyperparameters
+D) Production traffic logs only
+ANSWER: B
+
+Q2. Which metric is most appropriate for balanced binary classification accuracy overview?
+A) Mean squared error
+B) Accuracy
+C) Silhouette score
+D) Perplexity
+ANSWER: B

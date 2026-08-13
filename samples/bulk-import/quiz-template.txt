@@ -1,0 +1,15 @@
+LMS_IMPORT: QUIZ
+
+Q1. Which statement best describes a relational database primary key?
+A) It may be null on every row
+B) It uniquely identifies each row
+C) It must be a foreign key from another table
+D) It is only used for sorting reports
+ANSWER: B
+
+Q2. What does SQL stand for?
+A) Structured Query Language
+B) Simple Quick Lookup
+C) System Queue Logic
+D) Secure Query Layer
+ANSWER: A

@@ -13,6 +13,15 @@
 <div class="lms-page-stack">
     <x-lms.course-hero :course="$course->load('lecturer')->loadCount(['students', 'assignments', 'assessments'])" active="assessments" />
 
+    @unless ($isGoogleForm)
+        <x-lms.bulk-import-panel
+            :action="route('assessments.questions.import', $assessment)"
+            title="Bulk import questions"
+            description="Upload a QUIZ or QUESTION_BANK Word/PDF/TXT template. Existing questions on this quiz are replaced."
+            template-kind="quiz"
+        />
+    @endunless
+
     <form method="POST" action="{{ route('assessments.update', $assessment) }}" class="lms-form-card">
         @csrf
         @method('PATCH')

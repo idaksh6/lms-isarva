@@ -7,6 +7,13 @@
 <div class="lms-page-stack">
     <x-lms.course-hero :course="$course" active="assignment" />
 
+    <x-lms.bulk-import-panel
+        :action="route('courses.assignments.import', $course)"
+        title="Bulk import assignments"
+        description="Upload an ASSIGNMENTS Word/PDF/TXT template to create multiple assignments at once."
+        template-kind="assignments"
+    />
+
     <form method="POST" action="{{ route('courses.assignments.store', $course) }}" enctype="multipart/form-data" class="lms-form-card">
         @csrf
 
