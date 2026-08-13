@@ -9,8 +9,8 @@
 
     <x-lms.bulk-import-panel
         :action="route('courses.assignments.import', $course)"
-        title="Bulk import assignments"
-        description="Upload an ASSIGNMENTS Word/PDF/TXT template to create multiple assignments at once."
+        title="Import assignments"
+        description="Use an Excel or Word template to create several assignments for this course at once."
         template-kind="assignments"
     />
 

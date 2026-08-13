@@ -16,8 +16,9 @@
     @unless ($isGoogleForm)
         <x-lms.bulk-import-panel
             :action="route('assessments.questions.import', $assessment)"
-            title="Bulk import questions"
-            description="Upload a QUIZ or QUESTION_BANK Word/PDF/TXT template. Existing questions on this quiz are replaced."
+            title="Import quiz questions"
+            description="Use an Excel or Word template to add multiple-choice questions in one upload."
+            warning="Importing replaces all questions currently on this quiz."
             template-kind="quiz"
         />
     @endunless

@@ -1070,27 +1070,75 @@
     }
 
     .lms-bulk-import-panel {
-        @apply lms-card flex w-full flex-col gap-4 p-5 sm:p-6;
+        @apply lms-card flex w-full flex-col gap-5 p-5 sm:p-6;
     }
 
-    .lms-bulk-import-panel-head {
-        @apply flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+    .lms-bulk-import-panel-header {
+        @apply flex flex-col gap-3 border-b border-isarva-border pb-4 sm:flex-row sm:items-start sm:justify-between;
+    }
+
+    .lms-bulk-import-kicker {
+        @apply text-xs font-bold uppercase tracking-wide text-brand-700;
     }
 
     .lms-bulk-import-panel-title {
-        @apply text-base font-bold text-isarva-heading;
+        @apply mt-1 text-base font-bold text-isarva-heading;
     }
 
     .lms-bulk-import-panel-desc {
-        @apply mt-1 text-sm leading-relaxed text-isarva-muted;
+        @apply mt-1 max-w-2xl text-sm leading-relaxed text-isarva-muted;
     }
 
-    .lms-bulk-import-panel-actions {
-        @apply flex flex-wrap gap-2;
+    .lms-bulk-import-steps {
+        @apply flex flex-col gap-5;
+    }
+
+    .lms-bulk-import-step {
+        @apply flex gap-3 sm:gap-4;
+    }
+
+    .lms-bulk-import-step-num {
+        @apply mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100;
+    }
+
+    .lms-bulk-import-step-body {
+        @apply min-w-0 flex-1 space-y-3;
+    }
+
+    .lms-bulk-import-step-title {
+        @apply text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-bulk-import-step-desc {
+        @apply text-xs leading-relaxed text-isarva-muted;
+    }
+
+    .lms-bulk-import-template-grid {
+        @apply grid gap-3 sm:grid-cols-2;
+    }
+
+    .lms-bulk-import-template-card {
+        @apply flex items-center gap-3 rounded-xl border border-isarva-border bg-slate-50 px-4 py-3 transition hover:border-brand-300 hover:bg-brand-50/40;
+    }
+
+    .lms-bulk-import-template-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-700 shadow-sm ring-1 ring-isarva-border;
+    }
+
+    .lms-bulk-import-template-name {
+        @apply block text-sm font-semibold text-isarva-heading;
+    }
+
+    .lms-bulk-import-template-meta {
+        @apply block text-xs text-isarva-muted;
     }
 
     .lms-bulk-import-panel-form {
-        @apply flex flex-col gap-3 sm:flex-row sm:items-end;
+        @apply flex flex-col gap-4;
+    }
+
+    .lms-bulk-import-warning {
+        @apply rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900;
     }
 
     .lms-result-score {
