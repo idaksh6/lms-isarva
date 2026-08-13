@@ -20,25 +20,31 @@
 
         <nav class="lms-sidebar-nav" aria-label="Main menu">
             @foreach ($menuItems as $item)
-                @if (! empty($item['coming_soon']))
-                    <span class="lms-sidebar-link is-soon" title="Coming soon">
+                @php
+                    $routeName = $item['route'] ?? null;
+                    $routeExists = $routeName && \Illuminate\Support\Facades\Route::has($routeName);
+                @endphp
+                @if (! empty($item['coming_soon']) || ! $routeExists)
+                    <span class="lms-sidebar-link is-soon" title="{{ $routeExists ? 'Coming soon' : 'Route not available yet' }}">
                         @include('layouts.partials.nav-icon', ['name' => $item['icon']])
                         <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
                         <span class="lms-soon-badge">Soon</span>
                     </span>
                 @else
                     @php
-                        $active = match ($item['route'] ?? '') {
+                        $active = match ($routeName) {
                             'dashboard' => request()->routeIs('dashboard'),
                             'courses.index' => request()->routeIs('courses.*') && ! request()->routeIs('assignments.*', 'submissions.*'),
                             'assignments.index' => request()->routeIs('assignments.*') && ! request()->routeIs('assignments.submit', 'assignments.submissions.*'),
                             'submissions.index' => request()->routeIs('submissions.*'),
                             'admin.users.index' => request()->routeIs('admin.users.*'),
                             'profile.edit' => request()->routeIs('profile.*'),
-                            default => isset($item['route']) && request()->routeIs($item['route'].'*'),
+                            'mentoring.index' => request()->routeIs('mentoring.*'),
+                            'reports.index' => request()->routeIs('reports.*'),
+                            default => request()->routeIs($routeName, $routeName.'.*', str_replace('.index', '.*', $routeName)),
                         };
                     @endphp
-                    <a href="{{ route($item['route']) }}"
+                    <a href="{{ route($routeName) }}"
                        @if (! empty($item['new_tab'])) target="_blank" rel="noopener noreferrer" @else @click="sidebarOpen = false" @endif
                        class="lms-sidebar-link {{ $active ? 'is-active' : '' }}">
                         @include('layouts.partials.nav-icon', ['name' => $item['icon']])
